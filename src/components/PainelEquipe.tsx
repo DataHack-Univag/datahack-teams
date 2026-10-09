@@ -64,7 +64,27 @@ export function PainelEquipe({
           <h1 className="text-3xl font-extrabold break-words sm:text-4xl">
             <span className="grad-text">{equipe.nome}</span>
           </h1>
+          {lider && (
+            <p className="mt-1 truncate text-xs text-suave" title={`Líder: ${nomeDe(lider)}`}>
+              <span className="text-amber-600 dark:text-amber-300">★</span> Líder:{" "}
+              <strong className="font-semibold text-foreground">{nomeDe(lider)}</strong>
+              {souLider && " (você)"}
+            </p>
+          )}
         </div>
+
+        {!lider && (
+          <div className="space-y-1 rounded-xl border-2 border-amber-400/70 bg-amber-500/15 p-3">
+            <p className="font-semibold text-amber-900 dark:text-amber-200">A equipe ainda não tem líder</p>
+            <p className="text-sm text-amber-800 dark:text-amber-300">
+              {podeMexerLider ? "Escolham" : "A equipe precisa escolher"} o líder na{" "}
+              <a href="#integrantes" className="underline">
+                lista de integrantes
+              </a>
+              . É ele quem cadastra o nome e o repositório; depois de definido, só o líder passa a liderança adiante.
+            </p>
+          </div>
+        )}
 
         {equipe.repo_github ? (
           <div className="space-y-2 rounded-xl border border-borda p-3">
@@ -109,7 +129,7 @@ export function PainelEquipe({
                   Quem cadastra é o líder, <strong>{nomeDe(lider)}</strong>.
                 </>
               ) : (
-                "Escolham o líder da equipe (abaixo): é ele quem cadastra o nome e o repositório."
+                "Quem cadastra é o líder, que ainda não foi escolhido."
               )}
             </p>
           </div>
@@ -154,7 +174,7 @@ export function PainelEquipe({
       </section>
 
       {/* ------------------------------------------------ integrantes */}
-      <section className="card space-y-4">
+      <section id="integrantes" className="card scroll-mt-24 space-y-4">
         <div className="flex items-baseline justify-between gap-2">
           <h2 className="text-lg font-semibold">Integrantes</h2>
           <span className="text-sm text-suave">

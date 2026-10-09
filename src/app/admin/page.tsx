@@ -70,8 +70,14 @@ export default async function AdminEquipes() {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <h2 className="text-lg font-bold break-words">{e.nome}</h2>
-                  <p className="text-xs text-suave">
+                  <p className="truncate text-xs text-suave">
                     {e.membros.length}/{config.max_membros} integrantes
+                    {liderDe(e) && (
+                      <>
+                        {" · "}
+                        <span className="text-amber-600 dark:text-amber-300">★</span> {liderDe(e)}
+                      </>
+                    )}
                   </p>
                 </div>
                 <Link href={`/admin/equipes/${e.id}`} className="btn-secundario min-h-9 shrink-0 px-3 text-xs">
@@ -83,6 +89,9 @@ export default async function AdminEquipes() {
                 <div className="flex flex-wrap items-center gap-1.5">
                   <span className="selo bg-foreground text-background">GitHub</span>
                   <SeloRepo e={e} />
+                  {!e.lider_email && e.membros.length > 0 && (
+                    <span className="selo bg-amber-500/15 text-amber-800 dark:text-amber-300">líder pendente</span>
+                  )}
                 </div>
                 {e.repo_github ? (
                   <a
@@ -121,7 +130,6 @@ export default async function AdminEquipes() {
                 {e.membros
                   .map((m) => (m.inscritos?.nome ?? m.email) + (m.email === e.lider_email ? " ★" : ""))
                   .join(", ") || "sem integrantes"}
-                {e.membros.length > 0 && !e.lider_email && " · sem líder"}
               </p>
             </article>
           ))}
@@ -189,6 +197,11 @@ export default async function AdminEquipes() {
       </div>
     </Pagina>
   );
+}
+
+function liderDe(e: Equipe) {
+  const m = e.membros.find((x) => x.email === e.lider_email);
+  return m ? (m.inscritos?.nome ?? m.email) : null;
 }
 
 function SeloRepo({ e }: { e: Equipe }) {
