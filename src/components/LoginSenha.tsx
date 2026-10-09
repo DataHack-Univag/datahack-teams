@@ -80,7 +80,7 @@ export function LoginSenha() {
   if (modo === "esqueci" && enviado) {
     return (
       <div className="space-y-4 text-left">
-        <p className="rounded-xl bg-emerald-50 p-3 text-sm text-emerald-800 dark:bg-emerald-950 dark:text-emerald-200">
+        <p className="rounded-xl bg-emerald-500/15 p-3 text-sm text-emerald-800 dark:text-emerald-200">
           Se <strong>{email}</strong> já tiver conta, enviamos um link para criar uma nova senha.
           Confira também o spam.
         </p>
@@ -93,13 +93,17 @@ export function LoginSenha() {
 
   return (
     <div className="space-y-4 text-left">
-      <div className="grid grid-cols-2 rounded-xl bg-background p-1 text-sm font-medium">
+      <div className="grid grid-cols-2 rounded-xl border border-borda-forte bg-superficie-solida p-[3px] text-sm font-semibold">
         {(["entrar", "criar"] as const).map((m) => (
           <button
             key={m}
             type="button"
             onClick={() => trocar(m)}
-            className={`rounded-lg py-2 transition ${modo === m || (m === "entrar" && modo === "esqueci") ? "bg-superficie shadow-sm" : "text-suave"}`}
+            className={`rounded-lg py-2 transition ${
+              modo === m || (m === "entrar" && modo === "esqueci")
+                ? "text-white shadow-[0_4px_14px_-6px_rgb(47_91_255/.7)] [background:var(--grad)]"
+                : "text-suave hover:text-foreground"
+            }`}
           >
             {m === "entrar" ? "Entrar" : "Primeiro acesso"}
           </button>
@@ -160,7 +164,7 @@ export function LoginSenha() {
         )}
 
         {erro && (
-          <p className="rounded-xl bg-red-50 p-3 text-sm text-red-700 dark:bg-red-950 dark:text-red-300">
+          <p className="rounded-xl bg-red-500/15 p-3 text-sm text-red-700 dark:text-red-300">
             {erro}
           </p>
         )}

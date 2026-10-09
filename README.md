@@ -12,7 +12,8 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
 - No primeiro acesso cria a senha com o e-mail da inscrição (só se estiver em `inscritos`).
 - Vê a própria equipe, montada pela organização. **Não adiciona, não remove e não sai**:
   a composição é só da organização.
-- Escolhe o **líder** da equipe (qualquer integrante pode definir ou trocar).
+- Escolhe o **líder** da equipe: sem líder, qualquer integrante define; depois de
+  definido, só o próprio líder passa a liderança para outra pessoa (a organização sempre pode).
 - Edita nome da equipe, repositório GitHub (público, obrigatório para a entrega) e os
   links de entrega com categoria: GitHub, Google Drive, Apresentação, Vídeo, Dashboard,
   Figma, Site/Deploy, Outro.
@@ -33,7 +34,8 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
 - **Organizadores:** quem tem acesso à organização; adicionar e remover.
 - **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
-  aluno" abre a tela exatamente como aquele aluno vê, com todos os botões desativados
+  aluno" abre a tela exatamente como aquele aluno vê (inclusive os botões de líder que
+  ele teria). Os botões de líder funcionam, agindo como organização; os demais ficam desativados
   (`/ver-como?email=...`). Nada é alterado e não precisa da senha do aluno.
 
 ## Regras garantidas no banco (não só na tela)
@@ -48,6 +50,7 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
 - RLS: só organizador cria equipe e adiciona/remove integrantes; aluno edita nome,
   repositório, links e líder da própria equipe; com a trava ligada, aluno só visualiza.
 - O líder precisa ser integrante da equipe; se sair dela, a equipe fica sem líder.
+- Trava do líder: com líder definido, só ele (ou um organizador) troca o líder.
 
 ## Configuração (uma vez)
 
@@ -58,7 +61,8 @@ No painel do Supabase → **SQL Editor**, rode, nesta ordem:
 1. `supabase/schema.sql` — tabelas, funções, trigger e RLS.
 2. `supabase/002_organizacao.sql` — notas, materiais e o RPC do gerador de equipes.
 3. `supabase/003_lider_e_permissoes.sql` — líder da equipe; composição só pela organização.
-4. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+4. `supabase/004_trava_lider.sql` — depois de definido, só o líder troca o líder.
+5. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
 
 Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
 `node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { sair } from "@/app/actions";
+import { BotaoTema } from "@/components/BotaoTema";
 import { Logo } from "@/components/Logo";
 import type { Inscrito } from "@/lib/tipos";
 
@@ -19,7 +20,7 @@ export function Cabecalho({
 
   return (
     <header
-      className={`border-b border-borda bg-superficie/90 backdrop-blur ${simulacao ? "" : "sticky top-0 z-10"}`}
+      className={`border-b border-borda bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-[14px] ${simulacao ? "" : "sticky top-0 z-10"}`}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-2.5">
         {simulacao ? (
@@ -33,7 +34,7 @@ export function Cabecalho({
         )}
 
         {organizador && (
-          <span className="selo hidden bg-marca-fundo text-marca sm:inline-flex">Organização</span>
+          <span className="chip hidden sm:inline-flex">Organização</span>
         )}
 
         <div className="flex items-center gap-2">
@@ -41,12 +42,14 @@ export function Cabecalho({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={avatar} alt="" className="size-8 rounded-full" referrerPolicy="no-referrer" />
           ) : (
-            <span className="flex size-8 items-center justify-center rounded-full bg-marca-fundo text-sm font-bold text-marca">
+            <span className="flex size-8 items-center justify-center rounded-full text-sm font-bold text-white" style={{ background: "var(--grad)" }}>
               {primeiroNome[0]}
             </span>
           )}
           <span className="hidden text-sm sm:inline">{primeiroNome}</span>
         </div>
+
+        <BotaoTema className="btn-secundario size-9 min-h-9 p-0" />
 
         {simulacao ? (
           <span className="text-sm text-suave">Sair</span>

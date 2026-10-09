@@ -20,16 +20,7 @@
   --side-w:340px; --r:16px;
   color-scheme:dark;
 }
-@media (prefers-color-scheme: light){.arena:not([data-theme="dark"]){
-  --bg:#f4f7ff; --bg2:#e7eeff; --surface:rgb(255 255 255 / .82); --surface-solid:#ffffff; --side:rgb(255 255 255 / .86);
-  --fg:#000b38; --muted:#4a5a8c; --line:rgb(0 40 160 / .12); --line-strong:rgb(0 40 160 / .24);
-  --cy:#0090c8; --vi:#1530e0; --mg:#c4119f; --lime:#0b8a55; --warm:#c4119f; --danger:#d61b4b;
-  --accent-soft:rgb(0 144 200 / .12); --on-accent:#ffffff;
-  --grad:linear-gradient(110deg,#0090c8 0%,#1530e0 55%,#c4119f 100%);
-  --glow:0 0 0 1px rgb(0 144 200 / .25),0 10px 30px -12px rgb(21 48 224 / .35);
-  --shadow:0 1px 2px rgb(0 11 56 / .05),0 14px 30px -20px rgb(0 11 56 / .25);
-  --net:21,48,224; --dot:rgb(0 40 160 / .09); color-scheme:light}}
-.arena[data-theme="light"]{
+:root[data-theme="light"] .arena{
   --bg:#f4f7ff; --bg2:#e7eeff; --surface:rgb(255 255 255 / .82); --surface-solid:#ffffff; --side:rgb(255 255 255 / .86);
   --fg:#000b38; --muted:#4a5a8c; --line:rgb(0 40 160 / .12); --line-strong:rgb(0 40 160 / .24);
   --cy:#0090c8; --vi:#1530e0; --mg:#c4119f; --lime:#0b8a55; --warm:#c4119f; --danger:#d61b4b;
@@ -38,13 +29,14 @@
   --glow:0 0 0 1px rgb(0 144 200 / .25),0 10px 30px -12px rgb(21 48 224 / .35);
   --shadow:0 1px 2px rgb(0 11 56 / .05),0 14px 30px -20px rgb(0 11 56 / .25);
   --net:21,48,224; --dot:rgb(0 40 160 / .09); color-scheme:light}
+
 .arena *{box-sizing:border-box}
 .arena [hidden]{display:none!important}
-.arena{background:radial-gradient(var(--dot) 1px,transparent 1.2px) 0 0/22px 22px,radial-gradient(1200px 700px at 85% -10%,rgb(47 91 255 / .2),transparent 60%),radial-gradient(900px 600px at -10% 110%,rgb(0 229 255 / .12),transparent 60%),var(--bg);background-attachment:fixed;color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5;transition:background-color .4s,color .4s}
+/* fundo e rede animada vêm do sistema (globals.css / RedeDados) */
+.arena{color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.5}
 .arena button,.arena input,.arena select{font:inherit;color:inherit}
 .arena :focus-visible{outline:2px solid var(--cy);outline-offset:2px}
 .arena ::selection{background:var(--vi);color:#fff}
-.arena #bgfx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55}
 .arena .grad-text{background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% 100%;animation:dh-sheen 8s ease-in-out infinite alternate}
 .arena .app{position:relative;z-index:1;display:grid;grid-template-columns:var(--side-w) minmax(0,1fr);min-height:100%;transition:grid-template-columns .4s cubic-bezier(.2,.8,.2,1)}
 .arena .app.telao{grid-template-columns:0 minmax(0,1fr)}

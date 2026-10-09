@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { ListaMateriais } from "@/components/ListaMateriais";
 import { PainelEquipe } from "@/components/PainelEquipe";
-import { carregarConfiguracao, carregarEquipe, carregarMateriais, exigir, sessaoAtual } from "@/lib/dados";
+import { carregarConfiguracao, carregarEquipeDoAluno, carregarMateriais, sessaoAtual } from "@/lib/dados";
 import type { Inscrito } from "@/lib/tipos";
 
 type Cliente = Awaited<ReturnType<typeof sessaoAtual>>["supabase"];
@@ -20,15 +20,11 @@ export async function TelaAluno({
   aluno: Inscrito;
   simulacao?: boolean;
 }) {
-  const membro = exigir(
-    await supabase.from("membros").select("equipe_id").eq("email", aluno.email).maybeSingle<{ equipe_id: string }>(),
-    "equipe do aluno",
-  );
-
+  // Tudo em paralelo: uma única "rodada" até o banco.
   const [config, materiais, equipe] = await Promise.all([
     carregarConfiguracao(supabase),
     carregarMateriais(supabase),
-    membro ? carregarEquipe(supabase, membro.equipe_id) : null,
+    carregarEquipeDoAluno(supabase, aluno.email),
   ]);
 
   const secaoMateriais = (

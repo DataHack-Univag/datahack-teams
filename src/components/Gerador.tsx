@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { aplicarEquipes } from "@/app/actions";
+import { BotaoTema } from "@/components/BotaoTema";
 import {
   composicao,
   gerarEquipes,
@@ -61,7 +62,6 @@ export function Gerador({
   const [status, setStatus] = useState<{ texto: string; erro?: boolean }>({ texto: "" });
   const [menu, setMenu] = useState(false);
   const [telao, setTelao] = useState(false);
-  const [tema, setTema] = useState<"dark" | "light" | null>(null);
   const [salvo, setSalvo] = useState<{ ok?: string; erro?: string } | null>(null);
   const [confirmarSubst, setConfirmarSubst] = useState(false);
   const [salvando, iniciarSalvar] = useTransition();
@@ -80,23 +80,6 @@ export function Gerador({
   const substitui = fonte === "todos";
   const inicio = substitui ? 1 : totalEquipes + 1;
   const nomeEquipe = (n: number) => `Equipe ${pad(n + inicio - 1)}`;
-
-  // ---------------------------------------------------------------- tema (preferência do navegador)
-  useEffect(() => {
-    try {
-      const t = localStorage.getItem("dh-theme");
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (t === "dark" || t === "light") setTema(t);
-    } catch {}
-  }, []);
-  const escuro = () => (tema ? tema === "dark" : !window.matchMedia?.("(prefers-color-scheme: light)").matches);
-  function alternarTema() {
-    const prox = escuro() ? "light" : "dark";
-    setTema(prox);
-    try {
-      localStorage.setItem("dh-theme", prox);
-    } catch {}
-  }
 
   // ---------------------------------------------------------------- animação de contagem dos KPIs
   useEffect(() => contarAte(kpisRef.current), [fonte]);
@@ -234,15 +217,7 @@ export function Gerador({
   );
 
   return (
-    <div className="arena" data-theme={tema ?? undefined}>
-      {/* Fontes do layout original (se não carregarem, cai na fonte do sistema). */}
-      {/* eslint-disable-next-line @next/next/no-page-custom-font */}
-      <link
-        rel="stylesheet"
-        href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=JetBrains+Mono:wght@400;600&display=swap"
-        precedence="default"
-      />
-      <RedeDados tema={tema} />
+    <div className="arena">
 
       <div className={`app${telao ? " telao" : ""}`}>
         {/* ================================================ menu lateral */}
@@ -430,9 +405,7 @@ export function Gerador({
               <button className="icon" id="telaoBtn" aria-pressed={telao} onClick={alternarTelao} title="Modo telão" aria-label="Modo telão">
                 <IconeTelao />
               </button>
-              <button className="icon" onClick={alternarTema} title="Alternar tema claro/escuro" aria-label="Alternar tema claro/escuro">
-                <IconeTema tema={tema} />
-              </button>
+              <BotaoTema className="icon" />
             </div>
           </div>
 
@@ -941,101 +914,6 @@ function CardEquipe({
   );
 }
 
-/** Fundo animado: rede de dados (pontos ligados por linhas), como no HTML original. */
-function RedeDados({ tema }: { tema: string | null }) {
-  const ref = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const cv = ref.current;
-    const cx = cv?.getContext("2d");
-    if (!cv || !cx) return;
-    let nodes: { x: number; y: number; vx: number; vy: number }[] = [];
-    let W = 0,
-      H = 0,
-      raf = 0;
-    const cor = () =>
-      getComputedStyle(cv.closest(".arena") ?? document.documentElement).getPropertyValue("--net").trim() ||
-      "140,160,255";
-    let NET = cor();
-
-    const dimensionar = () => {
-      const DPR = Math.min(2, window.devicePixelRatio || 1);
-      W = innerWidth;
-      H = innerHeight;
-      cv.width = W * DPR;
-      cv.height = H * DPR;
-      cx.setTransform(DPR, 0, 0, DPR, 0, 0);
-      const n = Math.round(Math.min(70, (W * H) / 22000));
-      nodes = Array.from({ length: n }, () => ({
-        x: Math.random() * W,
-        y: Math.random() * H,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-      }));
-    };
-    const desenhar = () => {
-      cx.clearRect(0, 0, W, H);
-      const L = 130;
-      for (let i = 0; i < nodes.length; i++) {
-        const a = nodes[i];
-        for (let j = i + 1; j < nodes.length; j++) {
-          const b = nodes[j];
-          const d = Math.hypot(a.x - b.x, a.y - b.y);
-          if (d < L) {
-            cx.strokeStyle = `rgba(${NET},${(1 - d / L) * 0.35})`;
-            cx.lineWidth = 1;
-            cx.beginPath();
-            cx.moveTo(a.x, a.y);
-            cx.lineTo(b.x, b.y);
-            cx.stroke();
-          }
-        }
-      }
-      for (const a of nodes) {
-        cx.fillStyle = `rgba(${NET},.7)`;
-        cx.beginPath();
-        cx.arc(a.x, a.y, 1.6, 0, 6.283);
-        cx.fill();
-      }
-    };
-    const loop = () => {
-      for (const a of nodes) {
-        a.x += a.vx;
-        a.y += a.vy;
-        if (a.x < 0 || a.x > W) a.vx *= -1;
-        if (a.y < 0 || a.y > H) a.vy *= -1;
-      }
-      desenhar();
-      raf = requestAnimationFrame(loop);
-    };
-
-    dimensionar();
-    // Espera o tema aplicar antes de ler a cor.
-    requestAnimationFrame(() => {
-      NET = cor();
-      if (reduzido()) desenhar();
-      else loop();
-    });
-    const aoRedimensionar = () => {
-      dimensionar();
-      if (reduzido()) desenhar();
-    };
-    const aoOcultar = () => {
-      cancelAnimationFrame(raf);
-      if (!document.hidden && !reduzido()) loop();
-    };
-    addEventListener("resize", aoRedimensionar);
-    document.addEventListener("visibilitychange", aoOcultar);
-    return () => {
-      cancelAnimationFrame(raf);
-      removeEventListener("resize", aoRedimensionar);
-      document.removeEventListener("visibilitychange", aoOcultar);
-    };
-  }, [tema]);
-
-  return <canvas id="bgfx" ref={ref} aria-hidden="true" />;
-}
-
 // ---------------------------------------------------------------- ícones (mesmos do HTML)
 
 function IconeX() {
@@ -1058,27 +936,6 @@ function IconeTelao() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" />
-    </svg>
-  );
-}
-
-function IconeTema({ tema }: { tema: string | null }) {
-  // Sol no escuro (vai para o claro), lua no claro.
-  const [escuro, setEscuro] = useState(true);
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setEscuro(tema ? tema === "dark" : !window.matchMedia?.("(prefers-color-scheme: light)").matches);
-  }, [tema]);
-  return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      {escuro ? (
-        <>
-          <circle cx="12" cy="12" r="4" />
-          <path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4" />
-        </>
-      ) : (
-        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
-      )}
     </svg>
   );
 }

@@ -73,13 +73,13 @@ export async function atualizarEquipe(_: Resultado, fd: FormData): Promise<Resul
   if (nome.length < 2) return { erro: "Informe o nome da equipe." };
   if (!repo) return ERRO_REPO;
 
-  const publico = await repoEhPublico(repo);
+  // Só consulta o GitHub (lento) se o link do repositório mudou.
+  const mudouRepo = repo !== normalizarRepo(txt(fd, "repo_atual"));
+  const dados = mudouRepo
+    ? { nome, repo_github: repo, ...carimboVerificacao(await repoEhPublico(repo)) }
+    : { nome };
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from("equipes")
-    .update({ nome, repo_github: repo, ...carimboVerificacao(publico) })
-    .eq("id", id)
-    .select("id");
+  const { data, error } = await supabase.from("equipes").update(dados).eq("id", id).select("id");
   if (error) return { erro: traduzirErro(error) };
   if (!data?.length) return SEM_PERMISSAO;
 

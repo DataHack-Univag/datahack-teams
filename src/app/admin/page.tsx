@@ -30,7 +30,9 @@ export default async function AdminEquipes() {
     <Pagina>
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold sm:text-3xl">Equipes</h1>
+          <h1 className="text-2xl font-extrabold sm:text-3xl">
+            As <span className="grad-text">equipes</span>
+          </h1>
           <p className="text-sm text-suave">Integrantes, repositórios e links de entrega de cada equipe.</p>
         </div>
         <a href="/admin/exportar" className="btn-secundario">
@@ -59,11 +61,15 @@ export default async function AdminEquipes() {
           </p>
         )}
         <div className="grid gap-3 lg:grid-cols-2">
-          {equipes.map((e) => (
-            <article key={e.id} className="card space-y-3">
+          {equipes.map((e, i) => (
+            <article
+              key={e.id}
+              className="card faixa-topo space-y-3 transition duration-300 hover:-translate-y-1 hover:shadow-[var(--glow)]"
+              style={{ animation: "dh-carta .7s cubic-bezier(.2,.8,.2,1) both", animationDelay: `${i * 55}ms` }}
+            >
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <h2 className="font-semibold break-words">{e.nome}</h2>
+                  <h2 className="text-lg font-bold break-words">{e.nome}</h2>
                   <p className="text-xs text-suave">
                     {e.membros.length}/{config.max_membros} integrantes
                   </p>
@@ -187,21 +193,27 @@ export default async function AdminEquipes() {
 
 function SeloRepo({ e }: { e: Equipe }) {
   if (!e.repo_github)
-    return <span className="selo bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">pendente</span>;
+    return <span className="selo bg-amber-500/15 text-amber-800 dark:text-amber-300">pendente</span>;
   if (e.repo_publico === true)
     return (
-      <span className="selo bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">✔ público</span>
+      <span className="selo bg-emerald-500/15 text-emerald-800 dark:text-emerald-300">✔ público</span>
     );
   if (e.repo_publico === false)
-    return <span className="selo bg-red-100 text-red-700 dark:bg-red-950 dark:text-red-300">⚠ privado/inexistente</span>;
-  return <span className="selo bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300">não verificado</span>;
+    return <span className="selo bg-red-500/15 text-red-700 dark:text-red-300">⚠ privado/inexistente</span>;
+  return <span className="selo bg-amber-500/15 text-amber-800 dark:text-amber-300">não verificado</span>;
 }
 
 function Numero({ rotulo, valor, alerta = false }: { rotulo: string; valor: number | string; alerta?: boolean }) {
   return (
     <div className="card p-4!">
-      <p className="text-xs text-suave">{rotulo}</p>
-      <p className={`text-2xl font-bold ${alerta ? "text-amber-600 dark:text-amber-400" : ""}`}>{valor}</p>
+      <p
+        className={`font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums sm:text-3xl ${
+          alerta ? "text-amber-600 dark:text-amber-300" : ""
+        }`}
+      >
+        {valor}
+      </p>
+      <p className="mt-1 text-xs text-suave">{rotulo}</p>
     </div>
   );
 }

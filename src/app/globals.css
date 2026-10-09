@@ -1,70 +1,257 @@
 @import "tailwindcss";
 
-:root {
-  --background: #f6f7fb;
-  --foreground: #14161f;
-  --superficie: #ffffff;
-  --borda: #e3e6ef;
-  --suave: #5d6475;
-  --marca: #4f46e5;
-  --marca-forte: #4338ca;
-  --marca-fundo: #eef0ff;
+/* Tema controlado por <html data-theme="dark|light"> (definido antes da pintura no layout).
+   O variante dark: do Tailwind segue esse atributo, não só a preferência do sistema. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/* Paleta do DATAHack Univag (mesma do datahack-equipes.html): azul-marinho do site,
+   ciano, azul e magenta do logo. Dark-first, com tema claro. */
+:root,
+:root[data-theme="dark"] {
+  --background: #000b38;
+  --background-2: #06114a;
+  --foreground: #eef3ff;
+  --superficie: rgb(13 23 66 / 0.78);
+  --superficie-solida: #0d1742;
+  --borda: rgb(90 140 255 / 0.16);
+  --borda-forte: rgb(90 140 255 / 0.3);
+  --suave: #9fb0dd;
+  --marca: #00e5ff;
+  --marca-forte: #7df3ff;
+  --marca-fundo: rgb(0 229 255 / 0.13);
+  --azul: #2f5bff;
+  --magenta: #ff2bd6;
+  --verde: #5cffb0;
+  --grad: linear-gradient(110deg, #00e5ff 0%, #2f5bff 55%, #ff2bd6 100%);
+  --glow: 0 0 0 1px rgb(0 229 255 / 0.28), 0 10px 40px -10px rgb(47 91 255 / 0.55);
+  --sombra: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 18px 40px -24px rgb(0 0 0 / 0.8);
+  --net: 0, 229, 255;
+  --ponto: rgb(120 160 255 / 0.13);
+  color-scheme: dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0d0f16;
-    --foreground: #e8eaf2;
-    --superficie: #161a24;
-    --borda: #262b3a;
-    --suave: #9aa1b4;
-    --marca: #818cf8;
-    --marca-forte: #a5b4fc;
-    --marca-fundo: #1d2140;
-  }
+:root[data-theme="light"] {
+  --background: #f4f7ff;
+  --background-2: #e7eeff;
+  --foreground: #000b38;
+  --superficie: rgb(255 255 255 / 0.82);
+  --superficie-solida: #ffffff;
+  --borda: rgb(0 40 160 / 0.12);
+  --borda-forte: rgb(0 40 160 / 0.24);
+  --suave: #4a5a8c;
+  --marca: #0078b0;
+  --marca-forte: #005b88;
+  --marca-fundo: rgb(0 144 200 / 0.12);
+  --azul: #1530e0;
+  --magenta: #c4119f;
+  --verde: #0b8a55;
+  --grad: linear-gradient(110deg, #0090c8 0%, #1530e0 55%, #c4119f 100%);
+  --glow: 0 0 0 1px rgb(0 144 200 / 0.25), 0 10px 30px -12px rgb(21 48 224 / 0.35);
+  --sombra: 0 1px 2px rgb(0 11 56 / 0.05), 0 14px 30px -20px rgb(0 11 56 / 0.25);
+  --net: 21, 48, 224;
+  --ponto: rgb(0 40 160 / 0.09);
+  color-scheme: light;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-superficie: var(--superficie);
+  --color-superficie-solida: var(--superficie-solida);
   --color-borda: var(--borda);
+  --color-borda-forte: var(--borda-forte);
   --color-suave: var(--suave);
   --color-marca: var(--marca);
   --color-marca-forte: var(--marca-forte);
   --color-marca-fundo: var(--marca-fundo);
-  /* Fontes do sistema: não dependem de download do Google Fonts. */
-  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+  --color-azul: var(--azul);
+  --color-magenta: var(--magenta);
+  --font-sans: "DM Sans", "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+  --font-display: "Unbounded", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
 }
 
+/* Fundo "arena de dados": grade de pontos + brilhos azul/ciano, fixo. */
 body {
-  background: var(--background);
+  background:
+    radial-gradient(var(--ponto) 1px, transparent 1.2px) 0 0 / 22px 22px,
+    radial-gradient(1200px 700px at 85% -10%, rgb(47 91 255 / 0.2), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, rgb(0 229 255 / 0.12), transparent 60%),
+    var(--background);
+  background-attachment: fixed;
   color: var(--foreground);
+  /* Nada de rolagem horizontal no celular. */
+  overflow-x: clip;
+  transition:
+    background-color 0.4s,
+    color 0.4s;
 }
 
-/* Classes reutilizáveis (Tailwind v4 usa @utility para permitir @apply). */
+@layer base {
+  h1,
+  h2 {
+    font-family: var(--font-display);
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    background: var(--azul);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid var(--marca);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------------------------------------------------------------- classes reutilizáveis
+   (Tailwind v4 usa @utility para permitir @apply) */
+
+/* Cartão de vidro com entrada animada. */
 @utility card {
-  @apply rounded-2xl border border-borda bg-superficie p-4 shadow-sm sm:p-6;
+  @apply min-w-0 rounded-2xl border border-borda bg-superficie p-4 sm:p-6;
+  box-shadow: var(--sombra);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  animation: dh-sobe 0.5s both;
 }
 @utility rotulo {
-  @apply mb-1 block text-sm font-medium;
+  @apply mb-1 block text-sm font-semibold;
 }
 @utility campo {
-  @apply w-full rounded-xl border border-borda bg-background px-3 py-2.5 text-base outline-none transition focus:border-marca focus:ring-2 focus:ring-marca/30 disabled:opacity-60;
+  @apply w-full rounded-xl border border-borda-forte bg-superficie-solida px-3 py-2.5 text-base outline-none transition disabled:opacity-60;
+  &:focus {
+    border-color: var(--marca);
+    box-shadow: 0 0 0 3px var(--marca-fundo);
+  }
 }
 @utility btn {
-  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50;
+  &:active:not(:disabled) {
+    transform: translateY(1px) scale(0.99);
+  }
 }
+/* Botão principal: gradiente da marca com brilho passando. */
 @utility btn-primario {
-  @apply btn bg-marca text-white hover:bg-marca-forte dark:text-[#0d0f16];
+  @apply btn relative overflow-hidden border-0 text-white;
+  background: linear-gradient(110deg, #005bc9, var(--azul) 60%, #5a2bff);
+  background-size: 160% 100%;
+  box-shadow: 0 10px 30px -12px rgb(47 91 255 / 0.8);
+  transition:
+    background-position 0.5s,
+    box-shadow 0.2s,
+    transform 0.12s;
+  &:hover:not(:disabled) {
+    background-position: 100% 0;
+    box-shadow: 0 14px 36px -10px rgb(255 43 214 / 0.7);
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(100deg, transparent 30%, rgb(255 255 255 / 0.35) 50%, transparent 70%);
+    transform: translateX(-120%);
+    animation: dh-brilho 3.5s ease-in-out infinite;
+    pointer-events: none;
+  }
 }
 @utility btn-secundario {
-  @apply btn border border-borda bg-superficie hover:bg-marca-fundo;
+  @apply btn border border-borda-forte bg-superficie-solida;
+  &:hover:not(:disabled) {
+    border-color: var(--marca);
+  }
 }
 @utility btn-perigo {
-  @apply btn border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950;
+  @apply btn border border-red-400/50 text-red-600 hover:bg-red-500/10 dark:text-red-300;
 }
 @utility selo {
-  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+  @apply inline-flex max-w-full items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold whitespace-nowrap;
+}
+/* Texto com o gradiente da marca, que "brilha" devagar. */
+@utility grad-text {
+  background: var(--grad);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: dh-reflexo 8s ease-in-out infinite alternate;
+}
+/* Borda em gradiente + brilho (destaques). */
+@utility destaque-grad {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(var(--superficie-solida), var(--superficie-solida)) padding-box,
+    var(--grad) border-box;
+  box-shadow: var(--glow);
+}
+/* Faixa colorida no topo de um card. */
+@utility faixa-topo {
+  @apply relative overflow-hidden;
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto;
+    height: 3px;
+    background: var(--grad);
+    opacity: 0.85;
+  }
+}
+/* Chip "ao vivo" como no hero do HTML. */
+@utility chip {
+  @apply inline-flex items-center gap-2 rounded-full border border-borda-forte bg-superficie px-3 py-1.5 font-mono text-[11px] tracking-[0.12em] text-suave uppercase;
+}
+
+@keyframes dh-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+@keyframes dh-brilho {
+  0%,
+  60% {
+    transform: translateX(-120%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+@keyframes dh-reflexo {
+  to {
+    background-position: 100% 0;
+  }
+}
+@keyframes dh-pulso {
+  0% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--verde) 70%, transparent);
+  }
+  100% {
+    box-shadow: 0 0 0 10px transparent;
+  }
+}
+@keyframes dh-carta {
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.96) rotate(-1deg);
+    filter: blur(4px);
+  }
+}
+
+/* Fundo animado (rede de dados) — fica atrás de tudo. */
+#rede-dados {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

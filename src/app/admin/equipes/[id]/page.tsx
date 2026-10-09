@@ -32,7 +32,7 @@ export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/
         organizador
       />
 
-      <section className="card space-y-2 border-red-200 dark:border-red-900">
+      <section className="card space-y-2 border-red-400/40">
         <h2 className="font-semibold text-red-600 dark:text-red-400">Zona de perigo</h2>
         <Formulario
           action={excluirEquipe}

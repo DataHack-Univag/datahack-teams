@@ -35,12 +35,16 @@ export const sessaoAtual = cache(async () => {
   const { data: claims } = await supabase.auth.getClaims();
   if (!claims?.claims) redirect("/login");
 
-  const { data: email } = await supabase.rpc("email_atual");
-  const { data: inscrito } = await supabase
-    .from("inscritos")
-    .select("email, nome, curso, semestre, papel")
-    .eq("email", email as string)
-    .maybeSingle<Inscrito>();
+  // Caminho rápido: o e-mail do login quase sempre é igual ao da lista (1 consulta).
+  // Só se não achar, normaliza (Gmail com/sem pontos) via email_atual() (2 consultas).
+  const buscar = (email: string) =>
+    supabase.from("inscritos").select("email, nome, curso, semestre, papel").eq("email", email).maybeSingle<Inscrito>();
+  const emailLogin = String(claims.claims.email ?? "").toLowerCase();
+  let { data: inscrito } = await buscar(emailLogin);
+  if (!inscrito) {
+    const { data: email } = await supabase.rpc("email_atual");
+    if (email && email !== emailLogin) ({ data: inscrito } = await buscar(email as string));
+  }
 
   if (!inscrito) {
     await supabase.auth.signOut();
@@ -83,6 +87,19 @@ export async function carregarEquipe(
       .maybeSingle<Equipe>(),
     "equipe",
   );
+}
+
+/** Equipe de um aluno numa consulta só (membros → equipes), ou null se não tem equipe. */
+export async function carregarEquipeDoAluno(supabase: Cliente, email: string) {
+  const r = exigir(
+    await supabase
+      .from("membros")
+      .select(`equipes(${SELECT_EQUIPE})`)
+      .eq("email", email)
+      .maybeSingle<{ equipes: Equipe | null }>(),
+    "equipe do aluno",
+  );
+  return r?.equipes ?? null;
 }
 
 /** Inscritos (alunos) que ainda não estão em nenhuma equipe. */

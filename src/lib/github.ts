@@ -26,7 +26,7 @@ export async function repoEhPublico(url: string): Promise<boolean | null> {
     const r = await fetch(`https://api.github.com/repos/${caminho}`, {
       headers: { Accept: "application/vnd.github+json", "User-Agent": "datahack-teams" },
       cache: "no-store",
-      signal: AbortSignal.timeout(5000),
+      signal: AbortSignal.timeout(3000),
     });
     if (r.status === 200) {
       const j = (await r.json()) as { private?: boolean };
