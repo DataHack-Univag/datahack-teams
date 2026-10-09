@@ -24,18 +24,16 @@ export function PainelEquipe({
   config,
   meuEmail,
   organizador,
-  simulacao = false,
 }: {
   equipe: Equipe;
   disponiveis: Inscrito[];
   config: Configuracao;
   meuEmail: string;
-  organizador: boolean;
   /**
-   * "Ver como aluno": mostra os mesmos controles que o aluno vê. Só os de líder funcionam
-   * (a organização pode definir o líder); os demais ficam desativados.
+   * true = controles de organização. No "ver como aluno" vem false: o organizador vê
+   * e usa exatamente os mesmos controles daquele aluno (agindo com permissão de organização).
    */
-  simulacao?: boolean;
+  organizador: boolean;
 }) {
   const podeEditar = organizador || !config.edicao_bloqueada;
   // Composição da equipe (adicionar/remover) é só da organização; aluno só vê.
@@ -46,6 +44,8 @@ export function PainelEquipe({
   // Trava do líder: sem líder, qualquer integrante define; com líder, só o líder
   // (ou a organização) passa a liderança adiante. O banco garante a mesma regra.
   const podeMexerLider = podeEditar && (organizador || !lider || souLider);
+  // Nome e repositório: só o líder (ou a organização). O banco garante a mesma regra.
+  const podeEditarDados = podeEditar && (organizador || souLider);
   const nomeDe = (m: { email: string; inscritos: { nome: string } | null }) => m.inscritos?.nome ?? m.email;
 
   return (
@@ -81,59 +81,75 @@ export function PainelEquipe({
               {equipe.repo_github}
             </a>
             {podeEditar && (
-              <Trava ativa={simulacao}>
-                <Formulario action={verificarRepo} className="flex flex-wrap items-center gap-2">
-                  <input type="hidden" name="id" value={equipe.id} />
-                  <BotaoEnviar className="btn-secundario min-h-9 px-3 text-xs">
-                    Verificar se está público
-                  </BotaoEnviar>
-                </Formulario>
-              </Trava>
+              <Formulario action={verificarRepo} className="flex flex-wrap items-center gap-2">
+                <input type="hidden" name="id" value={equipe.id} />
+                <BotaoEnviar className="btn-secundario min-h-9 px-3 text-xs">
+                  Verificar se está público
+                </BotaoEnviar>
+              </Formulario>
             )}
           </div>
         ) : (
           <div className="space-y-1 rounded-xl border-2 border-amber-400/70 bg-amber-500/15 p-3">
-            <p className="font-semibold text-amber-900 dark:text-amber-200">Cadastre o repositório GitHub da equipe</p>
+            <p className="font-semibold text-amber-900 dark:text-amber-200">
+              {podeEditarDados ? "Cadastre o repositório GitHub da equipe" : "A equipe ainda não cadastrou o repositório GitHub"}
+            </p>
             <p className="text-sm text-amber-800 dark:text-amber-300">
-              É obrigatório: é nele que vocês entregam o código. Crie um repositório <strong>público</strong> em{" "}
-              <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" className="underline">
-                github.com/new
-              </a>{" "}
-              e cole o link abaixo.
+              É obrigatório: é nele que vocês entregam o código.{" "}
+              {podeEditarDados ? (
+                <>
+                  Crie um repositório <strong>público</strong> em{" "}
+                  <a href="https://github.com/new" target="_blank" rel="noopener noreferrer" className="underline">
+                    github.com/new
+                  </a>{" "}
+                  e cole o link abaixo.
+                </>
+              ) : lider ? (
+                <>
+                  Quem cadastra é o líder, <strong>{nomeDe(lider)}</strong>.
+                </>
+              ) : (
+                "Escolham o líder da equipe (abaixo): é ele quem cadastra o nome e o repositório."
+              )}
             </p>
           </div>
         )}
 
-        {podeEditar && (
+        {podeEditarDados && (
           <details className="group" open={!equipe.repo_github}>
             <summary className="cursor-pointer text-sm font-medium text-marca select-none">
               Editar nome e repositório
             </summary>
-            <Trava ativa={simulacao}>
-              <Formulario action={atualizarEquipe} className="mt-3 grid gap-3 sm:grid-cols-2">
-                <input type="hidden" name="id" value={equipe.id} />
-                <input type="hidden" name="repo_atual" value={equipe.repo_github ?? ""} />
-                <label>
-                  <span className="rotulo">Nome da equipe</span>
-                  <input name="nome" defaultValue={equipe.nome} required maxLength={60} className="campo" />
-                </label>
-                <label>
-                  <span className="rotulo">Repositório GitHub (público)</span>
-                  <input
-                    name="repo_github"
-                    defaultValue={equipe.repo_github ?? ""}
-                    required
-                    inputMode="url"
-                    placeholder="https://github.com/usuario/repo"
-                    className="campo font-mono text-sm"
-                  />
-                </label>
-                <div className="sm:col-span-2">
-                  <BotaoEnviar>Salvar</BotaoEnviar>
-                </div>
-              </Formulario>
-            </Trava>
+            <Formulario action={atualizarEquipe} className="mt-3 grid gap-3 sm:grid-cols-2">
+              <input type="hidden" name="id" value={equipe.id} />
+              <input type="hidden" name="repo_atual" value={equipe.repo_github ?? ""} />
+              <label>
+                <span className="rotulo">Nome da equipe</span>
+                <input name="nome" defaultValue={equipe.nome} required maxLength={60} className="campo" />
+              </label>
+              <label>
+                <span className="rotulo">Repositório GitHub (público)</span>
+                <input
+                  name="repo_github"
+                  defaultValue={equipe.repo_github ?? ""}
+                  required
+                  inputMode="url"
+                  placeholder="https://github.com/usuario/repo"
+                  className="campo font-mono text-sm"
+                />
+              </label>
+              <div className="sm:col-span-2">
+                <BotaoEnviar>Salvar</BotaoEnviar>
+              </div>
+            </Formulario>
           </details>
+        )}
+        {podeEditar && !podeEditarDados && equipe.repo_github && (
+          <p className="text-xs text-suave">
+            {lider
+              ? `Só o líder (${nomeDe(lider)}) pode alterar o nome e o repositório.`
+              : "Escolham o líder da equipe: só ele pode alterar o nome e o repositório."}
+          </p>
         )}
       </section>
 
@@ -324,14 +340,12 @@ export function PainelEquipe({
                 </a>
               </div>
               {podeEditar && (
-                <Trava ativa={simulacao}>
-                  <Formulario action={removerLink} confirmar="Remover este link?" rotuloConfirmar="Remover">
-                    <input type="hidden" name="id" value={l.id} />
-                    <BotaoEnviar className="btn-perigo min-h-9 px-3 text-xs" title="Remover link">
-                      ✕
-                    </BotaoEnviar>
-                  </Formulario>
-                </Trava>
+                <Formulario action={removerLink} confirmar="Remover este link?" rotuloConfirmar="Remover">
+                  <input type="hidden" name="id" value={l.id} />
+                  <BotaoEnviar className="btn-perigo min-h-9 px-3 text-xs" title="Remover link">
+                    ✕
+                  </BotaoEnviar>
+                </Formulario>
               )}
             </li>
           ))}
@@ -339,44 +353,33 @@ export function PainelEquipe({
         </ul>
 
         {podeEditar && (
-          <Trava ativa={simulacao}>
-            <Formulario action={adicionarLink} className="grid gap-2 sm:grid-cols-[180px_1fr]">
-              <input type="hidden" name="equipe_id" value={equipe.id} />
-              <label>
-                <span className="rotulo">Categoria</span>
-                <select name="categoria" required defaultValue="drive" className="campo">
-                  {CATEGORIAS.map((c) => (
-                    <option key={c.valor} value={c.valor}>
-                      {c.rotulo}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span className="rotulo">Descrição (opcional)</span>
-                <input name="titulo" maxLength={80} placeholder="Ex.: Slides do pitch final" className="campo" />
-              </label>
-              <label className="sm:col-span-2">
-                <span className="rotulo">URL</span>
-                <input name="url" required inputMode="url" placeholder="https://..." className="campo font-mono text-sm" />
-              </label>
-              <div className="sm:col-span-2">
-                <BotaoEnviar>Adicionar link</BotaoEnviar>
-              </div>
-            </Formulario>
-          </Trava>
+          <Formulario action={adicionarLink} className="grid gap-2 sm:grid-cols-[180px_1fr]">
+            <input type="hidden" name="equipe_id" value={equipe.id} />
+            <label>
+              <span className="rotulo">Categoria</span>
+              <select name="categoria" required defaultValue="drive" className="campo">
+                {CATEGORIAS.map((c) => (
+                  <option key={c.valor} value={c.valor}>
+                    {c.rotulo}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span className="rotulo">Descrição (opcional)</span>
+              <input name="titulo" maxLength={80} placeholder="Ex.: Slides do pitch final" className="campo" />
+            </label>
+            <label className="sm:col-span-2">
+              <span className="rotulo">URL</span>
+              <input name="url" required inputMode="url" placeholder="https://..." className="campo font-mono text-sm" />
+            </label>
+            <div className="sm:col-span-2">
+              <BotaoEnviar>Adicionar link</BotaoEnviar>
+            </div>
+          </Formulario>
         )}
       </section>
     </div>
-  );
-}
-
-/** Na simulação, desativa os controles que o aluno vê mas a organização não deve acionar por ele. */
-function Trava({ ativa, children }: { ativa: boolean; children: React.ReactNode }) {
-  return (
-    <fieldset disabled={ativa} className="contents">
-      {children}
-    </fieldset>
   );
 }
 

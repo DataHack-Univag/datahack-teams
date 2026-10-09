@@ -34,8 +34,8 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
 - **Organizadores:** quem tem acesso à organização; adicionar e remover.
 - **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
-  aluno" abre a tela exatamente como aquele aluno vê (inclusive os botões de líder que
-  ele teria). Os botões de líder funcionam, agindo como organização; os demais ficam desativados
+  aluno" abre a tela exatamente como aquele aluno vê, com os mesmos botões que ele tem,
+  todos funcionando (agindo como organização)
   (`/ver-como?email=...`). Nada é alterado e não precisa da senha do aluno.
 
 ## Regras garantidas no banco (não só na tela)
@@ -51,6 +51,7 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   repositório, links e líder da própria equipe; com a trava ligada, aluno só visualiza.
 - O líder precisa ser integrante da equipe; se sair dela, a equipe fica sem líder.
 - Trava do líder: com líder definido, só ele (ou um organizador) troca o líder.
+- Nome e repositório da equipe: só o líder (ou um organizador) altera; links, todos os integrantes.
 
 ## Configuração (uma vez)
 
@@ -62,7 +63,8 @@ No painel do Supabase → **SQL Editor**, rode, nesta ordem:
 2. `supabase/002_organizacao.sql` — notas, materiais e o RPC do gerador de equipes.
 3. `supabase/003_lider_e_permissoes.sql` — líder da equipe; composição só pela organização.
 4. `supabase/004_trava_lider.sql` — depois de definido, só o líder troca o líder.
-5. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+5. `supabase/005_lider_edita_dados.sql` — só o líder altera nome e repositório da equipe.
+6. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
 
 Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
 `node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos

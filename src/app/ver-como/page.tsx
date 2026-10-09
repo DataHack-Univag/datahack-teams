@@ -5,8 +5,8 @@ import { TelaAluno } from "@/components/TelaAluno";
 import { sessaoAtual } from "@/lib/dados";
 import type { Inscrito } from "@/lib/tipos";
 
-// "Ver como aluno": o organizador vê exatamente a tela de um aluno, sem poder alterar nada.
-// Os dados vêm com a sessão do organizador (que já pode ler tudo); nada é gravado.
+// "Ver como aluno": o organizador vê exatamente a tela de um aluno, com os mesmos botões.
+// Tudo roda com a sessão do organizador: o que ele fizer aqui fica registrado como organização.
 export default async function VerComo({ searchParams }: PageProps<"/ver-como">) {
   const { supabase, organizador } = await sessaoAtual();
   if (!organizador) redirect("/");
@@ -26,14 +26,14 @@ export default async function VerComo({ searchParams }: PageProps<"/ver-como">) 
       <div className="sticky top-0 z-20 bg-amber-400 text-amber-950">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2 text-sm">
           <span className="font-semibold">👁 Vendo como {aluno.nome}</span>
-          <span className="hidden sm:inline">· modo simulação, nada pode ser alterado</span>
+          <span className="hidden sm:inline">· mesmos botões que ele tem · você age como organização</span>
           <Link href="/admin/participantes" className="ml-auto rounded-lg bg-amber-950 px-3 py-1 font-semibold text-amber-50">
             Sair da simulação
           </Link>
         </div>
       </div>
       <Cabecalho inscrito={aluno} avatar={null} organizador={false} simulacao />
-      <TelaAluno supabase={supabase} aluno={aluno} simulacao />
+      <TelaAluno supabase={supabase} aluno={aluno} />
     </>
   );
 }

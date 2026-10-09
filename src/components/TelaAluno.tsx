@@ -9,16 +9,14 @@ type Cliente = Awaited<ReturnType<typeof sessaoAtual>>["supabase"];
 /**
  * Conteúdo da tela inicial do aluno: a equipe dele e os materiais do evento.
  * Usado na tela real ("/") e no modo "ver como aluno" da organização
- * (simulacao = mesma tela, com tudo desativado).
+ * (mesma tela e mesmos botões; quem age é o organizador).
  */
 export async function TelaAluno({
   supabase,
   aluno,
-  simulacao = false,
 }: {
   supabase: Cliente;
   aluno: Inscrito;
-  simulacao?: boolean;
 }) {
   // Tudo em paralelo: uma única "rodada" até o banco.
   const [config, materiais, equipe] = await Promise.all([
@@ -47,7 +45,6 @@ export async function TelaAluno({
           config={config}
           meuEmail={aluno.email}
           organizador={false}
-          simulacao={simulacao}
         />
       ) : (
         <section className="card space-y-3">
