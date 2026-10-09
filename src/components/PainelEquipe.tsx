@@ -221,6 +221,7 @@ export function PainelEquipe({
                         key={`lider-${m.email}-${equipe.lider_email ?? ""}`}
                         action={definirLider}
                         className="flex flex-col items-end"
+                        rotuloConfirmar={souLider ? "Passar liderança" : "Tornar líder"}
                         confirmar={
                           souLider
                             ? `Passar a liderança para ${nomeDe(m)}? Você deixa de ser líder e só ${nomeDe(m)} poderá trocar de novo.`
@@ -242,6 +243,7 @@ export function PainelEquipe({
                         action={definirLider}
                         className="flex flex-col items-end"
                         confirmar={`Tirar ${nomeDe(m)} da liderança? A equipe fica sem líder.`}
+                        rotuloConfirmar="Tirar líder"
                       >
                         <input type="hidden" name="equipe_id" value={equipe.id} />
                         <input type="hidden" name="email" value="" />
@@ -252,6 +254,7 @@ export function PainelEquipe({
                       <Formulario
                         action={removerMembro}
                         confirmar={`Remover ${m.inscritos?.nome ?? m.email} da equipe?`}
+                        rotuloConfirmar="Remover"
                         className="flex flex-col items-end"
                       >
                         <input type="hidden" name="email" value={m.email} />
@@ -322,7 +325,7 @@ export function PainelEquipe({
               </div>
               {podeEditar && (
                 <Trava ativa={simulacao}>
-                  <Formulario action={removerLink} confirmar="Remover este link?">
+                  <Formulario action={removerLink} confirmar="Remover este link?" rotuloConfirmar="Remover">
                     <input type="hidden" name="id" value={l.id} />
                     <BotaoEnviar className="btn-perigo min-h-9 px-3 text-xs" title="Remover link">
                       ✕

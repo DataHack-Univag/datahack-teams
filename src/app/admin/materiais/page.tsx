@@ -37,7 +37,7 @@ export default async function AdminMateriais() {
                   <FormMaterial m={m} />
                 </div>
               </details>
-              <Formulario action={removerMaterial} confirmar={`Remover "${m.titulo}"?`}>
+              <Formulario action={removerMaterial} confirmar={`Remover "${m.titulo}"?`} rotuloConfirmar="Remover">
                 <input type="hidden" name="id" value={m.id} />
                 <BotaoEnviar className="btn-perigo min-h-9 px-3 text-xs">Remover</BotaoEnviar>
               </Formulario>

@@ -41,6 +41,7 @@ export default async function AdminOrganizadores() {
                 <Formulario
                   action={alterarPapel}
                   confirmar={`Tirar o acesso de organizador de ${o.nome}? Ele(a) continua podendo logar como aluno.`}
+                  rotuloConfirmar="Tirar acesso"
                   className="flex flex-col items-end"
                 >
                   <input type="hidden" name="email" value={o.email} />

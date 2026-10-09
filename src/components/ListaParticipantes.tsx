@@ -96,6 +96,7 @@ export function ListaParticipantes({ participantes, meuEmail }: { participantes:
                   <Formulario
                     action={removerParticipante}
                     confirmar={`Remover ${p.nome} da lista? Ele(a) perde o acesso e sai da equipe.`}
+                    rotuloConfirmar="Remover"
                   >
                     <input type="hidden" name="email" value={p.email} />
                     <BotaoEnviar className="btn-perigo min-h-9 px-3 text-xs">Remover participante</BotaoEnviar>

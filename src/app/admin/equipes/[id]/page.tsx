@@ -37,6 +37,7 @@ export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/
         <Formulario
           action={excluirEquipe}
           confirmar={`Excluir a equipe "${equipe.nome}"? Os integrantes ficam sem equipe e os links são apagados.`}
+          rotuloConfirmar="Excluir equipe"
         >
           <input type="hidden" name="id" value={equipe.id} />
           <BotaoEnviar className="btn-perigo">Excluir equipe</BotaoEnviar>
