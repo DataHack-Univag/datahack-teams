@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { CampoSenha } from "./CampoSenha";
 
 export function NovaSenha() {
   const router = useRouter();
@@ -37,31 +38,23 @@ export function NovaSenha() {
 
   return (
     <form onSubmit={salvar} className="space-y-3">
-      <label className="block">
-        <span className="rotulo">Nova senha</span>
-        <input
-          type="password"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          autoComplete="new-password"
-          minLength={6}
-          required
-          autoFocus
-          className="campo"
-        />
-      </label>
-      <label className="block">
-        <span className="rotulo">Repita a senha</span>
-        <input
-          type="password"
-          value={confirma}
-          onChange={(e) => setConfirma(e.target.value)}
-          autoComplete="new-password"
-          minLength={6}
-          required
-          className="campo"
-        />
-      </label>
+      <CampoSenha
+        label="Nova senha"
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        autoComplete="new-password"
+        minLength={6}
+        required
+        autoFocus
+      />
+      <CampoSenha
+        label="Repita a senha"
+        value={confirma}
+        onChange={(e) => setConfirma(e.target.value)}
+        autoComplete="new-password"
+        minLength={6}
+        required
+      />
       {erro && (
         <p className="rounded-xl bg-red-500/15 p-3 text-sm text-red-700 dark:text-red-300">{erro}</p>
       )}

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { CampoSenha } from "./CampoSenha";
 
 // Login por e-mail + senha no Supabase Auth.
 // "Primeiro acesso" cria a conta; o trigger do banco recusa e-mails fora da
@@ -135,32 +136,24 @@ export function LoginSenha() {
           />
         </label>
         {modo !== "esqueci" && (
-          <label className="block">
-            <span className="rotulo">Senha</span>
-            <input
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              autoComplete={modo === "criar" ? "new-password" : "current-password"}
-              minLength={6}
-              required
-              className="campo"
-            />
-          </label>
+          <CampoSenha
+            label="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            autoComplete={modo === "criar" ? "new-password" : "current-password"}
+            minLength={6}
+            required
+          />
         )}
         {modo === "criar" && (
-          <label className="block">
-            <span className="rotulo">Repita a senha</span>
-            <input
-              type="password"
-              value={confirma}
-              onChange={(e) => setConfirma(e.target.value)}
-              autoComplete="new-password"
-              minLength={6}
-              required
-              className="campo"
-            />
-          </label>
+          <CampoSenha
+            label="Repita a senha"
+            value={confirma}
+            onChange={(e) => setConfirma(e.target.value)}
+            autoComplete="new-password"
+            minLength={6}
+            required
+          />
         )}
 
         {erro && (
