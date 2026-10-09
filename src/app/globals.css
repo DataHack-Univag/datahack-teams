@@ -1,0 +1,70 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7fb;
+  --foreground: #14161f;
+  --superficie: #ffffff;
+  --borda: #e3e6ef;
+  --suave: #5d6475;
+  --marca: #4f46e5;
+  --marca-forte: #4338ca;
+  --marca-fundo: #eef0ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0d0f16;
+    --foreground: #e8eaf2;
+    --superficie: #161a24;
+    --borda: #262b3a;
+    --suave: #9aa1b4;
+    --marca: #818cf8;
+    --marca-forte: #a5b4fc;
+    --marca-fundo: #1d2140;
+  }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-superficie: var(--superficie);
+  --color-borda: var(--borda);
+  --color-suave: var(--suave);
+  --color-marca: var(--marca);
+  --color-marca-forte: var(--marca-forte);
+  --color-marca-fundo: var(--marca-fundo);
+  /* Fontes do sistema: não dependem de download do Google Fonts. */
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, "Cascadia Mono", Consolas, "SF Mono", Menlo, monospace;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}
+
+/* Classes reutilizáveis (Tailwind v4 usa @utility para permitir @apply). */
+@utility card {
+  @apply rounded-2xl border border-borda bg-superficie p-4 shadow-sm sm:p-6;
+}
+@utility rotulo {
+  @apply mb-1 block text-sm font-medium;
+}
+@utility campo {
+  @apply w-full rounded-xl border border-borda bg-background px-3 py-2.5 text-base outline-none transition focus:border-marca focus:ring-2 focus:ring-marca/30 disabled:opacity-60;
+}
+@utility btn {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60;
+}
+@utility btn-primario {
+  @apply btn bg-marca text-white hover:bg-marca-forte dark:text-[#0d0f16];
+}
+@utility btn-secundario {
+  @apply btn border border-borda bg-superficie hover:bg-marca-fundo;
+}
+@utility btn-perigo {
+  @apply btn border border-red-300 text-red-600 hover:bg-red-50 dark:border-red-900 dark:text-red-400 dark:hover:bg-red-950;
+}
+@utility selo {
+  @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium;
+}

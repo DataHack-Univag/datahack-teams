@@ -1,0 +1,130 @@
+# DataHack Univag 2026 — Gestão de Equipes
+
+Sistema web (mobile e desktop) para os inscritos do DataHack formarem equipes e
+registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, com
+"esqueci a senha" por e-mail; só entra quem está na lista de inscritos. Backend 100% Supabase (Auth + Postgres com RLS).
+
+**Stack:** Next.js 16 (App Router, Server Actions) · `@supabase/ssr` · Tailwind CSS v4.
+
+## O que faz
+
+**Aluno**
+- No primeiro acesso cria a senha com o e-mail da inscrição (só se estiver em `inscritos`).
+- Vê a própria equipe, montada pela organização. **Não adiciona, não remove e não sai**:
+  a composição é só da organização.
+- Escolhe o **líder** da equipe (qualquer integrante pode definir ou trocar).
+- Edita nome da equipe, repositório GitHub (público, obrigatório para a entrega) e os
+  links de entrega com categoria: GitHub, Google Drive, Apresentação, Vídeo, Dashboard,
+  Figma, Site/Deploy, Outro.
+- Vê os materiais publicados pela organização.
+
+**Organização** (`/admin`, papel `organizador`), com abas:
+- **Equipes:** todas as equipes com integrantes, repositório (público/privado/pendente) e
+  links de entrega; quem está sem equipe; criar/editar/excluir equipe; limite de
+  integrantes e **trava de edição** (fim do prazo); exportar CSV.
+- **Participantes:** lista de quem pode logar, com nome, e-mail, curso, semestre e
+  **nota média** (só organizadores veem a nota). Cadastrar, editar, remover, buscar.
+- **Gerador de equipes:** o algoritmo do `datahack-equipes.html` integrado: equilibra
+  semestre + nota (peso ajustável), mistura cursos, semente reproduzível, compara com
+  200 sorteios aleatórios, modo telão. Lê os participantes do banco e **salva as equipes
+  no sistema** (só quem está sem equipe, ou refazendo tudo). Equipes geradas nascem sem
+  repositório; os alunos veem um aviso para cadastrar o GitHub.
+- **Materiais:** links publicados pela organização (repositório de documentação,
+  desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
+- **Organizadores:** quem tem acesso à organização; adicionar e remover.
+- **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
+  aluno" abre a tela exatamente como aquele aluno vê, com todos os botões desativados
+  (`/ver-como?email=...`). Nada é alterado e não precisa da senha do aluno.
+
+## Regras garantidas no banco (não só na tela)
+
+- Trigger em `auth.users` recusa cadastro de e-mail fora de `inscritos`.
+- Cada aluno está em no máximo uma equipe (PK em `membros.email`).
+- Nome de equipe único (sem diferenciar maiúsculas).
+- `repo_github` no formato `https://github.com/usuario/repo` (obrigatório ao criar equipe;
+  equipes do gerador ficam "pendente" até os alunos cadastrarem).
+- Nota média fica numa tabela separada (`notas`) que só organizadores leem.
+- Gmail é comparado sem pontos e sem `+sufixo` (`joao.silva@gmail.com` = `joaosilva@gmail.com`).
+- RLS: só organizador cria equipe e adiciona/remove integrantes; aluno edita nome,
+  repositório, links e líder da própria equipe; com a trava ligada, aluno só visualiza.
+- O líder precisa ser integrante da equipe; se sair dela, a equipe fica sem líder.
+
+## Configuração (uma vez)
+
+### 1. Banco
+
+No painel do Supabase → **SQL Editor**, rode, nesta ordem:
+
+1. `supabase/schema.sql` — tabelas, funções, trigger e RLS.
+2. `supabase/002_organizacao.sql` — notas, materiais e o RPC do gerador de equipes.
+3. `supabase/003_lider_e_permissoes.sql` — líder da equipe; composição só pela organização.
+4. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+
+Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
+`node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos
+participantes e organizadores podem ser cadastrados direto pelo sistema.
+
+> `seed.sql`, `INSCRIÇÕES.txt` e `inscritos-datahack.csv` contêm dados pessoais e
+> estão no `.gitignore`. Não versionar.
+
+### 2. Login (Supabase Auth, e-mail + senha)
+
+No **primeiro acesso** o aluno informa o e-mail da inscrição e cria uma senha; depois
+entra com e-mail + senha. Quem não está em `inscritos` é recusado pelo trigger do banco.
+Em **"Esqueci a senha"** o Supabase envia um link por e-mail para criar uma nova senha.
+
+1. **Authentication → Sign In / Providers → Email**: deixe ativo e **desligue
+   "Confirm email"** (o cadastro entra direto, sem e-mail de confirmação).
+2. **Authentication → URL Configuration**:
+   - *Site URL*: `http://localhost:3000` enquanto testa; depois o domínio de produção.
+   - *Redirect URLs*: `http://localhost:3000/**` e `https://SEU-DOMINIO/**`.
+3. **Authentication → Emails → Templates → Reset Password** (recomendado): troque o
+   link por este, que funciona mesmo se o aluno abrir o e-mail em outro navegador/celular:
+   ```html
+   <h2>Redefinir senha — DataHack Univag</h2>
+   <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/nova-senha">Criar nova senha</a></p>
+   ```
+   (Com o template padrão também funciona, mas só se abrir o link no mesmo navegador.)
+4. **SMTP:** o e-mail embutido do Supabase tem limite baixo de envios por hora e pode
+   só entregar para e-mails da equipe do projeto. Para os alunos receberem o e-mail de
+   redefinição, configure um SMTP em **Authentication → Emails → SMTP Settings**
+   (Resend, Brevo ou Gmail com senha de app). Só o "esqueci a senha" usa e-mail.
+
+### 3. Rodar
+
+```bash
+cp .env.example .env.local   # já existe um .env.local com as chaves do projeto
+npm install
+npm run dev                  # http://localhost:3000
+```
+
+### 4. Deploy
+
+Qualquer host de Next.js (Vercel é o mais simples): configure as variáveis
+`NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
+## Estrutura
+
+```
+supabase/schema.sql        tabelas, RLS, trigger de lista de inscritos, RPC criar_equipe
+supabase/seed.sql          inscritos (gerado de INSCRIÇÕES.txt — não versionar)
+src/proxy.ts               renova sessão e manda para /login quem não está logado
+src/app/login              tela de login (entrar / primeiro acesso / esqueci a senha)
+src/app/auth/confirm       destino do link de redefinição de senha
+src/app/nova-senha         define a nova senha
+src/app/ver-como           organizador vê a tela de um aluno (somente leitura)
+src/app/page.tsx           painel do aluno (minha equipe / criar equipe)
+src/app/admin              área da organização (equipes, participantes, gerador, materiais, organizadores)
+src/app/admin/equipes/[id] edição de qualquer equipe
+src/lib/gerador.ts         algoritmo de formação de equipes (portado do datahack-equipes.html)
+src/app/actions.ts         Server Actions (mutações)
+src/components/            PainelEquipe, CriarEquipe, Formulario, Cabecalho, LoginSenha
+```
+
+## Observações
+
+- Como o cadastro não exige confirmação por e-mail, quem souber o e-mail de um inscrito
+  poderia criar a senha antes dele. Se acontecer, o dono usa "Esqueci a senha" (o link
+  chega no e-mail dele) ou você apaga o usuário em Authentication → Users.
+- A checagem de "repositório público" usa a API pública do GitHub (60 consultas/hora
+  por IP do servidor). Ela não bloqueia a criação; só sinaliza.
