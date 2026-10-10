@@ -14,12 +14,20 @@ export type LinhaRanking = {
 
 const fmt = (v: number | null | undefined) => (v === null || v === undefined ? "—" : v.toFixed(1).replace(".", ","));
 const MEDALHA = ["🥇", "🥈", "🥉"];
+// Quantas posições aparecer (0 = todas). Padrão: top 5, para não expor as últimas colocações no telão.
+const OPCOES_TOP = [
+  { valor: 3, rotulo: "Top 3" },
+  { valor: 5, rotulo: "Top 5" },
+  { valor: 0, rotulo: "Todos" },
+];
 
 /**
- * Ranking final com pódio. "Modo revelação" esconde tudo e revela uma posição por clique,
- * do último para o 1º (para a premiação no telão).
+ * Ranking final com pódio. Mostra o top 3, o top 5 ou todas as equipes; o "modo revelação"
+ * esconde as posições escolhidas e revela uma por clique, da última para a 1ª (premiação no telão).
  */
-export function Podio({ linhas, encerrada }: { linhas: LinhaRanking[]; encerrada: boolean }) {
+export function Podio({ linhas: todas, encerrada }: { linhas: LinhaRanking[]; encerrada: boolean }) {
+  const [quantos, setQuantos] = useState(5);
+  const linhas = quantos ? todas.slice(0, quantos) : todas;
   const total = linhas.length;
   // revelados = quantas posições, contando do fim, já estão visíveis. total = tudo visível.
   const [revelados, setRevelados] = useState(total);
@@ -55,11 +63,31 @@ export function Podio({ linhas, encerrada }: { linhas: LinhaRanking[]; encerrada
       {/* ------------------------------------------------ controles */}
       <div className="flex flex-wrap items-center gap-2">
         {!encerrada && (
-          <span className="selo mr-auto bg-amber-500/15 text-amber-800 dark:text-amber-300">
+          <span className="selo bg-amber-500/15 text-amber-800 dark:text-amber-300">
             Avaliação em andamento: ranking parcial
           </span>
         )}
-        <div className={`flex flex-wrap gap-2 ${encerrada ? "ml-auto" : ""}`}>
+        <div role="radiogroup" aria-label="Quantas posições mostrar" className="mr-auto flex rounded-full border border-borda p-0.5">
+          {OPCOES_TOP.map((o) => (
+            <button
+              key={o.valor}
+              type="button"
+              role="radio"
+              aria-checked={quantos === o.valor}
+              onClick={() => {
+                const novoTotal = o.valor ? Math.min(o.valor, todas.length) : todas.length;
+                setQuantos(o.valor);
+                setRevelados(novoTotal); // trocar a quantidade sai do modo revelação
+              }}
+              className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                quantos === o.valor ? "bg-[var(--azul)] text-white" : "text-suave hover:text-foreground"
+              }`}
+            >
+              {o.rotulo}
+            </button>
+          ))}
+        </div>
+        <div className="flex flex-wrap gap-2">
           {revelacao ? (
             <>
               <button type="button" onClick={() => setRevelados((r) => Math.min(total, r + 1))} className="btn-primario">
@@ -166,6 +194,11 @@ export function Podio({ linhas, encerrada }: { linhas: LinhaRanking[]; encerrada
                 );
               })}
             </ol>
+          )}
+          {todas.length > total && (
+            <p className="text-center text-xs text-suave">
+              Mostrando as {total} primeiras posições de {todas.length} equipes.
+            </p>
           )}
         </>
       )}
