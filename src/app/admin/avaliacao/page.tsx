@@ -2,6 +2,7 @@ import Link from "next/link";
 import { alternarPenalidade, excluirAvaliacao, salvarEncerramentoAvaliacao } from "@/app/actions";
 import { BotaoEnviar, Formulario } from "@/components/Formulario";
 import { Pagina } from "@/components/Pagina";
+import { QuadroGeral, type EquipeResumoNota } from "@/components/QuadroGeral";
 import {
   avaliacaoEncerrada,
   carregarAvaliacoes,
@@ -46,6 +47,38 @@ export default async function AdminAvaliacao() {
     })
     .sort((a, b) => compararRanking(a.r, b.r));
   const avaliadores = new Set(fichas.map((f) => f.avaliador)).size;
+
+  // Dados prontos para o quadro geral / dashboard (componente do navegador).
+  const quadro: EquipeResumoNota[] = ranking.map(({ equipe, fichas: fe, pens, r }, i) => ({
+    id: equipe.id,
+    nome: equipe.nome,
+    posicao: i + 1,
+    final: r.final,
+    completa: r.completa,
+    penalidades: pens.map((id) => {
+      const p = PENALIDADES.find((x) => x.id === id);
+      return { texto: p?.texto ?? id, pontos: p?.pontos ?? 0 };
+    }),
+    fases: RUBRICAS.map((rb) => {
+      const x = r.rubricas[rb.id];
+      return {
+        id: rb.id,
+        nome: rb.nome,
+        peso: rb.pesoFinal,
+        media: x.nota,
+        pontos: x.nota === null ? null : (rb.pesoFinal * x.nota) / 100,
+        completa: x.completa,
+        criterios: rb.criterios.map((c) => ({ id: c.id, nome: c.nome, peso: c.peso, media: x.mediaCriterio[c.id] })),
+        fichas: fe
+          .filter((f) => f.rubrica === rb.id)
+          .map((f) => ({
+            avaliador: f.quem?.nome ?? f.avaliador,
+            nota: notaFicha(rb, f.notas ?? {}),
+            niveis: Object.fromEntries(rb.criterios.map((c) => [c.id, nivelDe(f.notas?.[c.id])])),
+          })),
+      };
+    }),
+  }));
 
   return (
     <Pagina>
@@ -100,77 +133,24 @@ export default async function AdminAvaliacao() {
         </Formulario>
       </section>
 
-      {/* ------------------------------------------------ quadro geral (só organização) */}
-      {ranking.length > 0 && (
-        <section className="card space-y-3">
-          <div>
-            <h2 className="text-lg font-semibold">Quadro geral · nota final</h2>
-            <p className="text-sm text-suave">
-              Em cada categoria: <strong className="text-foreground">média das notas dos avaliadores</strong>. Nota final ={" "}
-              {RUBRICAS.map((r) => `${r.pesoFinal}% × ${r.id.replace("_", " ")}`).join(" + ")} + penalidades.
-            </p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[640px] text-sm">
-              <thead>
-                <tr className="text-left text-xs text-suave">
-                  <th className="py-2 pr-2 font-semibold">#</th>
-                  <th className="py-2 pr-2 font-semibold">Equipe</th>
-                  {RUBRICAS.map((rb) => (
-                    <th key={rb.id} className="py-2 pr-2 text-right font-semibold" title={rb.nome}>
-                      {rb.id.replace("_", " ")}
-                      <span className="block font-normal">média · {rb.pesoFinal}%</span>
-                    </th>
-                  ))}
-                  <th className="py-2 pr-2 text-right font-semibold">Penal.</th>
-                  <th className="py-2 text-right font-semibold">Nota final</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ranking.map(({ equipe, r }, i) => (
-                  <tr key={equipe.id} className="border-t border-borda">
-                    <td className="py-2 pr-2 font-mono text-suave">{i + 1}º</td>
-                    <td className="max-w-48 truncate py-2 pr-2 font-semibold">
-                      <Link href={`/avaliar/${equipe.id}`} className="hover:text-marca hover:underline">
-                        {equipe.nome}
-                      </Link>
-                    </td>
-                    {RUBRICAS.map((rb) => {
-                      const x = r.rubricas[rb.id];
-                      return (
-                        <td key={rb.id} className="py-2 pr-2 text-right font-mono tabular-nums">
-                          {fmtNota(x.nota)}
-                          <span className="block text-[11px] text-suave">
-                            {x.avaliadores} aval.{x.nota !== null ? ` · ${fmtNota((rb.pesoFinal * x.nota) / 100)} pts` : ""}
-                          </span>
-                        </td>
-                      );
-                    })}
-                    <td className="py-2 pr-2 text-right font-mono tabular-nums text-red-600 dark:text-red-300">
-                      {r.penalidades || "—"}
-                    </td>
-                    <td className="py-2 text-right">
-                      <span className="font-[family-name:var(--font-display)] text-xl font-bold tabular-nums">
-                        <span className="grad-text">{fmtNota(r.final)}</span>
-                      </span>
-                      {!r.completa && <span className="block text-[11px] text-amber-700 dark:text-amber-300">parcial</span>}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="text-xs text-suave">
-            “pts” = quanto a categoria soma na nota final (peso × média). “parcial” = ainda falta avaliar alguma categoria ou
-            critério; a nota final cresce conforme as fichas são lançadas.
-          </p>
-        </section>
-      )}
+      {/* ------------------------------------------------ quadro geral + dashboard por grupo */}
+      {quadro.length > 0 && <QuadroGeral equipes={quadro} />}
 
       {/* ------------------------------------------------ ranking (detalhe por equipe) */}
       {ranking.length === 0 ? (
         <p className="card text-sm text-suave">Nenhuma equipe cadastrada.</p>
       ) : (
+        <details className="group space-y-3">
+          <summary className="card flex cursor-pointer list-none items-center justify-between gap-2 select-none">
+            <span>
+              <span className="text-lg font-semibold">Detalhe por grupo</span>
+              <span className="block text-sm text-suave">Notas de cada avaliador, penalidades e fichas.</span>
+            </span>
+            <span className="btn-secundario min-h-9 shrink-0 px-3 text-xs">
+              <span className="group-open:hidden">Mostrar ▾</span>
+              <span className="hidden group-open:inline">Esconder ▴</span>
+            </span>
+          </summary>
         <ol className="space-y-3">
           {ranking.map(({ equipe, fichas: fe, pens, r }, i) => (
             <li
@@ -355,6 +335,7 @@ export default async function AdminAvaliacao() {
             </li>
           ))}
         </ol>
+        </details>
       )}
 
       <section className="card space-y-2 text-sm">
