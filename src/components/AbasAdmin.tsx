@@ -8,6 +8,7 @@ const ABAS = [
   { href: "/admin/participantes", rotulo: "Participantes" },
   { href: "/admin/trocas", rotulo: "Trocas" },
   { href: "/admin/avaliacao", rotulo: "Avaliação" },
+  { href: "/admin/ranking", rotulo: "🏆 Ranking" },
   { href: "/admin/gerador", rotulo: "Gerador de equipes" },
   { href: "/admin/materiais", rotulo: "Materiais" },
   { href: "/admin/organizadores", rotulo: "Organizadores e bancas" },

@@ -107,6 +107,9 @@ export default async function AdminAvaliacao() {
           <Link href="/avaliar" className="btn-primario">
             Lançar notas
           </Link>
+          <Link href="/admin/ranking" className="btn-secundario">
+            🏆 Ver ranking
+          </Link>
           <a href="/admin/avaliacao/exportar" className="btn-secundario">
             Exportar ranking
           </a>

@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 import { AjudaCalculo } from "@/components/AjudaCalculo";
 import { Cabecalho } from "@/components/Cabecalho";
+import { ToastDaUrl } from "@/components/Toast";
 import { sessaoAtual } from "@/lib/dados";
 
 // Área das bancas: só avaliadores (técnico/negócio) e organizadores.
@@ -31,6 +33,10 @@ export default async function LayoutAvaliar({ children }: LayoutProps<"/avaliar"
         </div>
       </nav>
       <main className="flex flex-1 flex-col">{children}</main>
+      {/* "Ficha salva: ..." ao voltar da ficha para a lista de grupos */}
+      <Suspense>
+        <ToastDaUrl />
+      </Suspense>
     </>
   );
 }

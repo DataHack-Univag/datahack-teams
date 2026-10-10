@@ -458,8 +458,15 @@ export async function salvarAvaliacao(_: Resultado, fd: FormData): Promise<Resul
     return { erro: traduzirErro(error) };
   }
   atualizar();
+  // O toast aparece na próxima tela (?salvo=...). Avaliador volta para a lista de grupos;
+  // a organização fica na mesma rubrica (com ?r= para a tela não pular para outra).
   const faltam = rubrica.criterios.length - Object.keys(notas).length;
-  return { ok: faltam ? `Salvo. Faltam ${faltam} critério(s).` : "Ficha salva e completa." };
+  const rotulo = `${txt(fd, "equipe_nome") || "Equipe"} · ${rubrica.curto}${faltam ? ` (faltam ${faltam} critério(s))` : ""}`;
+  redirect(
+    txt(fd, "voltar") === "1"
+      ? `/avaliar?salvo=${encodeURIComponent(rotulo)}`
+      : `/avaliar/${equipeId}?r=${rubrica.id}&salvo=${encodeURIComponent(rotulo)}`,
+  );
 }
 
 /** Liga/desliga uma penalidade da nota final de uma equipe (organização). */

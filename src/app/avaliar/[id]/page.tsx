@@ -146,11 +146,14 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
           </div>
 
           <FichaAvaliacao
-            key={`${id}-${rubrica.id}`}
+            key={`${id}-${rubrica.id}-${ficha?.atualizado_em ?? "nova"}`}
             rubrica={rubrica}
             equipeId={id}
+            equipeNome={equipe.nome}
             notasIniciais={ficha?.notas ?? {}}
             comentarioInicial={ficha?.comentario ?? ""}
+            salvoEm={ficha?.atualizado_em ?? null}
+            voltarAoSalvar={!organizador}
             bloqueada={encerrada && !organizador}
           />
         </>
