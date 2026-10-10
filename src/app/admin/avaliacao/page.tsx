@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { alternarPenalidade, excluirAvaliacao, salvarEncerramentoAvaliacao } from "@/app/actions";
+import { MenuExportar } from "@/components/MenuExportar";
 import { AjudaCalculo } from "@/components/AjudaCalculo";
 import { BotaoEnviar, Formulario } from "@/components/Formulario";
 import { Pagina } from "@/components/Pagina";
@@ -110,12 +111,7 @@ export default async function AdminAvaliacao() {
           <Link href="/admin/ranking" className="btn-secundario">
             🏆 Ver ranking
           </Link>
-          <a href="/admin/avaliacao/exportar" className="btn-secundario">
-            Exportar ranking
-          </a>
-          <a href="/admin/avaliacao/exportar?tipo=fichas" className="btn-secundario">
-            Exportar notas por avaliador
-          </a>
+          <MenuExportar />
         </div>
       </div>
 
