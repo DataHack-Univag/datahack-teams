@@ -1,10 +1,12 @@
-// Cálculo das notas (mesma regra de src/build_cronograma_rubrica.py):
+// Cálculo das notas (mesma regra de src/build_cronograma_rubrica.py, versão 2):
 //   - cada critério: média dos fatores dados pelos avaliadores daquela rubrica;
 //   - nota da rubrica (0–100) = soma(peso_critério × fator médio);
+//   - fases 1 e 2 têm duas rubricas: pitch (professores) e mesa (organizadores);
+//     nota da fase (0–100) = soma(peso_final × nota_rubrica) / peso da fase;
 //   - nota final = soma(peso_final × nota_rubrica / 100) + penalidades, mínimo 0;
-//   - desempate: Técnica F3 → "Respondeu às perguntas" (NEG) → "Idempotência" (TEC_F2).
+//   - desempate: F3 · Repositório → "Respondeu às perguntas" (NEG) → "Idempotência" (F2 · Mesa).
 
-import { PENALIDADES, RUBRICAS, type Rubrica, type RubricaId } from "@/lib/rubricas";
+import { FASES, PENALIDADES, RUBRICAS, type FaseId, type Rubrica, type RubricaId } from "@/lib/rubricas";
 import type { Avaliacao } from "@/lib/tipos";
 
 /** Nota (0–100) de uma única ficha. Critérios sem nível contam 0. */
@@ -34,8 +36,17 @@ export function consolidarRubrica(rubrica: Rubrica, fichas: Avaliacao[]): Result
   return { nota: daRubrica.length ? nota : null, avaliadores: daRubrica.length, completa, mediaCriterio };
 }
 
+export type ResultadoFase = {
+  /** 0–100, juntando as partes avaliadas (null = nenhuma parte avaliada). */
+  nota: number | null;
+  /** quanto a fase soma na nota final (pontos). */
+  pontos: number;
+  completa: boolean;
+};
+
 export type ResultadoEquipe = {
   rubricas: Record<RubricaId, ResultadoRubrica>;
+  fases: Record<FaseId, ResultadoFase>;
   penalidades: number;
   final: number;
   completa: boolean;
@@ -48,17 +59,33 @@ export function consolidarEquipe(fichas: Avaliacao[], penalidadesIds: string[]):
     ResultadoRubrica
   >;
   const penalidades = penalidadesIds.reduce((s, id) => s + (PENALIDADES.find((p) => p.id === id)?.pontos ?? 0), 0);
+  const fases = Object.fromEntries(
+    FASES.map((f) => {
+      const partes = RUBRICAS.filter((r) => f.partes.includes(r.id));
+      const pontos = partes.reduce((s, r) => s + (r.pesoFinal * (rubricas[r.id].nota ?? 0)) / 100, 0);
+      const algumaAvaliada = partes.some((r) => rubricas[r.id].nota !== null);
+      return [
+        f.id,
+        {
+          nota: algumaAvaliada ? (pontos * 100) / f.peso : null,
+          pontos,
+          completa: partes.every((r) => rubricas[r.id].completa),
+        },
+      ];
+    }),
+  ) as Record<FaseId, ResultadoFase>;
   const bruta = RUBRICAS.reduce((s, r) => s + (r.pesoFinal * (rubricas[r.id].nota ?? 0)) / 100, 0);
   return {
     rubricas,
+    fases,
     penalidades,
     final: Math.max(0, bruta + penalidades),
     completa: RUBRICAS.every((r) => rubricas[r.id].completa),
     // critérios de desempate, nesta ordem (maior vence)
     desempate: [
-      rubricas.TEC_F3.nota ?? 0,
+      rubricas.F3_REPO.nota ?? 0,
       rubricas.NEG.mediaCriterio.respondeu ?? 0,
-      rubricas.TEC_F2.mediaCriterio.idempotencia ?? 0,
+      rubricas.F2_MESA.mediaCriterio.idempotencia ?? 0,
     ],
   };
 }

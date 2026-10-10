@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { alternarPenalidade, excluirAvaliacao, salvarEncerramentoAvaliacao } from "@/app/actions";
+import { AjudaCalculo } from "@/components/AjudaCalculo";
 import { BotaoEnviar, Formulario } from "@/components/Formulario";
 import { Pagina } from "@/components/Pagina";
 import { QuadroGeral, type EquipeResumoNota } from "@/components/QuadroGeral";
@@ -12,7 +13,7 @@ import {
   sessaoAtual,
 } from "@/lib/dados";
 import { compararRanking, consolidarEquipe, fmtNota, notaFicha } from "@/lib/nota";
-import { DESCLASSIFICACAO, DESEMPATE, FORMULA, NIVEIS, PENALIDADES, RUBRICAS } from "@/lib/rubricas";
+import { DESCLASSIFICACAO, DESEMPATE, FASES, FORMULA, NIVEIS, PENALIDADES, RUBRICAS } from "@/lib/rubricas";
 import type { Equipe } from "@/lib/tipos";
 
 const nivelDe = (f: number | undefined) => NIVEIS.find((n) => n.fator === f)?.nome ?? "–";
@@ -59,25 +60,35 @@ export default async function AdminAvaliacao() {
       const p = PENALIDADES.find((x) => x.id === id);
       return { texto: p?.texto ?? id, pontos: p?.pontos ?? 0 };
     }),
-    fases: RUBRICAS.map((rb) => {
-      const x = r.rubricas[rb.id];
-      return {
-        id: rb.id,
-        nome: rb.nome,
-        peso: rb.pesoFinal,
-        media: x.nota,
-        pontos: x.nota === null ? null : (rb.pesoFinal * x.nota) / 100,
-        completa: x.completa,
-        criterios: rb.criterios.map((c) => ({ id: c.id, nome: c.nome, peso: c.peso, media: x.mediaCriterio[c.id] })),
-        fichas: fe
-          .filter((f) => f.rubrica === rb.id)
-          .map((f) => ({
-            avaliador: f.quem?.nome ?? f.avaliador,
-            nota: notaFicha(rb, f.notas ?? {}),
-            niveis: Object.fromEntries(rb.criterios.map((c) => [c.id, nivelDe(f.notas?.[c.id])])),
-          })),
-      };
-    }),
+    fases: FASES.map((fa) => ({
+      id: fa.id,
+      nome: fa.nome,
+      peso: fa.peso,
+      nota: r.fases[fa.id].nota,
+      pontos: r.fases[fa.id].pontos,
+      completa: r.fases[fa.id].completa,
+      partes: RUBRICAS.filter((rb) => fa.partes.includes(rb.id)).map((rb) => {
+        const x = r.rubricas[rb.id];
+        return {
+          id: rb.id,
+          curto: rb.curto,
+          nome: rb.nome,
+          bancaTexto: rb.bancaTexto,
+          peso: rb.pesoFinal,
+          media: x.nota,
+          pontos: x.nota === null ? null : (rb.pesoFinal * x.nota) / 100,
+          completa: x.completa,
+          criterios: rb.criterios.map((c) => ({ id: c.id, nome: c.nome, peso: c.peso, media: x.mediaCriterio[c.id] })),
+          fichas: fe
+            .filter((f) => f.rubrica === rb.id)
+            .map((f) => ({
+              avaliador: f.quem?.nome ?? f.avaliador,
+              nota: notaFicha(rb, f.notas ?? {}),
+              niveis: Object.fromEntries(rb.criterios.map((c) => [c.id, nivelDe(f.notas?.[c.id])])),
+            })),
+        };
+      }),
+    })),
   }));
 
   return (
@@ -92,6 +103,7 @@ export default async function AdminAvaliacao() {
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
+          <AjudaCalculo />
           <Link href="/avaliar" className="btn-primario">
             Lançar notas
           </Link>
@@ -183,14 +195,14 @@ export default async function AdminAvaliacao() {
                 </p>
               </div>
 
-              <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+              <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
                 {RUBRICAS.map((rb) => {
                   const x = r.rubricas[rb.id];
                   const daRubrica = fe.filter((f) => f.rubrica === rb.id);
                   return (
                     <div key={rb.id} className="min-w-0 rounded-xl border border-borda bg-marca-fundo/40 p-2">
                       <p className="truncate text-[11px] text-suave" title={rb.nome}>
-                        {rb.id.replace("_", " ")} · {rb.pesoFinal}%
+                        {rb.curto} · {rb.pesoFinal}%
                       </p>
                       <p className="font-mono text-lg font-semibold tabular-nums" title="média dos avaliadores">
                         {fmtNota(x.nota)}

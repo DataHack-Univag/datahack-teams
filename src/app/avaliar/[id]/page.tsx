@@ -11,7 +11,10 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
   const { id } = await params;
   const { r } = await searchParams;
   const { supabase, inscrito, organizador, banca } = await sessaoAtual();
-  const minhas = RUBRICAS.filter((x) => organizador || x.banca === banca);
+  // Avaliador: só as rubricas da banca dele. Organização: todas (as dela primeiro).
+  const minhas = organizador
+    ? [...RUBRICAS.filter((x) => x.banca === "organizacao"), ...RUBRICAS.filter((x) => x.banca !== "organizacao")]
+    : RUBRICAS.filter((x) => x.banca === banca);
 
   const [rEquipe, rTodas, fichas, encerrada] = await Promise.all([
     supabase.from("equipes").select(SELECT_EQUIPE).eq("id", id).maybeSingle<Equipe>(),
@@ -122,7 +125,13 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
                         : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground"
                     }`}
                   >
-                    {x.id.replace("_", " ")} {ok ? "✔" : ""}
+                    {x.curto}
+                    {organizador && x.banca !== "organizacao" && (
+                      <span className="ml-1 text-[10px] font-normal opacity-75">
+                        ({x.banca === "professores" ? "professores" : "negócio"})
+                      </span>
+                    )}{" "}
+                    {ok ? "✔" : ""}
                   </Link>
                 );
               })}

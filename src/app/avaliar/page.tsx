@@ -2,13 +2,14 @@ import Link from "next/link";
 import { Pagina } from "@/components/Pagina";
 import { avaliacaoEncerrada, carregarAvaliacoes, exigir, SELECT_EQUIPE, sessaoAtual } from "@/lib/dados";
 import { fmtNota, notaFicha } from "@/lib/nota";
-import { RUBRICAS } from "@/lib/rubricas";
+import { BANCAS, RUBRICAS } from "@/lib/rubricas";
 import type { Equipe } from "@/lib/tipos";
 
 // Lista das equipes para a banca avaliar, com o andamento das fichas do avaliador logado.
 export default async function Avaliar() {
   const { supabase, inscrito, organizador, banca } = await sessaoAtual();
-  const minhas = RUBRICAS.filter((r) => organizador || r.banca === banca);
+  // Organização: as rubricas técnicas dela (mesa F1/F2 e F3); pode abrir as outras na ficha.
+  const minhas = RUBRICAS.filter((r) => r.banca === banca);
 
   const [rEquipes, fichas, encerrada] = await Promise.all([
     supabase.from("equipes").select(SELECT_EQUIPE).order("nome").returns<Equipe[]>(),
@@ -30,6 +31,14 @@ export default async function Avaliar() {
 
   const ficha = (equipeId: string, rubrica: string) =>
     fichas.find((f) => f.equipe_id === equipeId && f.rubrica === rubrica);
+  // Notas que o avaliador logado deu (uma por fase avaliada) e a média delas.
+  const minhasNotas = (equipeId: string) =>
+    minhas.flatMap((r) => {
+      const f = ficha(equipeId, r.id);
+      return f ? [notaFicha(r, f.notas ?? {})] : [];
+    });
+  const media = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : null);
+  const todasMinhas = equipes.flatMap((e) => minhasNotas(e.id));
   const totalFichas = equipes.length * minhas.length;
   const completas = equipes.reduce(
     (s, e) =>
@@ -46,20 +55,28 @@ export default async function Avaliar() {
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">
-            {organizador ? "Organização · todas as rubricas" : banca === "tecnica" ? "Banca técnica" : "Banca de negócio"}
+            {banca ? BANCAS[banca] : ""}{organizador ? " · pode lançar qualquer rubrica" : ""}
           </p>
           <h1 className="text-2xl font-extrabold sm:text-3xl">
             Avaliar <span className="grad-text">equipes</span>
           </h1>
           <p className="text-sm text-suave">
-            Suas rubricas: {minhas.map((r) => `${r.nome} (${r.pesoFinal}%)`).join(" · ")}
+            Suas rubricas: {minhas.map((r) => `${r.curto} (${r.pesoFinal}%)`).join(" · ")}
           </p>
         </div>
-        <div className="card p-4! text-right">
-          <p className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">
-            {completas}/{totalFichas}
-          </p>
-          <p className="text-xs text-suave">fichas completas</p>
+        <div className="flex gap-2">
+          <div className="card p-4! text-right">
+            <p className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">
+              {completas}/{totalFichas}
+            </p>
+            <p className="text-xs text-suave">fichas completas</p>
+          </div>
+          <div className="card p-4! text-right">
+            <p className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">
+              <span className="grad-text">{fmtNota(media(todasMinhas))}</span>
+            </p>
+            <p className="text-xs text-suave">sua média geral ({todasMinhas.length} fichas)</p>
+          </div>
         </div>
       </div>
 
@@ -92,6 +109,17 @@ export default async function Avaliar() {
                   Avaliar
                 </Link>
               </div>
+              {minhasNotas(e.id).length > 0 && (
+                <p className="text-sm">
+                  Sua média neste grupo:{" "}
+                  <strong className="font-mono tabular-nums">{fmtNota(media(minhasNotas(e.id)))}</strong>
+                  <span className="text-xs text-suave">
+                    {" "}
+                    ({minhasNotas(e.id).length} fase{minhasNotas(e.id).length > 1 ? "s" : ""} avaliada
+                    {minhasNotas(e.id).length > 1 ? "s" : ""})
+                  </span>
+                </p>
+              )}
               <div className="flex flex-wrap gap-1.5">
                 {minhas.map((r) => {
                   const f = ficha(e.id, r.id);
@@ -110,7 +138,7 @@ export default async function Avaliar() {
                       }`}
                       title={r.nome}
                     >
-                      {r.id.replace("_", " ")}: {ok ? `✔ ${fmtNota(notaFicha(r, f!.notas))}` : `${feitos}/${r.criterios.length}`}
+                      {r.curto}: {ok ? `✔ ${fmtNota(notaFicha(r, f!.notas))}` : `${feitos}/${r.criterios.length}`}
                     </Link>
                   );
                 })}

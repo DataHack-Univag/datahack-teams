@@ -23,8 +23,9 @@ export default async function AdminOrganizadores() {
       <div>
         <h1 className="text-2xl font-bold sm:text-3xl">Organizadores e bancas</h1>
         <p className="text-sm text-suave">
-          Organizadores veem tudo (equipes, alunos, notas, links, avaliação). As bancas só acessam a área de avaliação: a
-          técnica avalia as rubricas Técnica F1, F2 e F3; a de negócio, o pitch final.
+          Organizadores veem tudo e fazem a avaliação técnica (mesa das fases 1 e 2 e repositório da fase 3). As bancas só
+          acessam a área de avaliação: a banca de professores avalia os pitches das fases 1 e 2 (visão macro); os jurados de
+          negócio, o pitch final.
         </p>
       </div>
 
@@ -76,7 +77,7 @@ export default async function AdminOrganizadores() {
                 <Formulario
                   action={alterarPapel}
                   rotuloConfirmar="Trocar banca"
-                  confirmar={`Passar ${a.nome} para a banca ${a.papel === "avaliador_tecnico" ? "de negócio" : "técnica"}? As fichas já lançadas continuam valendo.`}
+                  confirmar={`Passar ${a.nome} para ${a.papel === "avaliador_tecnico" ? "os jurados de negócio" : "a banca de professores"}? As fichas já lançadas continuam valendo.`}
                 >
                   <input type="hidden" name="email" value={a.email} />
                   <input
@@ -85,7 +86,7 @@ export default async function AdminOrganizadores() {
                     value={a.papel === "avaliador_tecnico" ? "avaliador_negocio" : "avaliador_tecnico"}
                   />
                   <BotaoEnviar className="btn-secundario min-h-9 px-3 text-xs">
-                    Mudar para {a.papel === "avaliador_tecnico" ? "negócio" : "técnica"}
+                    Mudar para {a.papel === "avaliador_tecnico" ? "negócio" : "professores"}
                   </BotaoEnviar>
                 </Formulario>
                 <Formulario

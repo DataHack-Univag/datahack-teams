@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
+import type { Banca } from "@/lib/rubricas";
 import { createClient } from "@/lib/supabase/server";
 import type {
   Avaliacao,
@@ -68,10 +69,14 @@ export const sessaoAtual = cache(async () => {
     organizador: inscrito.papel === "organizador",
     // Bancas de avaliação (só veem a área /avaliar).
     avaliador: inscrito.papel === "avaliador_tecnico" || inscrito.papel === "avaliador_negocio",
-    banca: (inscrito.papel === "avaliador_tecnico" ? "tecnica" : inscrito.papel === "avaliador_negocio" ? "negocio" : null) as
-      | "tecnica"
-      | "negocio"
-      | null,
+    // Banca de avaliação do papel (ver src/lib/rubricas.ts): professores = pitches F1/F2.
+    banca: (inscrito.papel === "avaliador_tecnico"
+      ? "professores"
+      : inscrito.papel === "avaliador_negocio"
+        ? "negocio"
+        : inscrito.papel === "organizador"
+          ? "organizacao"
+          : null) as Banca | null,
   };
 });
 

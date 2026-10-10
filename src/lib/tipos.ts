@@ -5,8 +5,9 @@ export type Papel = "aluno" | "organizador" | "avaliador_tecnico" | "avaliador_n
 export const PAPEIS: { valor: Papel; rotulo: string }[] = [
   { valor: "aluno", rotulo: "Aluno" },
   { valor: "organizador", rotulo: "Organizador" },
-  { valor: "avaliador_tecnico", rotulo: "Avaliador técnico" },
-  { valor: "avaliador_negocio", rotulo: "Avaliador de negócio" },
+  // avaliador_tecnico = banca de professores de tecnologia (pitches das fases 1 e 2)
+  { valor: "avaliador_tecnico", rotulo: "Banca de professores (pitches F1/F2)" },
+  { valor: "avaliador_negocio", rotulo: "Jurado de negócio (pitch final)" },
 ];
 
 export const rotuloPapel = (p: string) => PAPEIS.find((x) => x.valor === p)?.rotulo ?? p;
