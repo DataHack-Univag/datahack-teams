@@ -2,7 +2,9 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { salvarAvaliacao } from "@/app/actions";
+import { PerguntasDesafio } from "@/components/PerguntasDesafio";
 import { fmtNota } from "@/lib/nota";
+import { CRITERIOS_COM_PERGUNTAS } from "@/lib/perguntas";
 import { NIVEIS, type Rubrica } from "@/lib/rubricas";
 import type { Resultado } from "@/lib/tipos";
 
@@ -344,6 +346,7 @@ function Criterio({
         </span>
       </div>
       <p className="text-sm text-suave">{c.descricao}</p>
+      {CRITERIOS_COM_PERGUNTAS.has(c.id) && <PerguntasDesafio />}
 
       {/* cada nível é um card clicável com nome, % e a descrição do nível */}
       <div className="grid gap-2 sm:grid-cols-2 xl:grid-cols-4" role="radiogroup" aria-label={c.nome}>
