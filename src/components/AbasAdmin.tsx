@@ -7,9 +7,10 @@ const ABAS = [
   { href: "/admin", rotulo: "Equipes" },
   { href: "/admin/participantes", rotulo: "Participantes" },
   { href: "/admin/trocas", rotulo: "Trocas" },
+  { href: "/admin/avaliacao", rotulo: "Avaliação" },
   { href: "/admin/gerador", rotulo: "Gerador de equipes" },
   { href: "/admin/materiais", rotulo: "Materiais" },
-  { href: "/admin/organizadores", rotulo: "Organizadores" },
+  { href: "/admin/organizadores", rotulo: "Organizadores e bancas" },
 ];
 
 // Navegação da área da organização (rolagem horizontal no celular).

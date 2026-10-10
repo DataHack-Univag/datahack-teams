@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { normalizarRepo, repoEhPublico } from "@/lib/github";
-import { CATEGORIAS, CATEGORIAS_MATERIAL, type Resultado } from "@/lib/tipos";
+import { PENALIDADES, RUBRICAS } from "@/lib/rubricas";
+import { CATEGORIAS, CATEGORIAS_MATERIAL, papelValido, type Resultado } from "@/lib/tipos";
 
 // Toda autorização real é feita pelo RLS do Supabase; estas actions só validam
 // a entrada, traduzem os erros e atualizam a tela.
@@ -19,7 +20,11 @@ function traduzirErro(e: ErroPg): string {
     return "Registro duplicado.";
   }
   if (e.code === "23514") return "Valor inválido. Confira o formato dos campos.";
-  if (e.code === "23503") return "Referência inválida (e-mail não está na lista de inscritos?).";
+  if (e.code === "23503") {
+    if (e.message.includes("avaliacoes"))
+      return "Não dá para apagar: já existem notas lançadas para essa equipe ou por esse avaliador.";
+    return "Referência inválida (e-mail não está na lista de inscritos?).";
+  }
   if (e.code === "42501") return "Você não tem permissão para fazer isso.";
   return "Erro inesperado: " + e.message;
 }
@@ -307,7 +312,7 @@ export async function salvarParticipante(_: Resultado, fd: FormData): Promise<Re
   const curso = txt(fd, "curso").toUpperCase() || null;
   const semestreTxt = txt(fd, "semestre");
   const notaTxt = txt(fd, "nota").replace(",", ".");
-  const papel = txt(fd, "papel") === "organizador" ? "organizador" : "aluno";
+  const papel = papelValido(txt(fd, "papel"));
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { erro: "E-mail inválido." };
   if (!nome) return { erro: "Informe o nome." };
@@ -362,7 +367,7 @@ export async function removerParticipante(_: Resultado, fd: FormData): Promise<R
 /** Rebaixa organizador para aluno (ou remove, se preferir, em Participantes). */
 export async function alterarPapel(_: Resultado, fd: FormData): Promise<Resultado> {
   const email = txt(fd, "email");
-  const papel = txt(fd, "papel") === "organizador" ? "organizador" : "aluno";
+  const papel = papelValido(txt(fd, "papel"));
   const supabase = await createClient();
   const { data: eu } = await supabase.rpc("email_atual");
   if (email === eu && papel !== "organizador") return { erro: "Você não pode tirar o seu próprio acesso." };
@@ -372,7 +377,7 @@ export async function alterarPapel(_: Resultado, fd: FormData): Promise<Resultad
   if (!data?.length) return SEM_PERMISSAO;
 
   atualizar();
-  return { ok: papel === "organizador" ? "Agora é organizador." : "Acesso de organizador removido." };
+  return { ok: papel === "aluno" ? "Acesso removido: agora é aluno." : "Papel atualizado." };
 }
 
 // ---------------------------------------------------------------- materiais
@@ -415,6 +420,89 @@ export async function removerMaterial(_: Resultado, fd: FormData): Promise<Resul
   if (!data?.length) return SEM_PERMISSAO;
   atualizar();
   return { ok: "Material removido." };
+}
+
+// ---------------------------------------------------------------- avaliação (bancas)
+
+/** Salva a ficha do avaliador logado para uma equipe e rubrica (um nível por critério). */
+export async function salvarAvaliacao(_: Resultado, fd: FormData): Promise<Resultado> {
+  const equipeId = txt(fd, "equipe_id");
+  const rubrica = RUBRICAS.find((r) => r.id === txt(fd, "rubrica"));
+  if (!rubrica) return { erro: "Rubrica inválida." };
+
+  const fatores = new Set([0, 0.5, 0.8, 1]);
+  const notas: Record<string, number> = {};
+  for (const c of rubrica.criterios) {
+    const v = fd.get(`c-${c.id}`);
+    if (v === null || v === "") continue;
+    const f = Number(v);
+    if (!fatores.has(f)) return { erro: `Nível inválido em “${c.nome}”.` };
+    notas[c.id] = f;
+  }
+  if (!Object.keys(notas).length) return { erro: "Marque o nível de pelo menos um critério." };
+
+  const supabase = await createClient();
+  const { data: email } = await supabase.rpc("email_atual");
+  const { error } = await supabase.from("avaliacoes").upsert(
+    {
+      equipe_id: equipeId,
+      avaliador: email,
+      rubrica: rubrica.id,
+      notas,
+      comentario: txt(fd, "comentario").slice(0, 2000) || null,
+    },
+    { onConflict: "equipe_id,avaliador,rubrica" },
+  );
+  if (error) {
+    if (error.code === "42501") return { erro: "Você não pode avaliar essa rubrica (ou a avaliação foi encerrada)." };
+    return { erro: traduzirErro(error) };
+  }
+  atualizar();
+  const faltam = rubrica.criterios.length - Object.keys(notas).length;
+  return { ok: faltam ? `Salvo. Faltam ${faltam} critério(s).` : "Ficha salva e completa." };
+}
+
+/** Liga/desliga uma penalidade da nota final de uma equipe (organização). */
+export async function alternarPenalidade(_: Resultado, fd: FormData): Promise<Resultado> {
+  const equipeId = txt(fd, "equipe_id");
+  const pen = PENALIDADES.find((p) => p.id === txt(fd, "penalidade"));
+  if (!pen) return { erro: "Penalidade inválida." };
+  const supabase = await createClient();
+  const aplicar = txt(fd, "aplicar") === "1";
+  const { data: email } = await supabase.rpc("email_atual");
+  const { error } = aplicar
+    ? await supabase
+        .from("penalidades_aplicadas")
+        .upsert({ equipe_id: equipeId, penalidade: pen.id, aplicado_por: email }, { onConflict: "equipe_id,penalidade" })
+    : await supabase.from("penalidades_aplicadas").delete().eq("equipe_id", equipeId).eq("penalidade", pen.id);
+  if (error) return { erro: traduzirErro(error) };
+  atualizar();
+  return { ok: aplicar ? `Penalidade aplicada (${pen.pontos}).` : "Penalidade removida." };
+}
+
+/** Encerra/reabre o lançamento de notas pelas bancas (organização continua editando). */
+export async function salvarEncerramentoAvaliacao(_: Resultado, fd: FormData): Promise<Resultado> {
+  const encerrar = txt(fd, "encerrar") === "1";
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("configuracao")
+    .update({ avaliacao_encerrada: encerrar })
+    .eq("id", 1)
+    .select("id");
+  if (error) return { erro: traduzirErro(error) };
+  if (!data?.length) return SEM_PERMISSAO;
+  atualizar();
+  return { ok: encerrar ? "Avaliação encerrada: as bancas não editam mais as fichas." : "Avaliação reaberta." };
+}
+
+/** Organização apaga uma ficha (ex.: lançada por engano). */
+export async function excluirAvaliacao(_: Resultado, fd: FormData): Promise<Resultado> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("avaliacoes").delete().eq("id", txt(fd, "id")).select("id");
+  if (error) return { erro: traduzirErro(error) };
+  if (!data?.length) return SEM_PERMISSAO;
+  atualizar();
+  return { ok: "Ficha apagada." };
 }
 
 export async function sair() {

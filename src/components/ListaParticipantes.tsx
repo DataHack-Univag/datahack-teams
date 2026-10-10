@@ -5,7 +5,7 @@ import { useState } from "react";
 import { removerParticipante } from "@/app/actions";
 import { FormParticipante } from "@/components/FormParticipante";
 import { BotaoEnviar, Formulario } from "@/components/Formulario";
-import type { Participante } from "@/lib/tipos";
+import { rotuloPapel, type Participante } from "@/lib/tipos";
 
 const semAcento = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 
@@ -55,8 +55,8 @@ export function ListaParticipantes({ participantes, meuEmail }: { participantes:
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">
                   {p.nome}
-                  {p.papel === "organizador" && (
-                    <span className="selo ml-2 bg-marca-fundo align-middle text-marca">organizador</span>
+                  {p.papel !== "aluno" && (
+                    <span className="selo ml-2 bg-marca-fundo align-middle text-marca">{rotuloPapel(p.papel)}</span>
                   )}
                 </p>
                 <p className="truncate text-xs text-suave">

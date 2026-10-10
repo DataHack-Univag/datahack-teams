@@ -1,7 +1,16 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { Configuracao, Equipe, EquipeResumo, Inscrito, Material, Participante, Troca } from "@/lib/tipos";
+import type {
+  Avaliacao,
+  Configuracao,
+  Equipe,
+  EquipeResumo,
+  Inscrito,
+  Material,
+  Participante,
+  Troca,
+} from "@/lib/tipos";
 
 type Cliente = Awaited<ReturnType<typeof createClient>>;
 
@@ -57,6 +66,12 @@ export const sessaoAtual = cache(async () => {
     inscrito,
     avatar: meta.avatar_url ?? meta.picture ?? null,
     organizador: inscrito.papel === "organizador",
+    // Bancas de avaliação (só veem a área /avaliar).
+    avaliador: inscrito.papel === "avaliador_tecnico" || inscrito.papel === "avaliador_negocio",
+    banca: (inscrito.papel === "avaliador_tecnico" ? "tecnica" : inscrito.papel === "avaliador_negocio" ? "negocio" : null) as
+      | "tecnica"
+      | "negocio"
+      | null,
   };
 });
 
@@ -249,4 +264,35 @@ export async function carregarHistoricoTrocas(supabase: Cliente) {
   }
   const lista: Troca[] = exigir(completo, "histórico de trocas") ?? [];
   return { lista, falta007: false };
+}
+
+// ---------------------------------------------------------------- avaliação
+
+const SELECT_AVALIACAO = "id, equipe_id, avaliador, rubrica, notas, comentario, atualizado_em, quem:inscritos!avaliacoes_avaliador_fkey(nome)";
+
+/** Fichas visíveis: o avaliador vê as dele; a organização vê todas (RLS). null = migração 008 não rodada. */
+export async function carregarAvaliacoes(supabase: Cliente, filtro?: { equipeId?: string; avaliador?: string }) {
+  let q = supabase.from("avaliacoes").select(SELECT_AVALIACAO);
+  if (filtro?.equipeId) q = q.eq("equipe_id", filtro.equipeId);
+  if (filtro?.avaliador) q = q.eq("avaliador", filtro.avaliador);
+  const r = await q.order("atualizado_em", { ascending: false }).returns<Avaliacao[]>();
+  if (r.error?.code === "PGRST205" || r.error?.code === "42P01") return null;
+  return exigir(r, "avaliações") ?? [];
+}
+
+/** Penalidades marcadas pela organização: equipe_id -> lista de ids. */
+export async function carregarPenalidades(supabase: Cliente) {
+  const r = await supabase
+    .from("penalidades_aplicadas")
+    .select("equipe_id, penalidade")
+    .returns<{ equipe_id: string; penalidade: string }[]>();
+  if (r.error?.code === "PGRST205" || r.error?.code === "42P01") return new Map<string, string[]>();
+  const mapa = new Map<string, string[]>();
+  for (const p of exigir(r, "penalidades") ?? []) mapa.set(p.equipe_id, [...(mapa.get(p.equipe_id) ?? []), p.penalidade]);
+  return mapa;
+}
+
+export async function avaliacaoEncerrada(supabase: Cliente) {
+  const r = await supabase.from("configuracao").select("avaliacao_encerrada").eq("id", 1).maybeSingle<{ avaliacao_encerrada: boolean }>();
+  return !r.error && !!r.data?.avaliacao_encerrada;
 }

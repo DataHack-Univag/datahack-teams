@@ -37,7 +37,18 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
 - **Trocas:** auditoria de todos os pedidos de troca (aguardando, aceitos, recusados,
   cancelados): quem pediu, de qual equipe para qual, mensagem, quem respondeu e quando.
-- **Organizadores:** quem tem acesso à organização; adicionar e remover.
+- **Avaliação:** ranking consolidado (média por critério entre avaliadores, nota de cada
+  rubrica, penalidades, nota final e desempate), detalhe de cada ficha, encerrar/reabrir a
+  avaliação e exportar CSV.
+- **Organizadores e bancas:** organizadores e avaliadores (técnico / negócio).
+
+**Bancas** (`/avaliar`, papéis `avaliador_tecnico` e `avaliador_negocio`; organizadores também)
+- Lista das equipes com o andamento das fichas; ficha por rubrica com os 4 níveis de cada
+  critério (descrições das rubricas do evento), nota calculada na hora e comentário.
+- Técnico avalia Técnica F1/F2/F3; negócio avalia o pitch final; organização, todas.
+- Rubricas, pesos e penalidades vêm de `src/build_cronograma_rubrica.py`. Se mudar lá:
+  `python src/build_cronograma_rubrica.py` e depois, em `datahack-teams/`,
+  `node scripts/gerar_rubricas.mjs ../docs/rubricas.json src/lib/rubricas.ts`.
 - **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
   aluno" abre a tela exatamente como aquele aluno vê, com os mesmos botões que ele tem,
   todos funcionando (agindo como organização)
@@ -71,7 +82,8 @@ No painel do Supabase → **SQL Editor**, rode, nesta ordem:
 5. `supabase/005_lider_edita_dados.sql` — só o líder altera nome e repositório da equipe.
 6. `supabase/006_trocas.sql` — pedidos de troca de equipe.
 7. `supabase/007_auditoria_trocas.sql` — histórico de trocas preservado + quem cancelou.
-8. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+8. `supabase/008_avaliacao.sql` — módulo de avaliação (bancas técnica e de negócio).
+9. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
 
 Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
 `node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos
@@ -130,6 +142,9 @@ src/app/page.tsx           painel do aluno (minha equipe / criar equipe)
 src/app/admin              área da organização (equipes, participantes, gerador, materiais, organizadores)
 src/app/admin/equipes/[id] edição de qualquer equipe
 src/lib/gerador.ts         algoritmo de formação de equipes (portado do datahack-equipes.html)
+src/lib/rubricas.ts        rubricas do evento (GERADO de docs/rubricas.json)
+src/lib/nota.ts            cálculo da nota (rubrica, final, desempate)
+src/app/avaliar            área das bancas (fichas de avaliação)
 src/app/actions.ts         Server Actions (mutações)
 src/components/            PainelEquipe, CriarEquipe, Formulario, Cabecalho, LoginSenha
 ```

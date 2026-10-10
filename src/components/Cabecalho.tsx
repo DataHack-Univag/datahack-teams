@@ -2,7 +2,7 @@ import Link from "next/link";
 import { sair } from "@/app/actions";
 import { BotaoTema } from "@/components/BotaoTema";
 import { Logo } from "@/components/Logo";
-import type { Inscrito } from "@/lib/tipos";
+import { rotuloPapel, type Inscrito } from "@/lib/tipos";
 
 export function Cabecalho({
   inscrito,
@@ -17,6 +17,7 @@ export function Cabecalho({
   simulacao?: boolean;
 }) {
   const primeiroNome = inscrito.nome.split(" ")[0];
+  const avaliador = inscrito.papel === "avaliador_tecnico" || inscrito.papel === "avaliador_negocio";
 
   return (
     <header
@@ -28,7 +29,7 @@ export function Cabecalho({
             <Logo className="w-28 sm:w-32" />
           </span>
         ) : (
-          <Link href={organizador ? "/admin" : "/"} className="mr-auto" aria-label="Início">
+          <Link href={organizador ? "/admin" : avaliador ? "/avaliar" : "/"} className="mr-auto" aria-label="Início">
             <Logo className="w-28 sm:w-32" />
           </Link>
         )}
@@ -36,6 +37,7 @@ export function Cabecalho({
         {organizador && (
           <span className="chip hidden sm:inline-flex">Organização</span>
         )}
+        {avaliador && <span className="chip hidden sm:inline-flex">{rotuloPapel(inscrito.papel)}</span>}
 
         <div className="flex items-center gap-2">
           {avatar ? (

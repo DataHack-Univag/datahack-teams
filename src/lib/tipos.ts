@@ -1,6 +1,18 @@
 // Tipos das tabelas do Supabase (ver supabase/schema.sql).
 
-export type Papel = "aluno" | "organizador";
+export type Papel = "aluno" | "organizador" | "avaliador_tecnico" | "avaliador_negocio";
+
+export const PAPEIS: { valor: Papel; rotulo: string }[] = [
+  { valor: "aluno", rotulo: "Aluno" },
+  { valor: "organizador", rotulo: "Organizador" },
+  { valor: "avaliador_tecnico", rotulo: "Avaliador técnico" },
+  { valor: "avaliador_negocio", rotulo: "Avaliador de negócio" },
+];
+
+export const rotuloPapel = (p: string) => PAPEIS.find((x) => x.valor === p)?.rotulo ?? p;
+
+/** Normaliza o papel vindo de um formulário (qualquer valor desconhecido vira aluno). */
+export const papelValido = (p: string): Papel => PAPEIS.find((x) => x.valor === p)?.valor ?? "aluno";
 
 export type Inscrito = {
   email: string;
@@ -134,3 +146,15 @@ export type Troca = {
 
 /** Equipe resumida para a lista de destinos da troca. */
 export type EquipeResumo = { id: string; nome: string; total: number };
+
+/** Ficha de avaliação: nível (fator) de cada critério de uma rubrica (ver supabase/008_avaliacao.sql). */
+export type Avaliacao = {
+  id: string;
+  equipe_id: string;
+  avaliador: string;
+  rubrica: string;
+  notas: Record<string, number>;
+  comentario: string | null;
+  atualizado_em: string;
+  quem?: { nome: string } | null;
+};
