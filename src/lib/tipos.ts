@@ -114,14 +114,22 @@ export type StatusTroca = "pendente" | "aceita" | "recusada" | "cancelada";
 /** Pedido de troca de equipe (ver supabase/006_trocas.sql). */
 export type Troca = {
   id: string;
-  solicitante: string;
-  equipe_origem: string;
-  equipe_destino: string;
+  /** null quando o participante/equipe foi apagado (histórico preservado pela migração 007). */
+  solicitante: string | null;
+  equipe_origem: string | null;
+  equipe_destino: string | null;
   status: StatusTroca;
   mensagem: string | null;
   criado_em: string;
   respondido_em: string | null;
   quem: { nome: string } | null;
+  /** Só no histórico da organização (cópias dos nomes gravadas pela migração 007). */
+  respondido_por?: string | null;
+  respondeu?: { nome: string } | null;
+  solicitante_nome?: string | null;
+  origem_nome?: string | null;
+  destino_nome?: string | null;
+  respondido_nome?: string | null;
 };
 
 /** Equipe resumida para a lista de destinos da troca. */

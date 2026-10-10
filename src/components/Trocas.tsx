@@ -27,12 +27,12 @@ export function AvisosTroca({
   souLider: boolean;
 }) {
   if (!recebidos.length) return null;
-  const nomeEquipe = (id: string) => equipes.find((e) => e.id === id)?.nome ?? "outra equipe";
+  const nomeEquipe = (id: string | null) => equipes.find((e) => e.id === id)?.nome ?? "outra equipe";
 
   return (
     <section className="space-y-3" aria-label="Pedidos de troca para a sua equipe">
       {recebidos.map((t) => {
-        const quem = t.quem?.nome ?? t.solicitante;
+        const quem = t.quem?.nome ?? t.solicitante ?? "Alguém";
         const origem = nomeEquipe(t.equipe_origem);
         return (
           <div key={t.id} className="card destaque-grad faixa-topo space-y-3">
@@ -111,7 +111,7 @@ export function SecaoTroca({
   bloqueada: boolean;
 }) {
   const outras = equipes.filter((e) => e.id !== equipeAtual);
-  const nomeEquipe = (id: string) => equipes.find((e) => e.id === id)?.nome ?? "outra equipe";
+  const nomeEquipe = (id: string | null) => equipes.find((e) => e.id === id)?.nome ?? "outra equipe";
 
   return (
     <section className="card space-y-4">

@@ -226,3 +226,27 @@ export async function carregarTrocasPendentes(supabase: Cliente) {
   if (semTabelaTrocas(r)) return [];
   return exigir(r, "pedidos de troca") ?? [];
 }
+
+/**
+ * Histórico completo de trocas (auditoria da organização), mais recentes primeiro.
+ * null = migração 006 não rodada. falta007 = sem as cópias de nomes (rodar a 007).
+ */
+export async function carregarHistoricoTrocas(supabase: Cliente) {
+  const buscar = (colunas: string) =>
+    supabase
+      .from("trocas")
+      .select(colunas)
+      .order("criado_em", { ascending: false })
+      .limit(500)
+      .returns<Troca[]>();
+  const comResposta = SELECT_TROCA + ", respondido_por, respondeu:inscritos!trocas_respondido_por_fkey(nome)";
+
+  const completo = await buscar(comResposta + ", solicitante_nome, origem_nome, destino_nome, respondido_nome");
+  if (semTabelaTrocas(completo)) return null;
+  if (completo.error?.code === "42703") {
+    const lista: Troca[] = exigir(await buscar(comResposta), "histórico de trocas") ?? [];
+    return { lista, falta007: true };
+  }
+  const lista: Troca[] = exigir(completo, "histórico de trocas") ?? [];
+  return { lista, falta007: false };
+}

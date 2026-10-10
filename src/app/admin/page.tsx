@@ -33,7 +33,7 @@ export default async function AdminEquipes() {
   const comEquipe = equipes.reduce((s, e) => s + e.membros.length, 0);
   const comRepo = equipes.filter((e) => e.repo_github).length;
   const reposOk = equipes.filter((e) => e.repo_publico).length;
-  const nomeEquipe = (id: string) => equipes.find((e) => e.id === id)?.nome ?? "?";
+  const nomeEquipe = (id: string | null) => equipes.find((e) => e.id === id)?.nome ?? "?";
 
   return (
     <Pagina>
@@ -64,7 +64,10 @@ export default async function AdminEquipes() {
           <div>
             <h2 className="text-lg font-semibold">Pedidos de troca aguardando ({trocas.length})</h2>
             <p className="text-sm text-suave">
-              Alguém da equipe de destino precisa aceitar (e troca de lugar com quem pediu). Você pode cancelar.
+              Alguém da equipe de destino precisa aceitar (e troca de lugar com quem pediu). Você pode cancelar.{" "}
+              <Link href="/admin/trocas" className="text-marca underline">
+                Ver histórico completo
+              </Link>
             </p>
           </div>
           <ul className="divide-y divide-borda">

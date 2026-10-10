@@ -35,6 +35,8 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   repositório; os alunos veem um aviso para cadastrar o GitHub.
 - **Materiais:** links publicados pela organização (repositório de documentação,
   desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
+- **Trocas:** auditoria de todos os pedidos de troca (aguardando, aceitos, recusados,
+  cancelados): quem pediu, de qual equipe para qual, mensagem, quem respondeu e quando.
 - **Organizadores:** quem tem acesso à organização; adicionar e remover.
 - **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
   aluno" abre a tela exatamente como aquele aluno vê, com os mesmos botões que ele tem,
@@ -68,7 +70,8 @@ No painel do Supabase → **SQL Editor**, rode, nesta ordem:
 4. `supabase/004_trava_lider.sql` — depois de definido, só o líder troca o líder.
 5. `supabase/005_lider_edita_dados.sql` — só o líder altera nome e repositório da equipe.
 6. `supabase/006_trocas.sql` — pedidos de troca de equipe.
-7. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+7. `supabase/007_auditoria_trocas.sql` — histórico de trocas preservado + quem cancelou.
+8. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
 
 Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
 `node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos
