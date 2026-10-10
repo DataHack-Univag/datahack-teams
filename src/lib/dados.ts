@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
-import type { Configuracao, Equipe, Inscrito, Material, Participante } from "@/lib/tipos";
+import type { Configuracao, Equipe, EquipeResumo, Inscrito, Material, Participante, Troca } from "@/lib/tipos";
 
 type Cliente = Awaited<ReturnType<typeof createClient>>;
 
@@ -158,4 +158,71 @@ export async function carregarParticipantes(supabase: Cliente): Promise<Particip
     equipe_id: equipeDe.get(i.email)?.equipe_id ?? null,
     equipe_nome: equipeDe.get(i.email)?.equipes?.nome ?? null,
   }));
+}
+
+/**
+ * Se a migração 006 (trocas) ainda não foi rodada, a troca de equipe simplesmente não
+ * aparece, em vez de derrubar a tela do aluno. Retorna null nesse caso.
+ */
+function semTabelaTrocas(r: { error: { code?: string } | null }) {
+  return r.error?.code === "PGRST205" || r.error?.code === "42P01";
+}
+
+const SELECT_TROCA =
+  "id, solicitante, equipe_origem, equipe_destino, status, mensagem, criado_em, respondido_em," +
+  " quem:inscritos!trocas_solicitante_fkey(nome)";
+
+/** Todas as equipes com o número de integrantes (destinos possíveis de uma troca). */
+export async function carregarEquipesResumo(supabase: Cliente): Promise<EquipeResumo[]> {
+  const data = exigir(
+    await supabase
+      .from("equipes")
+      .select("id, nome, membros(count)")
+      .order("nome")
+      .returns<{ id: string; nome: string; membros: { count: number }[] }[]>(),
+    "lista de equipes",
+  );
+  return (data ?? []).map((e) => ({ id: e.id, nome: e.nome, total: e.membros?.[0]?.count ?? 0 }));
+}
+
+/**
+ * Pedidos de troca que podem interessar a um aluno: os que ele fez (aguardando ou
+ * respondidos nas últimas 24 h) e os aguardando que o RLS deixa ver (os da equipe dele).
+ * Não depende da equipe, para rodar em paralelo com o resto; separe com separarTrocas().
+ */
+export async function carregarTrocasDoAluno(supabase: Cliente, email: string): Promise<Troca[] | null> {
+  const desde = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
+  const r = await supabase
+    .from("trocas")
+    .select(SELECT_TROCA)
+    .or(`solicitante.eq."${email}",status.eq.pendente`)
+    .or(`status.eq.pendente,respondido_em.gte."${desde}"`)
+    .order("criado_em", { ascending: false })
+    .limit(50)
+    .returns<Troca[]>();
+  if (semTabelaTrocas(r)) return null;
+  return exigir(r, "pedidos de troca") ?? [];
+}
+
+export function separarTrocas(lista: Troca[], email: string, equipeId: string) {
+  return {
+    // pedido meu aguardando resposta
+    meuPedido: lista.find((t) => t.solicitante === email && t.status === "pendente") ?? null,
+    // último pedido meu já respondido (para avisar "foi aceito/recusado")
+    meuUltimo: lista.find((t) => t.solicitante === email && t.status !== "pendente") ?? null,
+    // pedidos de outras equipes querendo entrar na minha
+    recebidos: lista.filter((t) => t.equipe_destino === equipeId && t.status === "pendente" && t.solicitante !== email),
+  };
+}
+
+/** Pedidos aguardando em todo o evento (visão da organização). */
+export async function carregarTrocasPendentes(supabase: Cliente) {
+  const r = await supabase
+    .from("trocas")
+    .select(SELECT_TROCA)
+    .eq("status", "pendente")
+    .order("criado_em", { ascending: true })
+    .returns<Troca[]>();
+  if (semTabelaTrocas(r)) return [];
+  return exigir(r, "pedidos de troca") ?? [];
 }

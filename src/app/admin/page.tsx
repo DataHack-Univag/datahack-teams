@@ -1,16 +1,23 @@
 import Link from "next/link";
-import { salvarConfiguracao } from "@/app/actions";
+import { cancelarTroca, salvarConfiguracao } from "@/app/actions";
 import { CriarEquipe } from "@/components/CriarEquipe";
 import { BotaoEnviar, Formulario } from "@/components/Formulario";
 import { Pagina } from "@/components/Pagina";
-import { carregarConfiguracao, carregarSemEquipe, exigir, SELECT_EQUIPE, sessaoAtual } from "@/lib/dados";
+import {
+  carregarConfiguracao,
+  carregarSemEquipe,
+  carregarTrocasPendentes,
+  exigir,
+  SELECT_EQUIPE,
+  sessaoAtual,
+} from "@/lib/dados";
 import { rotuloCategoria, type Equipe } from "@/lib/tipos";
 
 // Aba "Equipes": visão de todas as equipes, integrantes e links de entrega.
 export default async function AdminEquipes() {
   const { supabase } = await sessaoAtual();
 
-  const [config, semEquipe, rEquipes, { count: totalAlunos }] = await Promise.all([
+  const [config, semEquipe, rEquipes, { count: totalAlunos }, trocas] = await Promise.all([
     carregarConfiguracao(supabase),
     carregarSemEquipe(supabase),
     supabase
@@ -20,11 +27,13 @@ export default async function AdminEquipes() {
       .order("criado_em", { referencedTable: "links" })
       .returns<Equipe[]>(),
     supabase.from("inscritos").select("*", { count: "exact", head: true }).eq("papel", "aluno"),
+    carregarTrocasPendentes(supabase),
   ]);
   const equipes = exigir(rEquipes, "equipes") ?? [];
   const comEquipe = equipes.reduce((s, e) => s + e.membros.length, 0);
   const comRepo = equipes.filter((e) => e.repo_github).length;
   const reposOk = equipes.filter((e) => e.repo_publico).length;
+  const nomeEquipe = (id: string) => equipes.find((e) => e.id === id)?.nome ?? "?";
 
   return (
     <Pagina>
@@ -48,6 +57,37 @@ export default async function AdminEquipes() {
         <Numero rotulo="Com repositório" valor={`${comRepo}/${equipes.length}`} alerta={comRepo < equipes.length} />
         <Numero rotulo="Repos públicos" valor={`${reposOk}/${equipes.length}`} />
       </section>
+
+      {/* ------------------------------------------------ pedidos de troca */}
+      {trocas.length > 0 && (
+        <section className="card space-y-3">
+          <div>
+            <h2 className="text-lg font-semibold">Pedidos de troca aguardando ({trocas.length})</h2>
+            <p className="text-sm text-suave">
+              Alguém da equipe de destino precisa aceitar (e troca de lugar com quem pediu). Você pode cancelar.
+            </p>
+          </div>
+          <ul className="divide-y divide-borda">
+            {trocas.map((t) => (
+              <li key={t.id} className="flex flex-wrap items-center gap-x-3 gap-y-2 py-2">
+                <p className="min-w-0 flex-1 text-sm [overflow-wrap:anywhere]">
+                  <strong>{t.quem?.nome ?? t.solicitante}</strong>: {nomeEquipe(t.equipe_origem)} →{" "}
+                  <strong>{nomeEquipe(t.equipe_destino)}</strong>
+                  {t.mensagem && <span className="block text-xs text-suave italic">“{t.mensagem}”</span>}
+                </p>
+                <Formulario
+                  action={cancelarTroca}
+                  rotuloConfirmar="Cancelar pedido"
+                  confirmar={`Cancelar o pedido de ${t.quem?.nome ?? t.solicitante}?`}
+                >
+                  <input type="hidden" name="id" value={t.id} />
+                  <BotaoEnviar className="btn-secundario min-h-9 px-3 text-xs">Cancelar</BotaoEnviar>
+                </Formulario>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       {/* ------------------------------------------------ equipes */}
       <section className="space-y-3">

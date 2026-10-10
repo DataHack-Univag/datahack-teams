@@ -192,6 +192,51 @@ export async function definirLider(_: Resultado, fd: FormData): Promise<Resultad
   return { ok: lider ? "Líder definido." : "A equipe ficou sem líder." };
 }
 
+// ---------------------------------------------------------------- trocas de equipe
+// "como": e-mail do aluno em nome de quem o organizador age no "ver como aluno"
+// (o banco ignora para alunos).
+
+export async function pedirTroca(_: Resultado, fd: FormData): Promise<Resultado> {
+  const destino = txt(fd, "equipe_destino");
+  if (!destino) return { erro: "Escolha a equipe para onde quer ir." };
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("pedir_troca", {
+    p_destino: destino,
+    p_mensagem: txt(fd, "mensagem").slice(0, 200) || null,
+    p_como: txt(fd, "como") || null,
+  });
+  if (error) return { erro: traduzirErro(error) };
+  atualizar();
+  return { ok: "Pedido enviado. Aguarde alguém da equipe aceitar." };
+}
+
+export async function cancelarTroca(_: Resultado, fd: FormData): Promise<Resultado> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("cancelar_troca", { p_pedido: txt(fd, "id"), p_como: txt(fd, "como") || null });
+  if (error) return { erro: traduzirErro(error) };
+  atualizar();
+  return { ok: "Pedido cancelado." };
+}
+
+export async function recusarTroca(_: Resultado, fd: FormData): Promise<Resultado> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("recusar_troca", { p_pedido: txt(fd, "id"), p_como: txt(fd, "como") || null });
+  if (error) return { erro: traduzirErro(error) };
+  atualizar();
+  return { ok: "Pedido recusado." };
+}
+
+export async function aceitarTroca(_: Resultado, fd: FormData): Promise<Resultado> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("aceitar_troca", {
+    p_pedido: txt(fd, "id"),
+    p_como: txt(fd, "como") || null,
+  });
+  if (error) return { erro: traduzirErro(error) };
+  atualizar();
+  return data === "ok" ? { ok: "Troca feita! Você está na nova equipe." } : { erro: String(data) };
+}
+
 // ---------------------------------------------------------------- links
 
 export async function adicionarLink(_: Resultado, fd: FormData): Promise<Resultado> {

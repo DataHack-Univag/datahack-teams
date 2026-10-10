@@ -108,3 +108,21 @@ export type Configuracao = {
 };
 
 export type Resultado = { erro?: string; ok?: string } | null;
+
+export type StatusTroca = "pendente" | "aceita" | "recusada" | "cancelada";
+
+/** Pedido de troca de equipe (ver supabase/006_trocas.sql). */
+export type Troca = {
+  id: string;
+  solicitante: string;
+  equipe_origem: string;
+  equipe_destino: string;
+  status: StatusTroca;
+  mensagem: string | null;
+  criado_em: string;
+  respondido_em: string | null;
+  quem: { nome: string } | null;
+};
+
+/** Equipe resumida para a lista de destinos da troca. */
+export type EquipeResumo = { id: string; nome: string; total: number };

@@ -18,6 +18,9 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   links de entrega com categoria: GitHub, Google Drive, Apresentação, Vídeo, Dashboard,
   Figma, Site/Deploy, Outro.
 - Vê os materiais publicados pela organização.
+- **Troca de equipe:** pede para ir para outra equipe; qualquer integrante de lá pode
+  aceitar (os dois trocam de lugar) ou recusar. Quem pediu pode cancelar. O aviso aparece
+  no topo da tela da equipe pedida (a tela se atualiza sozinha a cada 30 s).
 
 **Organização** (`/admin`, papel `organizador`), com abas:
 - **Equipes:** todas as equipes com integrantes, repositório (público/privado/pendente) e
@@ -64,7 +67,8 @@ No painel do Supabase → **SQL Editor**, rode, nesta ordem:
 3. `supabase/003_lider_e_permissoes.sql` — líder da equipe; composição só pela organização.
 4. `supabase/004_trava_lider.sql` — depois de definido, só o líder troca o líder.
 5. `supabase/005_lider_edita_dados.sql` — só o líder altera nome e repositório da equipe.
-6. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+6. `supabase/006_trocas.sql` — pedidos de troca de equipe.
+7. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
 
 Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
 `node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos

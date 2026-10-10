@@ -1,51 +1,49 @@
 "use client";
 
-import { useId, useState } from "react";
-import type { InputHTMLAttributes } from "react";
+import { useState, type InputHTMLAttributes } from "react";
 
-type CampoSenhaProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
+  /** Rótulo exibido acima do campo. */
   label: string;
 };
 
-export function CampoSenha({ label, className, ...props }: CampoSenhaProps) {
+/** Campo de senha com o "olhinho" para mostrar/esconder o que foi digitado. */
+export function CampoSenha({ label, className = "", ...props }: Props) {
   const [visivel, setVisivel] = useState(false);
-  const id = useId();
 
   return (
     <label className="block">
       <span className="rotulo">{label}</span>
       <span className="relative block">
-        <input
-          {...props}
-          id={id}
-          type={visivel ? "text" : "password"}
-          className={`campo pr-12${className ? ` ${className}` : ""}`}
-        />
+        <input {...props} type={visivel ? "text" : "password"} className={`campo pr-12 ${className}`} />
         <button
           type="button"
-          onClick={() => setVisivel((atual) => !atual)}
-          aria-label={visivel ? "Ocultar senha" : "Mostrar senha"}
+          onClick={() => setVisivel((v) => !v)}
+          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-suave hover:text-foreground"
+          aria-label={visivel ? "Esconder senha" : "Mostrar senha"}
           aria-pressed={visivel}
-          className="absolute inset-y-0 right-0 flex w-11 items-center justify-center text-suave transition hover:text-foreground"
+          title={visivel ? "Esconder senha" : "Mostrar senha"}
         >
           <svg
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="1.8"
-            className="h-5 w-5"
-            aria-hidden="true"
+            strokeWidth={2}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="size-5"
+            aria-hidden
           >
             {visivel ? (
               <>
-                <path d="M3 3l18 18" strokeLinecap="round" />
-                <path d="M10.6 10.7a2 2 0 0 0 2.7 2.7" strokeLinecap="round" />
-                <path d="M9.9 4.2A10.7 10.7 0 0 1 12 4c5.2 0 8.4 4 9.5 6a11.8 11.8 0 0 1-3.1 3.7M6.2 6.2C4.1 7.5 2.9 9.4 2.5 10c1.1 2 4.3 6 9.5 6 1 0 1.9-.1 2.7-.4" strokeLinecap="round" strokeLinejoin="round" />
+                <path d="M3 3l18 18" />
+                <path d="M10.6 10.6a2 2 0 0 0 2.8 2.8" />
+                <path d="M9.9 4.2A10.6 10.6 0 0 1 12 4c5 0 9 4.5 10 8a12.6 12.6 0 0 1-3.2 4.6M6.1 6.1A12.5 12.5 0 0 0 2 12c1 3.5 5 8 10 8 1.7 0 3.3-.5 4.7-1.3" />
               </>
             ) : (
               <>
-                <path d="M2.5 10s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z" />
-                <circle cx="12" cy="10" r="2.3" />
+                <path d="M2 12c1-3.5 5-8 10-8s9 4.5 10 8c-1 3.5-5 8-10 8S3 15.5 2 12z" />
+                <circle cx="12" cy="12" r="3" />
               </>
             )}
           </svg>
