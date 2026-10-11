@@ -9,6 +9,7 @@ import * as repo from "@/modules/avaliacao/infra/repositorio";
 import { salvarConfiguracao } from "@/modules/equipes/infra/repositorio";
 import { emailNormalizado } from "@/modules/pessoas/infra/repositorio";
 import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
+import { emailSimulado } from "@/shared/auth/simulacao";
 import { id, sim, textoOpcional } from "@/shared/acao/campos";
 import { falha, SEM_PERMISSAO, sucesso } from "@/shared/acao/resultado";
 import { traduzirErro } from "@/shared/db/erros";
@@ -41,6 +42,7 @@ export const salvarFicha = criarAcao(
     }
     if (!Object.keys(notas).length) return falha("Marque o nível de pelo menos um critério antes de salvar.");
 
+    if (await emailSimulado()) return falha("Você está no modo “ver como”: a ficha não é salva. Saia da simulação para lançar notas.");
     const cliente = await clienteServidor();
     const avaliador = await emailNormalizado(cliente);
     if (!avaliador) return falha("Sua sessão expirou. Entre de novo para salvar.");

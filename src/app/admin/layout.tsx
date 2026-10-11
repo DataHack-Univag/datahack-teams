@@ -3,6 +3,7 @@ import { Area } from "@/app/_shell/Area";
 import { comandosDasAbas, comandosExtrasOrganizacao, navOrganizacao } from "@/app/_shell/menus";
 import { listarResumo } from "@/modules/equipes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { rotuloPapel } from "@/modules/pessoas/domain/papeis";
 import { listarPessoasResumo } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import type { Comando } from "@/shared/ui/PaletaComandos";
@@ -19,8 +20,8 @@ export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
     ...comandosExtrasOrganizacao,
     ...equipes.map((e) => ({ grupo: "Equipes", rotulo: e.nome, href: `/admin/equipes/${e.id}`, icone: "equipe" as const, detalhe: `${e.total} integrantes` })),
     ...pessoas
-      .filter((p) => p.papel === "aluno")
-      .map((p) => ({ grupo: "Ver como aluno", rotulo: p.nome, href: `/ver-como?email=${encodeURIComponent(p.email)}`, icone: "olho" as const })),
+      .filter((p) => p.papel !== "organizador")
+      .map((p) => ({ grupo: "Ver como", rotulo: p.nome, href: `/ver-como?email=${encodeURIComponent(p.email)}`, icone: "olho" as const, detalhe: rotuloPapel(p.papel) })),
     ...pessoas.map((p) => ({ grupo: "Pessoas", rotulo: p.nome, href: `/admin/pessoas?busca=${encodeURIComponent(p.nome)}`, icone: "pessoas" as const, detalhe: p.email })),
   ];
 

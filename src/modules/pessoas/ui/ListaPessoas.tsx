@@ -140,7 +140,7 @@ export function ListaPessoas({
                 {abertoAqui && (
                   <div className="mt-2 space-y-3 rounded-xl border border-borda p-3" style={{ animation: "dh-sobe .2s both" }}>
                     <div className="flex flex-wrap gap-2">
-                      {p.papel === "aluno" && (
+                      {p.papel !== "organizador" && (
                         <Link href={`/ver-como?email=${encodeURIComponent(p.email)}`} className="btn-secundario min-h-9 px-3 text-xs">
                           <Icone nome="olho" className="size-4" /> Ver como esta pessoa
                         </Link>

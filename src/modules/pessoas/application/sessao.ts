@@ -5,6 +5,7 @@ import { ehAvaliador } from "@/modules/pessoas/domain/papeis";
 import type { Inscrito } from "@/modules/pessoas/domain/tipos";
 import { buscarInscrito, emailNormalizado } from "@/modules/pessoas/infra/repositorio";
 import { encerrarSessao, usuarioAutenticado } from "@/shared/auth/autenticacao";
+import { emailSimulado } from "@/shared/auth/simulacao";
 import { clienteServidor } from "@/shared/db/servidor";
 
 /**
@@ -28,13 +29,26 @@ export const sessaoAtual = cache(async () => {
     redirect("/login?erro=nao_inscrito");
   }
 
+  // "Ver como": o organizador passa a ver o sistema como a pessoa escolhida.
+  let simulado: Inscrito | null = null;
+  if (inscrito.papel === "organizador") {
+    const email = await emailSimulado();
+    const alvo = email ? await buscarInscrito(cliente, email) : null;
+    if (alvo && alvo.papel !== "organizador") simulado = alvo;
+  }
+  const usuario = simulado ?? inscrito;
+
   return {
     cliente,
-    usuario: inscrito,
-    avatar: auth.avatar,
-    organizador: inscrito.papel === "organizador",
-    avaliador: ehAvaliador(inscrito.papel),
-    banca: bancaDoPapel(inscrito.papel),
+    /** Quem a tela representa (no "ver como", a pessoa simulada). */
+    usuario,
+    /** Quem está de fato logado. */
+    real: inscrito,
+    simulacao: !!simulado,
+    avatar: simulado ? null : auth.avatar,
+    organizador: usuario.papel === "organizador",
+    avaliador: ehAvaliador(usuario.papel),
+    banca: bancaDoPapel(usuario.papel),
   };
 });
 

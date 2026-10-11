@@ -20,7 +20,7 @@ export function Cabecalho({
   papel: Papel;
   avatar: string | null;
   inicio: string;
-  /** Modo "ver como": mostra o cabeçalho do aluno, mas sem sair da conta da organização. */
+  /** Modo "ver como": cabeçalho da pessoa simulada, sem o botão de sair da conta da organização. */
   simulacao?: boolean;
 }) {
   return (
@@ -33,7 +33,7 @@ export function Cabecalho({
         </Link>
 
         {papel !== "aluno" && <span className="chip hidden md:inline-flex">{rotuloPapel(papel)}</span>}
-        {!simulacao && <BotaoBusca />}
+        <BotaoBusca />
 
         <div className="flex items-center gap-2" title={nome}>
           <Avatar nome={nome} foto={avatar} tamanho="size-8" />

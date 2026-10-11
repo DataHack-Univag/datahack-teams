@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { Area } from "@/app/_shell/Area";
 import { comandosDasAbas, navAluno } from "@/app/_shell/menus";
 import { equipeDoAluno, lerConfiguracao, listarResumo } from "@/modules/equipes/infra/repositorio";
@@ -23,22 +22,21 @@ export const abaDoAluno = (v: unknown): AbaAluno => (v === "trocas" || v === "ma
 
 /**
  * Tela do aluno com as três abas (Minha equipe · Trocas · Materiais).
- * Usada na tela real ("/") e no "ver como aluno" da organização: mesma tela e mesmos botões;
- * na simulação quem age é o organizador (o banco registra assim).
+ * No "ver como" da organização é a mesma tela, com os mesmos botões; quem age é o
+ * organizador (o banco registra assim).
  */
 export async function TelaAluno({
   cliente,
   aluno,
   avatar,
   aba,
-  simulacao,
+  simulacao = false,
 }: {
   cliente: Cliente;
   aluno: Inscrito;
   avatar: string | null;
   aba: AbaAluno;
-  /** Faixa "Vendo como…" (só no modo ver como). */
-  simulacao?: ReactNode;
+  simulacao?: boolean;
 }) {
   // Tudo em paralelo: uma única "rodada" até o banco.
   const [config, materiais, equipe, equipes, trocas] = await Promise.all([
@@ -51,8 +49,7 @@ export async function TelaAluno({
   const troca = equipe ? separarTrocas(trocas, aluno.email, equipe.id) : null;
   const souLider = !!equipe && equipe.lider_email === aluno.email;
 
-  const base = simulacao ? `/ver-como?email=${encodeURIComponent(aluno.email)}` : "/";
-  const itens = navAluno(base, { trocas: troca?.recebidos.length }, !simulacao);
+  const itens = navAluno("/", { trocas: troca?.recebidos.length });
   const destaques = materiais.filter((m) => m.destaque);
 
   return (
@@ -62,8 +59,6 @@ export async function TelaAluno({
       avatar={avatar}
       itens={itens}
       comandos={comandosDasAbas(itens)}
-      faixa={simulacao}
-      simulacao={!!simulacao}
     >
       {/* Pedidos de troca e mudanças da organização chegam sem recarregar. */}
       <AutoAtualizar segundos={30} />
