@@ -1,0 +1,969 @@
+{
+  "evento": "DataHack Univag 2026 · Rota do Diploma",
+  "versao": 2,
+  "niveis": [
+    {
+      "nivel": "Insuficiente",
+      "fator": 0.0
+    },
+    {
+      "nivel": "Básico",
+      "fator": 0.5
+    },
+    {
+      "nivel": "Proficiente",
+      "fator": 0.8
+    },
+    {
+      "nivel": "Excelente",
+      "fator": 1.0
+    }
+  ],
+  "pesos_fases": {
+    "F1": 15,
+    "F2": 20,
+    "F3": 25,
+    "NEG": 40
+  },
+  "divisao_fases_1_2": {
+    "mesa": 60,
+    "pitch": 40
+  },
+  "bancas": {
+    "professores": "Banca de professores de tecnologia",
+    "organizadores": "Organizadores (avaliação técnica)",
+    "negocio": "Jurados de negócio (3)"
+  },
+  "formula": {
+    "descricao": "Cada rubrica vale 0–100 (soma de peso_criterio × fator_do_nivel). Com vários avaliadores na mesma rubrica, usa-se a média por critério. Nota final = soma(peso_final × nota_rubrica / 100) + soma(penalidades), mínimo 0. Fases 1 e 2: a nota da fase é a soma das partes pitch (professores) e mesa (organizadores).",
+    "texto": "Nota final = 6% × F1_PITCH + 9% × F1_MESA + 8% × F2_PITCH + 12% × F2_MESA + 25% × F3_REPO + 40% × NEG + penalidades",
+    "pesos": {
+      "F1_PITCH": 6,
+      "F1_MESA": 9,
+      "F2_PITCH": 8,
+      "F2_MESA": 12,
+      "F3_REPO": 25,
+      "NEG": 40
+    }
+  },
+  "rubricas": [
+    {
+      "id": "F1_PITCH",
+      "fase": "F1",
+      "parte": "pitch",
+      "nome": "Fase 1 · Pitch · Exploração e estratégia",
+      "banca": "Banca de professores de tecnologia",
+      "banca_tipo": "professores",
+      "peso_final": 6,
+      "momento": "10:45–11:45, pitch de 3 + 2 min",
+      "criterios": [
+        {
+          "id": "problema",
+          "nome": "Entendimento do desafio",
+          "peso": 20,
+          "descricao": "A equipe explica com as próprias palavras o que vai responder e por que isso importa.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não sabe dizer o que vai responder."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Repete o enunciado, sem mostrar entendimento."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Explica o problema e quais perguntas vai atacar primeiro."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Explica o problema, prioriza as perguntas e diz o que espera encontrar."
+            }
+          ]
+        },
+        {
+          "id": "escolhas",
+          "nome": "Justificativa das escolhas",
+          "peso": 25,
+          "descricao": "Consegue explicar, em linguagem clara, por que escolheu o banco, as ferramentas e a forma de organizar os dados.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não justifica (“porque sim”, “porque a IA sugeriu”)."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Justificativa genérica, sem ligação com os dados do desafio."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Justifica cada escolha pelo volume, formato dos arquivos ou facilidade da equipe."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Compara alternativas e explica o que perdeu e o que ganhou com cada escolha."
+            }
+          ]
+        },
+        {
+          "id": "raciocinio",
+          "nome": "Raciocínio sobre os dados",
+          "peso": 25,
+          "descricao": "O que a equipe descobriu olhando os arquivos e que riscos ou armadilhas já percebeu.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Ainda não olhou os dados."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Descreve os arquivos, sem tirar conclusão."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Aponta o que cada base tem, como elas se ligam e ao menos uma dificuldade."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Antecipa armadilhas concretas e diz como vai lidar com cada uma."
+            }
+          ]
+        },
+        {
+          "id": "plano",
+          "nome": "Plano para as próximas fases",
+          "peso": 15,
+          "descricao": "O plano é realista para o tempo do evento e está dividido entre os integrantes.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem plano."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Plano vago ou irreal para o tempo."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Plano claro, com etapas e responsáveis."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Plano claro, priorizado e com plano B se algo der errado."
+            }
+          ]
+        },
+        {
+          "id": "comunicacao",
+          "nome": "Comunicação e domínio da equipe",
+          "peso": 15,
+          "descricao": "Clareza, uso do tempo e segurança nas respostas; o domínio é da equipe, não de uma pessoa só.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não se entende ou estoura o tempo."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Compreensível, mas confuso ou dependente de uma pessoa."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Claro, no tempo, responde bem às perguntas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Claro e seguro; qualquer integrante responde."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F1_MESA",
+      "fase": "F1",
+      "parte": "mesa",
+      "nome": "Fase 1 · Mesa · Ambiente, exploração e estratégia",
+      "banca": "Organizadores (avaliação técnica)",
+      "banca_tipo": "organizadores",
+      "peso_final": 9,
+      "momento": "10:45–11:45, ~5 min na mesa + commit da Entrega 1",
+      "criterios": [
+        {
+          "id": "ambiente",
+          "nome": "Ambiente e repositório",
+          "peso": 15,
+          "descricao": "Montado no laboratório às 8h: repositório público com todos como colaboradores, estrutura inicial, banco escolhido instalado (local ou nuvem).",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem repositório funcional ou equipe sem acesso."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Repositório existe, mas sem estrutura ou faltando integrantes."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Repositório organizado, todos com acesso, banco instalado e acessível."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, .gitignore correto (dados fora do Git) e README inicial com o plano."
+            }
+          ]
+        },
+        {
+          "id": "fontes",
+          "nome": "Entendimento das fontes",
+          "peso": 30,
+          "descricao": "Identificou arquivos principais × cópias/apoio, formatos, dicionários, chaves e granularidade.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não sabe o que há nos zips nem qual arquivo usar."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Sabe quais arquivos usar, mas não percebeu formatos/granularidade."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Formatos (CSV ; latin-1, xlsx com cabeçalho fora da 1ª linha), chave CO_CURSO e granularidade (coorte; EAD por polo) entendidos."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, aponta armadilhas (EAD duplicada por polo, coortes com tempos diferentes, valores que saltam num ano) antes de ingerir."
+            }
+          ]
+        },
+        {
+          "id": "exploratoria",
+          "nome": "Análise exploratória",
+          "peso": 25,
+          "descricao": "Volumes, tipos, nulos, distribuições e anomalias iniciais, com evidência no repositório.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não fez exploração."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Contou linhas/colunas, sem olhar qualidade."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Tipos, nulos, valores suprimidos (--, SC) e distribuições das variáveis-chave."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Exploração orientada às perguntas, com hipóteses e anomalias registradas."
+            }
+          ]
+        },
+        {
+          "id": "estrategia",
+          "nome": "Estratégia de ingestão e transformação",
+          "peso": 30,
+          "descricao": "Banco/ferramenta, camadas, idempotência planejada, tipos e plano de junções, documentados (ex.: docs/estrategia.md).",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem estratégia."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Estratégia genérica (“vamos jogar no banco”)."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Camadas (bruto → tratado → analítico), tipos (códigos como texto) e junções planejados."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, idempotência explícita (como reexecutar sem duplicar), controle de carga e estimativa de volume."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F2_PITCH",
+      "fase": "F2",
+      "parte": "pitch",
+      "nome": "Fase 2 · Pitch · Ingestão, transformação e protótipo",
+      "banca": "Banca de professores de tecnologia",
+      "banca_tipo": "professores",
+      "peso_final": 8,
+      "momento": "14:15–15:15, pitch de 3 + 2 min",
+      "criterios": [
+        {
+          "id": "evolucao",
+          "nome": "Evolução desde a Fase 1",
+          "peso": 15,
+          "descricao": "O que mudou no plano, o que deu errado e como a equipe resolveu.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não sabe dizer o que fez desde a Fase 1."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Lista o que fez, sem refletir."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Mostra o avanço e explica os ajustes de rota."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Mostra o avanço, explica os ajustes e o que aprendeu com eles."
+            }
+          ]
+        },
+        {
+          "id": "pipeline",
+          "nome": "Explicação do pipeline",
+          "peso": 25,
+          "descricao": "Explica, sem jargão desnecessário, o caminho do arquivo baixado até a tabela que responde às perguntas.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não consegue explicar."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Explica partes soltas, sem o caminho completo."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Explica o caminho completo, em ordem, de forma compreensível."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Explica o caminho completo e como garante que os números estão certos."
+            }
+          ]
+        },
+        {
+          "id": "respostas",
+          "nome": "Primeiras respostas",
+          "peso": 25,
+          "descricao": "Já existem números que respondem a alguma pergunta, com fonte e cuidado na interpretação.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Nenhum número."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Números sem dizer de onde vêm ou o que significam."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Números para pelo menos 2 perguntas, com fonte e interpretação correta."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Números para a maioria das perguntas, com ressalvas (associação ≠ causa, anual × turma)."
+            }
+          ]
+        },
+        {
+          "id": "dashboard",
+          "nome": "Plano do dashboard",
+          "peso": 20,
+          "descricao": "O que o dashboard vai mostrar, para quem, e por que esses gráficos.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem plano."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Plano genérico (“vamos fazer uns gráficos”)."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Plano organizado pelas perguntas, com o público definido."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Plano claro, com rascunho ou protótipo e escolhas de visualização justificadas."
+            }
+          ]
+        },
+        {
+          "id": "comunicacao",
+          "nome": "Comunicação e domínio da equipe",
+          "peso": 15,
+          "descricao": "Clareza, uso do tempo e segurança nas respostas; o domínio é da equipe, não de uma pessoa só.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não se entende ou estoura o tempo."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Compreensível, mas confuso ou dependente de uma pessoa."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Claro, no tempo, responde bem às perguntas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Claro e seguro; qualquer integrante responde."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F2_MESA",
+      "fase": "F2",
+      "parte": "mesa",
+      "nome": "Fase 2 · Mesa · Ingestão, transformação e protótipo",
+      "banca": "Organizadores (avaliação técnica)",
+      "banca_tipo": "organizadores",
+      "peso_final": 12,
+      "momento": "14:15–15:15, ~5 min na mesa + commit da Entrega 2",
+      "criterios": [
+        {
+          "id": "ingestao",
+          "nome": "Ingestão implementada",
+          "peso": 25,
+          "descricao": "Carga automatizada das bases necessárias no banco escolhido, vista funcionando na mesa.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem ingestão, ou feita à mão (copiar/colar, importação manual)."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Parte das bases carregada, com passos manuais."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Todas as bases necessárias carregadas por código, com encoding e cabeçalho corretos."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Carga parametrizada, registro do que foi carregado (log/controle) e tratamento de erros."
+            }
+          ]
+        },
+        {
+          "id": "idempotencia",
+          "nome": "Idempotência",
+          "peso": 20,
+          "descricao": "Rodar a carga/transformação de novo não duplica nem altera o resultado.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Reexecutar duplica linhas ou quebra."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Funciona só apagando tudo à mão antes."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Reexecução segura (truncate-and-load, upsert ou controle de arquivos carregados)."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, demonstrou na mesa: rodou duas vezes e conferiu contagens iguais."
+            }
+          ]
+        },
+        {
+          "id": "transformacao",
+          "nome": "Transformação e qualidade",
+          "peso": 25,
+          "descricao": "Limpeza, filtros, junções e checagens.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Erros que mudam o resultado (códigos como número, nulos como zero, EAD somada sem agregar)."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Limpeza correta, mas sem checagens (taxa de junção, linhas antes/depois)."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Filtro de graduação, agregação por curso, junções com taxa de match, células < 10 suprimidas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, trata anomalias e tem checagens automatizadas."
+            }
+          ]
+        },
+        {
+          "id": "modelagem",
+          "nome": "Modelagem e arquitetura",
+          "peso": 15,
+          "descricao": "Como os dados estão organizados para responder às perguntas.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Tudo numa tabela só, sem critério."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Tabelas separadas, sem lógica clara."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Camadas definidas e modelo analítico que atende às perguntas (ex.: fatos por curso/coorte)."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Modelo justificado (granularidade, chaves), documentado em docs/arquitetura.md."
+            }
+          ]
+        },
+        {
+          "id": "prototipo",
+          "nome": "Protótipo ligado aos dados",
+          "peso": 15,
+          "descricao": "O protótipo mostrado no pitch lê de fato das tabelas transformadas.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem protótipo."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Protótipo com números digitados ou de planilha à parte."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Protótipo lê das tabelas do pipeline para pelo menos 2 perguntas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Protótipo ligado ao pipeline cobrindo a maioria das perguntas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "F3_REPO",
+      "fase": "F3",
+      "parte": "mesa",
+      "nome": "Fase 3 · Repositório final e uso de IA",
+      "banca": "Organizadores (avaliação técnica)",
+      "banca_tipo": "organizadores",
+      "peso_final": 25,
+      "momento": "Em paralelo ao pitch final (17:15–19:15), no commit das 17:00",
+      "criterios": [
+        {
+          "id": "reprodutibilidade",
+          "nome": "Reprodutibilidade de ponta a ponta",
+          "peso": 20,
+          "descricao": "Seguindo o README, alguém de fora roda do zero e chega aos mesmos números.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Não roda."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Roda com ajustes (caminhos absolutos, dependências faltando, ordem não documentada)."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Roda do zero seguindo o README, e gera as extrações em outputs/ que alimentam o dashboard."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Um comando (ou ordem numerada) roda tudo, do download ao dashboard; dependências fixadas; saídas determinísticas."
+            }
+          ]
+        },
+        {
+          "id": "codigo",
+          "nome": "Qualidade do código e da arquitetura",
+          "peso": 20,
+          "descricao": "Organização, legibilidade, separação de etapas, coerência com a estratégia.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Ilegível ou um notebook caótico."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Organizado em partes, com muita repetição."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Etapas separadas, nomes claros, comentários onde importa."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Modular, limpo, coerente com a arquitetura documentada."
+            }
+          ]
+        },
+        {
+          "id": "corretude",
+          "nome": "Corretude das respostas",
+          "peso": 20,
+          "descricao": "Os números do dashboard conferem com o código e com o gabarito da organização.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Números errados ou não rastreáveis no código."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Ordem de grandeza certa, erros de método."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Números corretos para as perguntas obrigatórias."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Corretos, incluindo bônus, com ressalvas metodológicas bem colocadas."
+            }
+          ]
+        },
+        {
+          "id": "ia",
+          "nome": "Uso de IA e domínio técnico",
+          "peso": 25,
+          "descricao": "Pasta prompts/ completa e o que as conversas mostram sobre o conhecimento do aluno.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem pasta prompts/, conversas omitidas, ou só pedidos de “faz pra mim”."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Conversas presentes, mas o aluno só aceita respostas, sem demonstrar entendimento."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Conversas mostram o aluno usando conceitos certos (ingestão, idempotência, chaves, camadas) e conferindo o que a IA gera."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Aluno conduz a IA com domínio: compara abordagens, discute arquitetura, corrige erros da IA e registra as decisões."
+            }
+          ]
+        },
+        {
+          "id": "documentacao",
+          "nome": "Validação e documentação",
+          "peso": 15,
+          "descricao": "Checagens, dicionário das variáveis criadas e decisões registradas.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem documentação."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "README mínimo."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "README completo, variáveis derivadas explicadas, checagens registradas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Além disso, decisões e limitações documentadas e testes/asserts no código."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "NEG",
+      "fase": "NEG",
+      "parte": "negocio",
+      "nome": "Negócio · Pitch final",
+      "banca": "Jurados de negócio (3)",
+      "banca_tipo": "negocio",
+      "peso_final": 40,
+      "momento": "Pitch final (17:15–19:15)",
+      "criterios": [
+        {
+          "id": "respondeu",
+          "nome": "Respondeu às perguntas",
+          "peso": 30,
+          "descricao": "As perguntas do desafio (P1–P5) foram respondidas de forma direta, com número e fonte?",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Respondeu 0–1 pergunta, ou falou do tema sem responder."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Respondeu 2–3 perguntas."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Respondeu as 5 obrigatórias."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Respondeu as 5 obrigatórias e ao menos 1 bônus (B1/B2)."
+            }
+          ]
+        },
+        {
+          "id": "solidez",
+          "nome": "Clareza e solidez das respostas",
+          "peso": 20,
+          "descricao": "As respostas são claras, convincentes e mostram de onde vem cada número?",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Respostas vagas ou contraditórias."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Respostas claras, mas sem mostrar de onde vêm."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Claras e sustentadas por dados, com limitações citadas."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Muito claras, sustentadas e com a dúvida certa levantada (o que os dados não dizem)."
+            }
+          ]
+        },
+        {
+          "id": "dashboard",
+          "nome": "Dashboard e visualização",
+          "peso": 20,
+          "descricao": "O dashboard é fácil de entender, ajuda a responder às perguntas e funciona na sala da banca?",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Confuso, ou não abriu na sala da banca (só o plano B salvou parte)."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Funciona, mas é difícil de ler."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Claro, organizado pelas perguntas, gráficos adequados."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Claro, bonito e útil; dá vontade de usar."
+            }
+          ]
+        },
+        {
+          "id": "valor",
+          "nome": "Valor e recomendações",
+          "peso": 20,
+          "descricao": "O que um gestor (IES, governo) faria com isso?",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Sem recomendação."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Recomendações genéricas."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Pelo menos uma recomendação concreta, ligada aos achados."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Recomendações priorizadas, viáveis e com público definido."
+            }
+          ]
+        },
+        {
+          "id": "comunicacao",
+          "nome": "Comunicação",
+          "peso": 10,
+          "descricao": "Narrativa no tempo e segurança nas respostas à banca.",
+          "niveis": [
+            {
+              "nivel": "Insuficiente",
+              "fator": 0.0,
+              "descricao": "Estoura o tempo ou não se entende."
+            },
+            {
+              "nivel": "Básico",
+              "fator": 0.5,
+              "descricao": "Compreensível, desorganizado."
+            },
+            {
+              "nivel": "Proficiente",
+              "fator": 0.8,
+              "descricao": "Clara, no tempo, responde bem."
+            },
+            {
+              "nivel": "Excelente",
+              "fator": 1.0,
+              "descricao": "Envolvente; todo o time domina o trabalho."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "penalidades": [
+    {
+      "id": "causalidade",
+      "pontos": -5,
+      "texto": "Afirmar causalidade (“X causa evasão”) em vez de associação."
+    },
+    {
+      "id": "celulas",
+      "pontos": -3,
+      "texto": "Expor células com menos de 10 alunos em tabela ou gráfico."
+    },
+    {
+      "id": "acesso",
+      "pontos": -5,
+      "texto": "Repositório ou link do pitch sem acesso na hora da entrega (10 min de tolerância para corrigir)."
+    },
+    {
+      "id": "planob",
+      "pontos": -3,
+      "texto": "Entrega final sem plano B (PDF/vídeo do dashboard)."
+    },
+    {
+      "id": "tempo",
+      "pontos": -2,
+      "texto": "Estourar em mais de 1 min o tempo do pitch final."
+    }
+  ],
+  "desclassificacao": "Sem entrega final até 17:00, plágio entre equipes ou dados que não sejam públicos.",
+  "desempate": [
+    "Maior nota na rubrica F3 · Repositório final.",
+    "Maior nota em “Respondeu às perguntas” (Negócio).",
+    "Maior nota em “Idempotência” (F2 · Mesa).",
+    "Persistindo, decisão conjunta das bancas."
+  ]
+}

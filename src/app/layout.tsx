@@ -1,6 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import Script from "next/script";
-import { RedeDados } from "@/components/RedeDados";
+import { AvisoOffline } from "@/shared/ui/AvisoOffline";
+import { RedeDados } from "@/shared/ui/RedeDados";
+import { ProvedorToast } from "@/shared/ui/Toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -35,9 +37,15 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         />
       </head>
       <body className="flex min-h-full flex-col font-sans">
+        <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-50 focus:rounded-lg focus:bg-superficie-solida focus:px-3 focus:py-2">
+          Pular para o conteúdo
+        </a>
         <RedeDados />
-        {/* Conteúdo acima da rede animada. */}
-        <div className="relative z-[1] flex min-h-full flex-1 flex-col">{children}</div>
+        <ProvedorToast>
+          <AvisoOffline />
+          {/* Conteúdo acima da rede animada. */}
+          <div className="relative z-[1] flex min-h-full flex-1 flex-col">{children}</div>
+        </ProvedorToast>
       </body>
     </html>
   );
