@@ -1,8 +1,9 @@
 import { redirect } from "next/navigation";
-import { BotaoTema } from "@/components/BotaoTema";
-import { LoginSenha } from "@/components/LoginSenha";
-import { Logo } from "@/components/Logo";
-import { createClient } from "@/lib/supabase/server";
+import { LoginSenha } from "@/modules/pessoas/ui/LoginSenha";
+import { clienteServidor } from "@/shared/db/servidor";
+import { Aviso } from "@/shared/ui/Aviso";
+import { BotaoTema } from "@/shared/ui/BotaoTema";
+import { Logo } from "@/shared/ui/Logo";
 
 const MENSAGENS: Record<string, string> = {
   nao_inscrito:
@@ -16,7 +17,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
   const { erro } = await searchParams;
 
   // Já logado? Vai direto para o painel.
-  const supabase = await createClient();
+  const supabase = await clienteServidor();
   const { data } = await supabase.auth.getClaims();
   if (data?.claims && !erro) redirect("/");
 
@@ -49,9 +50,9 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
         </div>
 
         {mensagem && (
-          <p className="rounded-xl border border-red-400/40 bg-red-500/10 p-3 text-sm text-red-700 dark:text-red-300">
+          <Aviso tom="erro" titulo="Não deu para entrar">
             {mensagem}
-          </p>
+          </Aviso>
         )}
 
         <LoginSenha />

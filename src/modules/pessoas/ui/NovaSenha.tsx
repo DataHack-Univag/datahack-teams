@@ -1,0 +1,66 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { clienteNavegador } from "@/shared/db/navegador";
+import { CampoSenha } from "@/shared/ui/CampoSenha";
+
+export function NovaSenha() {
+  const router = useRouter();
+  const [senha, setSenha] = useState("");
+  const [confirma, setConfirma] = useState("");
+  const [carregando, setCarregando] = useState(false);
+  const [erro, setErro] = useState<string | null>(null);
+
+  async function salvar(e: React.FormEvent) {
+    e.preventDefault();
+    setErro(null);
+    if (senha !== confirma) {
+      setErro("As senhas não conferem.");
+      return;
+    }
+    setCarregando(true);
+    const { error } = await clienteNavegador().auth.updateUser({ password: senha });
+    if (error) {
+      setCarregando(false);
+      setErro(
+        /different from the old/i.test(error.message)
+          ? "A nova senha precisa ser diferente da anterior."
+          : /session/i.test(error.message)
+            ? "Link expirado. Peça um novo em \"Esqueci a senha\"."
+            : "Não foi possível salvar: " + error.message,
+      );
+      return;
+    }
+    router.replace("/");
+    router.refresh();
+  }
+
+  return (
+    <form onSubmit={salvar} className="space-y-3">
+      <CampoSenha
+        label="Nova senha"
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        autoComplete="new-password"
+        minLength={6}
+        required
+        autoFocus
+      />
+      <CampoSenha
+        label="Repita a senha"
+        value={confirma}
+        onChange={(e) => setConfirma(e.target.value)}
+        autoComplete="new-password"
+        minLength={6}
+        required
+      />
+      {erro && (
+        <p className="rounded-xl bg-red-500/15 p-3 text-sm text-red-700 dark:text-red-300">{erro}</p>
+      )}
+      <button disabled={carregando} className="btn-primario w-full text-base">
+        {carregando ? "Salvando..." : "Salvar e entrar"}
+      </button>
+    </form>
+  );
+}

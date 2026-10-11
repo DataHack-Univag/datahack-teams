@@ -22,25 +22,28 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   aceitar (os dois trocam de lugar) ou recusar. Quem pediu pode cancelar. O aviso aparece
   no topo da tela da equipe pedida (a tela se atualiza sozinha a cada 30 s).
 
-**Organização** (`/admin`, papel `organizador`), com abas:
-- **Equipes:** todas as equipes com integrantes, repositório (público/privado/pendente) e
-  links de entrega; quem está sem equipe; criar/editar/excluir equipe; limite de
-  integrantes e **trava de edição** (fim do prazo); exportar CSV.
-- **Participantes:** lista de quem pode logar, com nome, e-mail, curso, semestre e
-  **nota média** (só organizadores veem a nota). Cadastrar, editar, remover, buscar.
-- **Gerador de equipes:** o algoritmo do `datahack-equipes.html` integrado: equilibra
-  semestre + nota (peso ajustável), mistura cursos, semente reproduzível, compara com
-  200 sorteios aleatórios, modo telão. Lê os participantes do banco e **salva as equipes
-  no sistema** (só quem está sem equipe, ou refazendo tudo). Equipes geradas nascem sem
-  repositório; os alunos veem um aviso para cadastrar o GitHub.
-- **Materiais:** links publicados pela organização (repositório de documentação,
-  desafios, fontes e dicionários de dados...). Aparecem na tela inicial de todos os alunos.
-- **Trocas:** auditoria de todos os pedidos de troca (aguardando, aceitos, recusados,
-  cancelados): quem pediu, de qual equipe para qual, mensagem, quem respondeu e quando.
-- **Avaliação:** ranking consolidado (média por critério entre avaliadores, nota de cada
-  rubrica, penalidades, nota final e desempate), detalhe de cada ficha, encerrar/reabrir a
-  avaliação e exportar CSV.
-- **Organizadores e bancas:** organizadores e avaliadores (técnico / negócio).
+**Organização** (`/admin`, papel `organizador`), com 6 abas na ordem do evento
+(no celular: barra embaixo com Painel, Equipes, Avaliação, Ranking e "Mais"):
+- **Painel:** números do evento e pendências (equipes sem líder/repositório, trocas
+  aguardando, alunos sem equipe, fichas faltando), cada uma com link para resolver.
+- **Pessoas:** alunos, organizadores e bancas num lugar só, com filtros (papel, sem
+  equipe, sem nota) e busca. Cadastrar, editar, mudar papel, remover. A **nota média**
+  só os organizadores veem.
+- **Equipes**, com sub-abas:
+  - *Equipes:* todas as equipes com integrantes, repositório (público/privado/pendente) e
+    links; filtro "com pendência"; quem está sem equipe; criar equipe; limite de
+    integrantes e **trava de edição**; exportar CSV.
+  - *Trocas:* auditoria de todos os pedidos (aguardando, aceitos, recusados, cancelados).
+  - *Gerador:* o algoritmo do `datahack-equipes.html`: equilibra semestre + nota, mistura
+    cursos, semente reproduzível, compara com 200 sorteios aleatórios, modo telão, e
+    **salva as equipes no sistema**.
+- **Materiais:** links publicados para todos os alunos (desafios, fontes, dicionários).
+- **Avaliação:** quadro geral, andamento das bancas e fichas com penalidades; encerrar ou
+  reabrir; exportar ranking, analítico, dados brutos e notas por avaliador (CSV).
+- **Ranking:** pódio com Top 3 / Top 5 / Todos e modo revelação para o telão.
+
+Em qualquer tela: **Ctrl+K** abre a busca rápida (telas, equipes, pessoas, "ver como");
+**?** mostra os atalhos. Remoções simples têm **Desfazer** no aviso.
 
 **Bancas** (`/avaliar`, papéis `avaliador_tecnico` e `avaliador_negocio`; organizadores também)
 - Lista das equipes com o andamento das fichas; ficha por rubrica com os 4 níveis de cada
@@ -50,10 +53,11 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
   avalia os pitches F1/F2; organização avalia mesa F1/F2 e F3 (e pode lançar qualquer rubrica);
   jurados de negócio (`avaliador_negocio`) avaliam o pitch final.
 - Rubricas, pesos e penalidades vêm de `src/build_cronograma_rubrica.py`. Se mudar lá:
-  `python src/build_cronograma_rubrica.py` e depois, em `datahack-teams/`,
-  `node scripts/gerar_rubricas.mjs ../docs/rubricas_v2.json src/lib/rubricas.ts`.
-- **Ver como aluno:** em Participantes (ou na página de uma equipe), "👁 Ver como este
-  aluno" abre a tela exatamente como aquele aluno vê, com os mesmos botões que ele tem,
+  `python src/build_cronograma_rubrica.py`, copie `docs/rubricas_v2.json` para
+  `config/rubricas_v2.json` e rode `npm run gerar:rubricas`
+  (gera `src/modules/avaliacao/domain/rubricas.ts`).
+- **Ver como aluno:** na página de uma equipe ("Ver como este aluno") ou pela busca rápida
+  (Ctrl+K → "Ver como"), abre a tela exatamente como aquele aluno vê, com os mesmos botões que ele tem,
   todos funcionando (agindo como organização)
   (`/ver-como?email=...`). Nada é alterado e não precisa da senha do aluno.
 
@@ -76,22 +80,32 @@ registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, c
 
 ### 1. Banco
 
-No painel do Supabase → **SQL Editor**, rode, nesta ordem:
+As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ordem:
 
-1. `supabase/schema.sql` — tabelas, funções, trigger e RLS.
-2. `supabase/002_organizacao.sql` — notas, materiais e o RPC do gerador de equipes.
-3. `supabase/003_lider_e_permissoes.sql` — líder da equipe; composição só pela organização.
-4. `supabase/004_trava_lider.sql` — depois de definido, só o líder troca o líder.
-5. `supabase/005_lider_edita_dados.sql` — só o líder altera nome e repositório da equipe.
-6. `supabase/006_trocas.sql` — pedidos de troca de equipe.
-7. `supabase/007_auditoria_trocas.sql` — histórico de trocas preservado + quem cancelou.
-8. `supabase/008_avaliacao.sql` — módulo de avaliação (bancas).
-9. `supabase/009_rubricas_v2.sql` — rubricas v2: fases 1 e 2 com pitch (professores) + mesa (organização).
-10. `supabase/seed.sql` — os 55 inscritos ativos, as notas e o organizador inicial.
+1. `…01_esquema_inicial` — tabelas, funções, trigger e RLS.
+2. `…02_organizacao` — notas, materiais e o RPC do gerador de equipes.
+3. `…03_lider_e_permissoes` — líder da equipe; composição só pela organização.
+4. `…04_trava_lider` — depois de definido, só o líder troca o líder.
+5. `…05_lider_edita_dados` — só o líder altera nome e repositório da equipe.
+6. `…06_trocas` — pedidos de troca de equipe.
+7. `…07_auditoria_trocas` — histórico de trocas preservado + quem cancelou.
+8. `…08_avaliacao` — módulo de avaliação (bancas).
+9. `…09_rubricas_v2` — fases 1 e 2 com pitch (professores) + mesa (organização).
 
-Todos podem ser rodados de novo sem problema. Se a lista de inscrições mudar:
-`node supabase/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`. Depois, novos
-participantes e organizadores podem ser cadastrados direto pelo sistema.
+**Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
+(ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
+(os inscritos, as notas e o organizador inicial).
+
+**Projeto que já existe** (as 9 migrações já foram aplicadas à mão pelo SQL Editor):
+marque-as como aplicadas uma vez, sem rodar nada no banco:
+
+```bash
+supabase migration repair --status applied 20261006000001 20261007000002 20261007000003   20261008000004 20261008000005 20261009000006 20261009000007 20261010000008 20261010000009
+```
+
+A partir daí, mudanças novas no banco viram um arquivo novo em `supabase/migrations/`
+(`supabase migration new <nome>`), testado num projeto de teste antes da produção.
+Se a lista de inscrições mudar: `node scripts/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql`.
 
 > `seed.sql`, `INSCRIÇÕES.txt` e `inscritos-datahack.csv` contêm dados pessoais e
 > estão no `.gitignore`. Não versionar.
@@ -132,26 +146,52 @@ npm run dev                  # http://localhost:3000
 Qualquer host de Next.js (Vercel é o mais simples): configure as variáveis
 `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
 
-## Estrutura
+## Desenvolvimento
+
+```bash
+npm run dev          # http://localhost:3000
+npm run lint         # ESLint
+npm run typecheck    # tipos das rotas (next typegen) + tsc
+npm test             # Vitest: regras de nota, permissões, trocas, gerador, validação
+npm run db:tipos     # regenera src/shared/db/tipos-banco.ts lendo o banco (DATABASE_URL, só leitura)
+```
+
+O GitHub Actions (`.github/workflows/ci.yml`) roda lint, typecheck e testes em cada push.
+
+## Arquitetura
+
+Monólito modular em Next.js (App Router) sobre Supabase. Cada módulo de negócio tem as
+mesmas camadas, e a dependência só vai "para dentro" (ui → application → domain; infra
+implementa o acesso ao banco):
 
 ```
-supabase/schema.sql        tabelas, RLS, trigger de lista de inscritos, RPC criar_equipe
-supabase/seed.sql          inscritos (gerado de INSCRIÇÕES.txt — não versionar)
-src/proxy.ts               renova sessão e manda para /login quem não está logado
-src/app/login              tela de login (entrar / primeiro acesso / esqueci a senha)
-src/app/auth/confirm       destino do link de redefinição de senha
-src/app/nova-senha         define a nova senha
-src/app/ver-como           organizador vê a tela de um aluno (somente leitura)
-src/app/page.tsx           painel do aluno (minha equipe / criar equipe)
-src/app/admin              área da organização (equipes, participantes, gerador, materiais, organizadores)
-src/app/admin/equipes/[id] edição de qualquer equipe
-src/lib/gerador.ts         algoritmo de formação de equipes (portado do datahack-equipes.html)
-src/lib/rubricas.ts        rubricas do evento (GERADO de docs/rubricas_v2.json)
-src/lib/nota.ts            cálculo da nota (rubrica, final, desempate)
-src/app/avaliar            área das bancas (fichas de avaliação)
-src/app/actions.ts         Server Actions (mutações)
-src/components/            PainelEquipe, CriarEquipe, Formulario, Cabecalho, LoginSenha
+src/
+  app/                    rotas (só compõem telas; sem regra de negócio)
+    _shell/               Area (cabeçalho + navegação + busca), menus, TelaAluno
+    admin/                organização: painel, pessoas, equipes (lista/trocas/gerador),
+                          materiais, avaliacao (+ exportar), ranking
+    avaliar/              bancas: lista de equipes e ficha por rubrica
+    ver-como/ ajuda/ login/ nova-senha/ auth/confirm/
+  modules/
+    pessoas/ equipes/ trocas/ materiais/ avaliacao/ gerador/ painel/
+      domain/             tipos e regras puras (testadas com Vitest)
+      infra/              repositorio.ts: consultas Supabase tipadas
+      application/        Server Actions (validação Zod) e consultas compostas
+      ui/                 componentes do módulo
+  shared/
+    db/                   clientes Supabase (servidor/navegador), tipos gerados, erros
+    acao/                 criarAcao(schema, fn), Resultado { ok, erro, desfazer }, campos Zod
+    auth/ lib/            sessão, formatação (fuso de Cuiabá), texto, CSV
+    ui/                   design system: Botao, Campo, Formulario, Modal, Toast, Aviso,
+                          Selo, EstadoVazio, Navegacao, PaletaComandos, Pagina…
+  proxy.ts                renova a sessão e manda para /login quem não está logado
+supabase/migrations/      esquema do banco (Supabase CLI)
+config/rubricas_v2.json   fonte das rubricas → scripts/gerar_rubricas.mjs
 ```
+
+A segurança continua no banco (RLS, triggers e RPCs); as regras repetidas na tela
+(`modules/equipes/domain/permissoes.ts`) só servem para mostrar o que é possível e
+explicar o motivo quando algo está bloqueado.
 
 ## Observações
 

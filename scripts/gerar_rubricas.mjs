@@ -1,12 +1,12 @@
 // Gera src/lib/rubricas.ts a partir do JSON exportado por src/build_cronograma_rubrica.py
-// (fonte da verdade das rubricas do evento). Versão atual: docs/rubricas_v2.json.
+// (fonte da verdade das rubricas do evento). Cópia no repositório: config/rubricas_v2.json.
 //
 // Uso (na pasta datahack-teams):
-//   node scripts/gerar_rubricas.mjs ../docs/rubricas_v2.json src/lib/rubricas.ts
+//   node scripts/gerar_rubricas.mjs
 
 import { readFileSync, writeFileSync } from "node:fs";
 
-const [, , origem = "../docs/rubricas_v2.json", destino = "src/lib/rubricas.ts"] = process.argv;
+const [, , origem = "config/rubricas_v2.json", destino = "src/modules/avaliacao/domain/rubricas.ts"] = process.argv;
 const d = JSON.parse(readFileSync(origem, "utf8"));
 
 // Quem avalia cada rubrica no sistema.

@@ -1,6 +1,6 @@
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { NextResponse, type NextRequest } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { clienteServidor } from "@/shared/db/servidor";
 
 // Destino do link de "esqueci a senha" enviado pelo Supabase.
 // Aceita os dois formatos de link:
@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   // Só redireciona para caminhos internos.
   const destino = nextParam.startsWith("/") && !nextParam.startsWith("//") ? nextParam : "/nova-senha";
 
-  const supabase = await createClient();
+  const supabase = await clienteServidor();
   let ok = false;
 
   if (tokenHash && type) {

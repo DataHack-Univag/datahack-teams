@@ -1,65 +1,63 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { FichaAvaliacao } from "@/components/FichaAvaliacao";
-import { Pagina } from "@/components/Pagina";
-import { avaliacaoEncerrada, carregarAvaliacoes, exigir, SELECT_EQUIPE, sessaoAtual } from "@/lib/dados";
-import { RUBRICAS } from "@/lib/rubricas";
-import { rotuloCategoria, type Equipe } from "@/lib/tipos";
+import { rubricasDaBanca, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
+import { avaliacaoEncerrada, listarFichas } from "@/modules/avaliacao/infra/repositorio";
+import { FichaAvaliacao } from "@/modules/avaliacao/ui/FichaAvaliacao";
+import { liderDa, nomeMembro, rotuloCategoria } from "@/modules/equipes/domain/tipos";
+import { buscarEquipe, listarResumo } from "@/modules/equipes/infra/repositorio";
+import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { BotaoLink } from "@/shared/ui/Botao";
+import { Icone } from "@/shared/ui/Icone";
+import { Pagina } from "@/shared/ui/Pagina";
+import { Selo } from "@/shared/ui/Selo";
 
-// Ficha de avaliação de uma equipe: dados da entrega + uma aba por rubrica da banca.
+// Ficha de avaliação de uma equipe: o que ela entregou + uma aba por rubrica da banca.
 export default async function AvaliarEquipe({ params, searchParams }: PageProps<"/avaliar/[id]">) {
   const { id } = await params;
   const { r } = await searchParams;
-  const { supabase, inscrito, organizador, banca } = await sessaoAtual();
+  const { cliente, usuario, organizador, banca } = await sessaoAtual();
   // Avaliador: só as rubricas da banca dele. Organização: todas (as dela primeiro).
-  const minhas = organizador
-    ? [...RUBRICAS.filter((x) => x.banca === "organizacao"), ...RUBRICAS.filter((x) => x.banca !== "organizacao")]
-    : RUBRICAS.filter((x) => x.banca === banca);
+  const minhas = rubricasDaBanca(banca, organizador);
 
-  const [rEquipe, rTodas, fichas, encerrada] = await Promise.all([
-    supabase.from("equipes").select(SELECT_EQUIPE).eq("id", id).maybeSingle<Equipe>(),
-    supabase.from("equipes").select("id, nome").order("nome").returns<{ id: string; nome: string }[]>(),
-    carregarAvaliacoes(supabase, { equipeId: id, avaliador: inscrito.email }),
-    avaliacaoEncerrada(supabase),
+  const [equipe, todas, fichas, encerrada] = await Promise.all([
+    buscarEquipe(cliente, id),
+    listarResumo(cliente),
+    listarFichas(cliente, { equipeId: id, avaliador: usuario.email }),
+    avaliacaoEncerrada(cliente),
   ]);
-  const equipe = exigir(rEquipe, "equipe");
   if (!equipe) notFound();
-  const todas = exigir(rTodas, "equipes") ?? [];
   const pos = todas.findIndex((e) => e.id === id);
   const anterior = pos > 0 ? todas[pos - 1] : null;
   const proxima = pos >= 0 && pos < todas.length - 1 ? todas[pos + 1] : null;
 
   // Aba escolhida, ou a primeira ainda incompleta.
-  const fichaDe = (rid: string) => fichas?.find((f) => f.rubrica === rid);
-  const incompleta = minhas.find((x) => {
-    const f = fichaDe(x.id);
-    return !f || x.criterios.some((c) => typeof f.notas?.[c.id] !== "number");
-  });
+  const fichaDe = (rid: string) => fichas.find((f) => f.rubrica === rid);
+  const incompleta = minhas.find((x) => situacaoFicha(x, fichaDe(x.id)?.notas) !== "completa");
   const rubrica = minhas.find((x) => x.id === r) ?? incompleta ?? minhas[0];
   const ficha = fichaDe(rubrica.id);
-  const lider = equipe.membros.find((m) => m.email === equipe.lider_email);
+  const lider = liderDa(equipe);
 
   return (
     <Pagina>
-      <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
-        <Link href="/avaliar" className="text-marca">
-          ← Todas as equipes
+      <nav aria-label="Navegar entre equipes" className="flex flex-wrap items-center justify-between gap-2 text-sm">
+        <Link href="/avaliar" className="inline-flex items-center gap-1 text-marca">
+          <Icone nome="voltar" className="size-4" /> Todas as equipes
         </Link>
         <div className="flex gap-2">
           {anterior && (
-            <Link href={`/avaliar/${anterior.id}?r=${rubrica.id}`} className="btn-secundario min-h-9 px-3 text-xs">
-              ← {anterior.nome}
-            </Link>
+            <BotaoLink href={`/avaliar/${anterior.id}?r=${rubrica.id}`} tamanho="pequeno" icone="voltar">
+              {anterior.nome}
+            </BotaoLink>
           )}
           {proxima && (
-            <Link href={`/avaliar/${proxima.id}?r=${rubrica.id}`} className="btn-secundario min-h-9 px-3 text-xs">
-              {proxima.nome} →
-            </Link>
+            <BotaoLink href={`/avaliar/${proxima.id}?r=${rubrica.id}`} tamanho="pequeno">
+              {proxima.nome} <Icone nome="avancar" className="size-4" />
+            </BotaoLink>
           )}
         </div>
-      </div>
+      </nav>
 
-      {/* ------------------------------------------------ o que a equipe entregou */}
+      {/* O que a equipe entregou */}
       <section className="card faixa-topo space-y-3">
         <div>
           <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Equipe avaliada</p>
@@ -67,97 +65,73 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
             <span className="grad-text">{equipe.nome}</span>
           </h1>
           <p className="mt-1 text-xs text-suave">
-            {equipe.membros.map((m) => m.inscritos?.nome ?? m.email).join(", ") || "sem integrantes"}
-            {lider && ` · ★ Líder: ${lider.inscritos?.nome ?? lider.email}`}
+            {equipe.membros.map(nomeMembro).join(", ") || "sem integrantes"}
+            {lider && ` · ★ Líder: ${nomeMembro(lider)}`}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           {equipe.repo_github ? (
-            <a
-              href={equipe.repo_github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secundario min-h-9 max-w-full px-3 text-xs"
-            >
-              <span className="truncate">GitHub ↗ {equipe.repo_github.replace("https://github.com/", "")}</span>
-            </a>
+            <BotaoLink href={equipe.repo_github} externo tamanho="pequeno" icone="github" className="max-w-full">
+              <span className="truncate">{equipe.repo_github.replace("https://github.com/", "")}</span>
+            </BotaoLink>
           ) : (
-            <span className="selo bg-amber-500/15 text-amber-800 dark:text-amber-300">sem repositório</span>
+            <Selo tom="alerta">sem repositório</Selo>
           )}
           {equipe.links.map((l) => (
-            <a
-              key={l.id}
-              href={l.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-secundario min-h-9 max-w-full px-3 text-xs"
-              title={l.url}
-            >
+            <BotaoLink key={l.id} href={l.url} externo tamanho="pequeno" icone="link" className="max-w-full" title={l.url}>
               <span className="truncate">
-                {rotuloCategoria(l.categoria)} ↗{l.titulo ? ` ${l.titulo}` : ""}
+                {rotuloCategoria(l.categoria)}
+                {l.titulo ? ` · ${l.titulo}` : ""}
               </span>
-            </a>
+            </BotaoLink>
           ))}
         </div>
       </section>
 
-      {fichas === null ? (
-        <p className="card text-sm text-suave">
-          Rode <code>supabase/008_avaliacao.sql</code> no Supabase para ativar as fichas.
-        </p>
-      ) : (
-        <>
-          {/* ------------------------------------------------ abas das rubricas */}
-          {minhas.length > 1 && (
-            <nav className="flex flex-wrap gap-2" aria-label="Rubricas">
-              {minhas.map((x) => {
-                const f = fichaDe(x.id);
-                const ok = f && x.criterios.every((c) => typeof f.notas?.[c.id] === "number");
-                const ativa = x.id === rubrica.id;
-                return (
-                  <Link
-                    key={x.id}
-                    href={`/avaliar/${id}?r=${x.id}`}
-                    aria-current={ativa ? "page" : undefined}
-                    className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
-                      ativa
-                        ? "border-transparent text-white [background:var(--grad)]"
-                        : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground"
-                    }`}
-                  >
-                    {x.curto}
-                    {organizador && x.banca !== "organizacao" && (
-                      <span className="ml-1 text-[10px] font-normal opacity-75">
-                        ({x.banca === "professores" ? "professores" : "negócio"})
-                      </span>
-                    )}{" "}
-                    {ok ? "✔" : ""}
-                  </Link>
-                );
-              })}
-            </nav>
-          )}
-
-          <div>
-            <h2 className="text-xl font-bold">{rubrica.nome}</h2>
-            <p className="text-sm text-suave">
-              {rubrica.pesoFinal}% da nota final · Banca: {rubrica.bancaTexto} · Quando: {rubrica.momento}
-            </p>
-          </div>
-
-          <FichaAvaliacao
-            key={`${id}-${rubrica.id}-${ficha?.atualizado_em ?? "nova"}`}
-            rubrica={rubrica}
-            equipeId={id}
-            equipeNome={equipe.nome}
-            notasIniciais={ficha?.notas ?? {}}
-            comentarioInicial={ficha?.comentario ?? ""}
-            salvoEm={ficha?.atualizado_em ?? null}
-            voltarAoSalvar={!organizador}
-            bloqueada={encerrada && !organizador}
-          />
-        </>
+      {/* Abas das rubricas */}
+      {minhas.length > 1 && (
+        <nav className="flex flex-wrap gap-2" aria-label="Rubricas">
+          {minhas.map((x) => {
+            const ok = situacaoFicha(x, fichaDe(x.id)?.notas) === "completa";
+            const ativa = x.id === rubrica.id;
+            return (
+              <Link
+                key={x.id}
+                href={`/avaliar/${id}?r=${x.id}`}
+                aria-current={ativa ? "page" : undefined}
+                className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition ${
+                  ativa ? "border-transparent text-white [background:var(--grad)]" : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground"
+                }`}
+              >
+                {x.curto}
+                {organizador && x.banca !== "organizacao" && (
+                  <span className="ml-1 text-[10px] font-normal opacity-75">({x.banca === "professores" ? "professores" : "negócio"})</span>
+                )}
+                {ok && <span className="ml-1" aria-label="completa">✔</span>}
+              </Link>
+            );
+          })}
+        </nav>
       )}
+
+      <div>
+        <h2 className="text-xl font-bold">{rubrica.nome}</h2>
+        <p className="text-sm text-suave">
+          {rubrica.pesoFinal}% da nota final · Banca: {rubrica.bancaTexto} · Quando: {rubrica.momento}
+        </p>
+      </div>
+
+      <FichaAvaliacao
+        key={`${id}-${rubrica.id}-${ficha?.atualizado_em ?? "nova"}`}
+        rubrica={rubrica}
+        equipeId={id}
+        equipeNome={equipe.nome}
+        notasIniciais={ficha?.notas ?? {}}
+        comentarioInicial={ficha?.comentario ?? ""}
+        salvoEm={ficha?.atualizado_em ?? null}
+        voltarAoSalvar={!organizador}
+        bloqueada={encerrada && !organizador}
+      />
     </Pagina>
   );
 }

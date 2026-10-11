@@ -1,4 +1,4 @@
-import { NovaSenha } from "@/components/NovaSenha";
+import { NovaSenha } from "@/modules/pessoas/ui/NovaSenha";
 
 // Aberta pelo link de "esqueci a senha": o usuário já chega com sessão de recuperação.
 export default function PaginaNovaSenha() {

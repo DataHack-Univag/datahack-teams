@@ -1,48 +1,36 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
-import { excluirEquipe } from "@/app/actions";
-import { BotaoEnviar, Formulario } from "@/components/Formulario";
-import { Pagina } from "@/components/Pagina";
-import { PainelEquipe } from "@/components/PainelEquipe";
-import { carregarConfiguracao, carregarEquipe, carregarSemEquipe, sessaoAtual } from "@/lib/dados";
+import { buscarEquipe, lerConfiguracao } from "@/modules/equipes/infra/repositorio";
+import { ExcluirEquipe } from "@/modules/equipes/ui/FormulariosOrganizacao";
+import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
+import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
+import { BotaoLink } from "@/shared/ui/Botao";
+import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
-// Página de uma equipe vista pela organização (pode editar qualquer equipe).
+// Uma equipe vista pela organização (pode editar tudo).
 export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/[id]">) {
   const { id } = await params;
-  const { supabase, inscrito } = await sessaoAtual();
-
-  const [equipe, disponiveis, config] = await Promise.all([
-    carregarEquipe(supabase, id),
-    carregarSemEquipe(supabase),
-    carregarConfiguracao(supabase),
-  ]);
+  const { cliente, usuario } = await sessaoAtual();
+  const [equipe, disponiveis, config] = await Promise.all([buscarEquipe(cliente, id), listarSemEquipe(cliente), lerConfiguracao(cliente)]);
   if (!equipe) notFound();
 
   return (
     <Pagina estreita>
-      <Link href="/admin" className="text-sm text-marca">
-        ← Voltar às equipes
-      </Link>
-
-      <PainelEquipe
-        equipe={equipe}
-        disponiveis={disponiveis}
-        config={config}
-        meuEmail={inscrito.email}
-        organizador
+      <CabecalhoPagina
+        trilha={[
+          { rotulo: "Organização", href: "/admin" },
+          { rotulo: "Equipes", href: "/admin/equipes" },
+          { rotulo: equipe.nome },
+        ]}
+        titulo="Gerenciar equipe"
+        acoes={
+          <BotaoLink href={`/avaliar/${equipe.id}`} icone="avaliacao" tamanho="pequeno">
+            Avaliar esta equipe
+          </BotaoLink>
+        }
       />
-
-      <section className="card space-y-2 border-red-400/40">
-        <h2 className="font-semibold text-red-600 dark:text-red-400">Zona de perigo</h2>
-        <Formulario
-          action={excluirEquipe}
-          confirmar={`Excluir a equipe "${equipe.nome}"? Os integrantes ficam sem equipe e os links são apagados.`}
-          rotuloConfirmar="Excluir equipe"
-        >
-          <input type="hidden" name="id" value={equipe.id} />
-          <BotaoEnviar className="btn-perigo">Excluir equipe</BotaoEnviar>
-        </Formulario>
-      </section>
+      <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={config} meuEmail={usuario.email} organizador rotulo="Equipe" />
+      <ExcluirEquipe equipe={equipe} />
     </Pagina>
   );
 }
