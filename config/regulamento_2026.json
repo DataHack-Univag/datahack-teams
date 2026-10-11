@@ -1,0 +1,882 @@
+{
+  "versao": 1,
+  "bancas": [
+    {
+      "codigo": "professores",
+      "nome": "Banca de professores de tecnologia",
+      "da_organizacao": false
+    },
+    {
+      "codigo": "organizacao",
+      "nome": "Organizadores (avaliação técnica)",
+      "da_organizacao": true
+    },
+    {
+      "codigo": "negocio",
+      "nome": "Jurados de negócio (3)",
+      "da_organizacao": false
+    }
+  ],
+  "niveis": [
+    {
+      "nome": "Insuficiente",
+      "fator": 0
+    },
+    {
+      "nome": "Básico",
+      "fator": 0.5
+    },
+    {
+      "nome": "Proficiente",
+      "fator": 0.8
+    },
+    {
+      "nome": "Excelente",
+      "fator": 1
+    }
+  ],
+  "fases": [
+    {
+      "codigo": "F1",
+      "nome": "Fase 1 · Exploração e estratégia",
+      "peso": 15
+    },
+    {
+      "codigo": "F2",
+      "nome": "Fase 2 · Ingestão e protótipo",
+      "peso": 20
+    },
+    {
+      "codigo": "F3",
+      "nome": "Fase 3 · Repositório final",
+      "peso": 25
+    },
+    {
+      "codigo": "NEG",
+      "nome": "Negócio · Pitch final",
+      "peso": 40
+    }
+  ],
+  "rubricas": [
+    {
+      "codigo": "F1_PITCH",
+      "fase": "F1",
+      "banca": "professores",
+      "parte": "pitch",
+      "nome": "Fase 1 · Pitch · Exploração e estratégia",
+      "curto": "F1 · Pitch",
+      "peso_final": 6,
+      "momento": "10:45–11:45, pitch de 3 + 2 min",
+      "criterios": [
+        {
+          "codigo": "problema",
+          "nome": "Entendimento do desafio",
+          "peso": 20,
+          "descricao": "A equipe explica com as próprias palavras o que vai responder e por que isso importa.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não sabe dizer o que vai responder."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Repete o enunciado, sem mostrar entendimento."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Explica o problema e quais perguntas vai atacar primeiro."
+            },
+            {
+              "fator": 1,
+              "descricao": "Explica o problema, prioriza as perguntas e diz o que espera encontrar."
+            }
+          ]
+        },
+        {
+          "codigo": "escolhas",
+          "nome": "Justificativa das escolhas",
+          "peso": 25,
+          "descricao": "Consegue explicar, em linguagem clara, por que escolheu o banco, as ferramentas e a forma de organizar os dados.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não justifica (“porque sim”, “porque a IA sugeriu”)."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Justificativa genérica, sem ligação com os dados do desafio."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Justifica cada escolha pelo volume, formato dos arquivos ou facilidade da equipe."
+            },
+            {
+              "fator": 1,
+              "descricao": "Compara alternativas e explica o que perdeu e o que ganhou com cada escolha."
+            }
+          ]
+        },
+        {
+          "codigo": "raciocinio",
+          "nome": "Raciocínio sobre os dados",
+          "peso": 25,
+          "descricao": "O que a equipe descobriu olhando os arquivos e que riscos ou armadilhas já percebeu.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Ainda não olhou os dados."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Descreve os arquivos, sem tirar conclusão."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Aponta o que cada base tem, como elas se ligam e ao menos uma dificuldade."
+            },
+            {
+              "fator": 1,
+              "descricao": "Antecipa armadilhas concretas e diz como vai lidar com cada uma."
+            }
+          ]
+        },
+        {
+          "codigo": "plano",
+          "nome": "Plano para as próximas fases",
+          "peso": 15,
+          "descricao": "O plano é realista para o tempo do evento e está dividido entre os integrantes.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem plano."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Plano vago ou irreal para o tempo."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Plano claro, com etapas e responsáveis."
+            },
+            {
+              "fator": 1,
+              "descricao": "Plano claro, priorizado e com plano B se algo der errado."
+            }
+          ]
+        },
+        {
+          "codigo": "comunicacao",
+          "nome": "Comunicação e domínio da equipe",
+          "peso": 15,
+          "descricao": "Clareza, uso do tempo e segurança nas respostas; o domínio é da equipe, não de uma pessoa só.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não se entende ou estoura o tempo."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Compreensível, mas confuso ou dependente de uma pessoa."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Claro, no tempo, responde bem às perguntas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Claro e seguro; qualquer integrante responde."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "F1_MESA",
+      "fase": "F1",
+      "banca": "organizacao",
+      "parte": "mesa",
+      "nome": "Fase 1 · Mesa · Ambiente, exploração e estratégia",
+      "curto": "F1 · Mesa",
+      "peso_final": 9,
+      "momento": "10:45–11:45, ~5 min na mesa + commit da Entrega 1",
+      "criterios": [
+        {
+          "codigo": "ambiente",
+          "nome": "Ambiente e repositório",
+          "peso": 15,
+          "descricao": "Montado no laboratório às 8h: repositório público com todos como colaboradores, estrutura inicial, banco escolhido instalado (local ou nuvem).",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem repositório funcional ou equipe sem acesso."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Repositório existe, mas sem estrutura ou faltando integrantes."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Repositório organizado, todos com acesso, banco instalado e acessível."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, .gitignore correto (dados fora do Git) e README inicial com o plano."
+            }
+          ]
+        },
+        {
+          "codigo": "fontes",
+          "nome": "Entendimento das fontes",
+          "peso": 30,
+          "descricao": "Identificou arquivos principais × cópias/apoio, formatos, dicionários, chaves e granularidade.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não sabe o que há nos zips nem qual arquivo usar."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Sabe quais arquivos usar, mas não percebeu formatos/granularidade."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Formatos (CSV ; latin-1, xlsx com cabeçalho fora da 1ª linha), chave CO_CURSO e granularidade (coorte; EAD por polo) entendidos."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, aponta armadilhas (EAD duplicada por polo, coortes com tempos diferentes, valores que saltam num ano) antes de ingerir."
+            }
+          ]
+        },
+        {
+          "codigo": "exploratoria",
+          "nome": "Análise exploratória",
+          "peso": 25,
+          "descricao": "Volumes, tipos, nulos, distribuições e anomalias iniciais, com evidência no repositório.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não fez exploração."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Contou linhas/colunas, sem olhar qualidade."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Tipos, nulos, valores suprimidos (--, SC) e distribuições das variáveis-chave."
+            },
+            {
+              "fator": 1,
+              "descricao": "Exploração orientada às perguntas, com hipóteses e anomalias registradas."
+            }
+          ]
+        },
+        {
+          "codigo": "estrategia",
+          "nome": "Estratégia de ingestão e transformação",
+          "peso": 30,
+          "descricao": "Banco/ferramenta, camadas, idempotência planejada, tipos e plano de junções, documentados (ex.: docs/estrategia.md).",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem estratégia."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Estratégia genérica (“vamos jogar no banco”)."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Camadas (bruto → tratado → analítico), tipos (códigos como texto) e junções planejados."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, idempotência explícita (como reexecutar sem duplicar), controle de carga e estimativa de volume."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "F2_PITCH",
+      "fase": "F2",
+      "banca": "professores",
+      "parte": "pitch",
+      "nome": "Fase 2 · Pitch · Ingestão, transformação e protótipo",
+      "curto": "F2 · Pitch",
+      "peso_final": 8,
+      "momento": "14:15–15:15, pitch de 3 + 2 min",
+      "criterios": [
+        {
+          "codigo": "evolucao",
+          "nome": "Evolução desde a Fase 1",
+          "peso": 15,
+          "descricao": "O que mudou no plano, o que deu errado e como a equipe resolveu.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não sabe dizer o que fez desde a Fase 1."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Lista o que fez, sem refletir."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Mostra o avanço e explica os ajustes de rota."
+            },
+            {
+              "fator": 1,
+              "descricao": "Mostra o avanço, explica os ajustes e o que aprendeu com eles."
+            }
+          ]
+        },
+        {
+          "codigo": "pipeline",
+          "nome": "Explicação do pipeline",
+          "peso": 25,
+          "descricao": "Explica, sem jargão desnecessário, o caminho do arquivo baixado até a tabela que responde às perguntas.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não consegue explicar."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Explica partes soltas, sem o caminho completo."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Explica o caminho completo, em ordem, de forma compreensível."
+            },
+            {
+              "fator": 1,
+              "descricao": "Explica o caminho completo e como garante que os números estão certos."
+            }
+          ]
+        },
+        {
+          "codigo": "respostas",
+          "nome": "Primeiras respostas",
+          "peso": 25,
+          "descricao": "Já existem números que respondem a alguma pergunta, com fonte e cuidado na interpretação.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Nenhum número."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Números sem dizer de onde vêm ou o que significam."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Números para pelo menos 2 perguntas, com fonte e interpretação correta."
+            },
+            {
+              "fator": 1,
+              "descricao": "Números para a maioria das perguntas, com ressalvas (associação ≠ causa, anual × turma)."
+            }
+          ]
+        },
+        {
+          "codigo": "dashboard",
+          "nome": "Plano do dashboard",
+          "peso": 20,
+          "descricao": "O que o dashboard vai mostrar, para quem, e por que esses gráficos.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem plano."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Plano genérico (“vamos fazer uns gráficos”)."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Plano organizado pelas perguntas, com o público definido."
+            },
+            {
+              "fator": 1,
+              "descricao": "Plano claro, com rascunho ou protótipo e escolhas de visualização justificadas."
+            }
+          ]
+        },
+        {
+          "codigo": "comunicacao",
+          "nome": "Comunicação e domínio da equipe",
+          "peso": 15,
+          "descricao": "Clareza, uso do tempo e segurança nas respostas; o domínio é da equipe, não de uma pessoa só.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não se entende ou estoura o tempo."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Compreensível, mas confuso ou dependente de uma pessoa."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Claro, no tempo, responde bem às perguntas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Claro e seguro; qualquer integrante responde."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "F2_MESA",
+      "fase": "F2",
+      "banca": "organizacao",
+      "parte": "mesa",
+      "nome": "Fase 2 · Mesa · Ingestão, transformação e protótipo",
+      "curto": "F2 · Mesa",
+      "peso_final": 12,
+      "momento": "14:15–15:15, ~5 min na mesa + commit da Entrega 2",
+      "criterios": [
+        {
+          "codigo": "ingestao",
+          "nome": "Ingestão implementada",
+          "peso": 25,
+          "descricao": "Carga automatizada das bases necessárias no banco escolhido, vista funcionando na mesa.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem ingestão, ou feita à mão (copiar/colar, importação manual)."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Parte das bases carregada, com passos manuais."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Todas as bases necessárias carregadas por código, com encoding e cabeçalho corretos."
+            },
+            {
+              "fator": 1,
+              "descricao": "Carga parametrizada, registro do que foi carregado (log/controle) e tratamento de erros."
+            }
+          ]
+        },
+        {
+          "codigo": "idempotencia",
+          "nome": "Idempotência",
+          "peso": 20,
+          "descricao": "Rodar a carga/transformação de novo não duplica nem altera o resultado.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Reexecutar duplica linhas ou quebra."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Funciona só apagando tudo à mão antes."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Reexecução segura (truncate-and-load, upsert ou controle de arquivos carregados)."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, demonstrou na mesa: rodou duas vezes e conferiu contagens iguais."
+            }
+          ]
+        },
+        {
+          "codigo": "transformacao",
+          "nome": "Transformação e qualidade",
+          "peso": 25,
+          "descricao": "Limpeza, filtros, junções e checagens.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Erros que mudam o resultado (códigos como número, nulos como zero, EAD somada sem agregar)."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Limpeza correta, mas sem checagens (taxa de junção, linhas antes/depois)."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Filtro de graduação, agregação por curso, junções com taxa de match, células < 10 suprimidas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, trata anomalias e tem checagens automatizadas."
+            }
+          ]
+        },
+        {
+          "codigo": "modelagem",
+          "nome": "Modelagem e arquitetura",
+          "peso": 15,
+          "descricao": "Como os dados estão organizados para responder às perguntas.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Tudo numa tabela só, sem critério."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Tabelas separadas, sem lógica clara."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Camadas definidas e modelo analítico que atende às perguntas (ex.: fatos por curso/coorte)."
+            },
+            {
+              "fator": 1,
+              "descricao": "Modelo justificado (granularidade, chaves), documentado em docs/arquitetura.md."
+            }
+          ]
+        },
+        {
+          "codigo": "prototipo",
+          "nome": "Protótipo ligado aos dados",
+          "peso": 15,
+          "descricao": "O protótipo mostrado no pitch lê de fato das tabelas transformadas.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem protótipo."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Protótipo com números digitados ou de planilha à parte."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Protótipo lê das tabelas do pipeline para pelo menos 2 perguntas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Protótipo ligado ao pipeline cobrindo a maioria das perguntas."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "F3_REPO",
+      "fase": "F3",
+      "banca": "organizacao",
+      "parte": "mesa",
+      "nome": "Fase 3 · Repositório final e uso de IA",
+      "curto": "F3 · Repositório",
+      "peso_final": 25,
+      "momento": "Em paralelo ao pitch final (17:15–19:15), no commit das 17:00",
+      "criterios": [
+        {
+          "codigo": "reprodutibilidade",
+          "nome": "Reprodutibilidade de ponta a ponta",
+          "peso": 20,
+          "descricao": "Seguindo o README, alguém de fora roda do zero e chega aos mesmos números.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Não roda."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Roda com ajustes (caminhos absolutos, dependências faltando, ordem não documentada)."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Roda do zero seguindo o README, e gera as extrações em outputs/ que alimentam o dashboard."
+            },
+            {
+              "fator": 1,
+              "descricao": "Um comando (ou ordem numerada) roda tudo, do download ao dashboard; dependências fixadas; saídas determinísticas."
+            }
+          ]
+        },
+        {
+          "codigo": "codigo",
+          "nome": "Qualidade do código e da arquitetura",
+          "peso": 20,
+          "descricao": "Organização, legibilidade, separação de etapas, coerência com a estratégia.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Ilegível ou um notebook caótico."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Organizado em partes, com muita repetição."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Etapas separadas, nomes claros, comentários onde importa."
+            },
+            {
+              "fator": 1,
+              "descricao": "Modular, limpo, coerente com a arquitetura documentada."
+            }
+          ]
+        },
+        {
+          "codigo": "corretude",
+          "nome": "Corretude das respostas",
+          "peso": 20,
+          "descricao": "Os números do dashboard conferem com o código e com o gabarito da organização.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Números errados ou não rastreáveis no código."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Ordem de grandeza certa, erros de método."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Números corretos para as perguntas obrigatórias."
+            },
+            {
+              "fator": 1,
+              "descricao": "Corretos, incluindo bônus, com ressalvas metodológicas bem colocadas."
+            }
+          ]
+        },
+        {
+          "codigo": "ia",
+          "nome": "Uso de IA e domínio técnico",
+          "peso": 25,
+          "descricao": "Pasta prompts/ completa e o que as conversas mostram sobre o conhecimento do aluno.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem pasta prompts/, conversas omitidas, ou só pedidos de “faz pra mim”."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Conversas presentes, mas o aluno só aceita respostas, sem demonstrar entendimento."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Conversas mostram o aluno usando conceitos certos (ingestão, idempotência, chaves, camadas) e conferindo o que a IA gera."
+            },
+            {
+              "fator": 1,
+              "descricao": "Aluno conduz a IA com domínio: compara abordagens, discute arquitetura, corrige erros da IA e registra as decisões."
+            }
+          ]
+        },
+        {
+          "codigo": "documentacao",
+          "nome": "Validação e documentação",
+          "peso": 15,
+          "descricao": "Checagens, dicionário das variáveis criadas e decisões registradas.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem documentação."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "README mínimo."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "README completo, variáveis derivadas explicadas, checagens registradas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Além disso, decisões e limitações documentadas e testes/asserts no código."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "codigo": "NEG",
+      "fase": "NEG",
+      "banca": "negocio",
+      "parte": "negocio",
+      "nome": "Negócio · Pitch final",
+      "curto": "Negócio",
+      "peso_final": 40,
+      "momento": "Pitch final (17:15–19:15)",
+      "criterios": [
+        {
+          "codigo": "respondeu",
+          "nome": "Respondeu às perguntas",
+          "peso": 30,
+          "descricao": "As perguntas do desafio (P1–P5) foram respondidas de forma direta, com número e fonte?",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Respondeu 0–1 pergunta, ou falou do tema sem responder."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Respondeu 2–3 perguntas."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Respondeu as 5 obrigatórias."
+            },
+            {
+              "fator": 1,
+              "descricao": "Respondeu as 5 obrigatórias e ao menos 1 bônus (B1/B2)."
+            }
+          ]
+        },
+        {
+          "codigo": "solidez",
+          "nome": "Clareza e solidez das respostas",
+          "peso": 20,
+          "descricao": "As respostas são claras, convincentes e mostram de onde vem cada número?",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Respostas vagas ou contraditórias."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Respostas claras, mas sem mostrar de onde vêm."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Claras e sustentadas por dados, com limitações citadas."
+            },
+            {
+              "fator": 1,
+              "descricao": "Muito claras, sustentadas e com a dúvida certa levantada (o que os dados não dizem)."
+            }
+          ]
+        },
+        {
+          "codigo": "dashboard",
+          "nome": "Dashboard e visualização",
+          "peso": 20,
+          "descricao": "O dashboard é fácil de entender, ajuda a responder às perguntas e funciona na sala da banca?",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Confuso, ou não abriu na sala da banca (só o plano B salvou parte)."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Funciona, mas é difícil de ler."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Claro, organizado pelas perguntas, gráficos adequados."
+            },
+            {
+              "fator": 1,
+              "descricao": "Claro, bonito e útil; dá vontade de usar."
+            }
+          ]
+        },
+        {
+          "codigo": "valor",
+          "nome": "Valor e recomendações",
+          "peso": 20,
+          "descricao": "O que um gestor (IES, governo) faria com isso?",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Sem recomendação."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Recomendações genéricas."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Pelo menos uma recomendação concreta, ligada aos achados."
+            },
+            {
+              "fator": 1,
+              "descricao": "Recomendações priorizadas, viáveis e com público definido."
+            }
+          ]
+        },
+        {
+          "codigo": "comunicacao",
+          "nome": "Comunicação",
+          "peso": 10,
+          "descricao": "Narrativa no tempo e segurança nas respostas à banca.",
+          "niveis": [
+            {
+              "fator": 0,
+              "descricao": "Estoura o tempo ou não se entende."
+            },
+            {
+              "fator": 0.5,
+              "descricao": "Compreensível, desorganizado."
+            },
+            {
+              "fator": 0.8,
+              "descricao": "Clara, no tempo, responde bem."
+            },
+            {
+              "fator": 1,
+              "descricao": "Envolvente; todo o time domina o trabalho."
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "penalidades": [
+    {
+      "codigo": "causalidade",
+      "texto": "Afirmar causalidade (“X causa evasão”) em vez de associação.",
+      "pontos": -5
+    },
+    {
+      "codigo": "celulas",
+      "texto": "Expor células com menos de 10 alunos em tabela ou gráfico.",
+      "pontos": -3
+    },
+    {
+      "codigo": "acesso",
+      "texto": "Repositório ou link do pitch sem acesso na hora da entrega (10 min de tolerância para corrigir).",
+      "pontos": -5
+    },
+    {
+      "codigo": "planob",
+      "texto": "Entrega final sem plano B (PDF/vídeo do dashboard).",
+      "pontos": -3
+    },
+    {
+      "codigo": "tempo",
+      "texto": "Estourar em mais de 1 min o tempo do pitch final.",
+      "pontos": -2
+    }
+  ],
+  "desempate": [
+    {
+      "descricao": "Maior nota na rubrica F3 · Repositório final.",
+      "tipo": "rubrica",
+      "rubrica": "F3_REPO"
+    },
+    {
+      "descricao": "Maior nota em “Respondeu às perguntas” (Negócio).",
+      "tipo": "criterio",
+      "rubrica": "NEG",
+      "criterio": "respondeu"
+    },
+    {
+      "descricao": "Maior nota em “Idempotência” (F2 · Mesa).",
+      "tipo": "criterio",
+      "rubrica": "F2_MESA",
+      "criterio": "idempotencia"
+    },
+    {
+      "descricao": "Persistindo, decisão conjunta das bancas.",
+      "tipo": "manual"
+    }
+  ],
+  "formula": "Nota final = 6% × F1_PITCH + 9% × F1_MESA + 8% × F2_PITCH + 12% × F2_MESA + 25% × F3_REPO + 40% × NEG + penalidades",
+  "desclassificacao": "Sem entrega final até 17:00, plágio entre equipes ou dados que não sejam públicos."
+}

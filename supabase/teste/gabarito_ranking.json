@@ -1,0 +1,858 @@
+[
+  {
+    "posicao": 1,
+    "equipe": "00000000-0000-4000-8000-000000000002",
+    "final": 66.09083333333334,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      61.5,
+      0.6666666666666666,
+      0.25
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 54.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0,
+          "escolhas": 0.9,
+          "raciocinio": 0.65,
+          "plano": 0.25,
+          "comunicacao": 0.8
+        }
+      },
+      "F1_MESA": {
+        "nota": 63.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 1,
+          "fontes": 0.4,
+          "exploratoria": 0.25,
+          "estrategia": 1
+        }
+      },
+      "F2_PITCH": {
+        "nota": 71,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.25,
+          "pipeline": 1,
+          "respostas": 0.65,
+          "dashboard": 1,
+          "comunicacao": 0.4
+        }
+      },
+      "F2_MESA": {
+        "nota": 69.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 1,
+          "idempotencia": 0.25,
+          "transformacao": 0.65,
+          "modelagem": 0.75,
+          "prototipo": 0.8
+        }
+      },
+      "F3_REPO": {
+        "nota": 61.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.4,
+          "codigo": 0.75,
+          "corretude": 0.75,
+          "ia": 0.4,
+          "documentacao": 0.9
+        }
+      },
+      "NEG": {
+        "nota": 69.33333333333334,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.6666666666666666,
+          "solidez": 0.8333333333333334,
+          "dashboard": 0.5,
+          "valor": 0.9333333333333332,
+          "comunicacao": 0.4
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 59.75,
+        "pontos": 8.9625,
+        "completa": true
+      },
+      "F2": {
+        "nota": 70.1,
+        "pontos": 14.02,
+        "completa": true
+      },
+      "F3": {
+        "nota": 61.5,
+        "pontos": 15.375,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 69.33333333333334,
+        "pontos": 27.733333333333338,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 2,
+    "equipe": "00000000-0000-4000-8000-000000000001",
+    "final": 62.23166666666667,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      70.25,
+      0.5,
+      0.8
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 67.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.75,
+          "escolhas": 0.8,
+          "raciocinio": 0.75,
+          "plano": 0.5,
+          "comunicacao": 0.4
+        }
+      },
+      "F1_MESA": {
+        "nota": 61.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 0.65,
+          "fontes": 0.5,
+          "exploratoria": 0.4,
+          "estrategia": 0.9
+        }
+      },
+      "F2_PITCH": {
+        "nota": 59.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.9,
+          "pipeline": 0.65,
+          "respostas": 0.4,
+          "dashboard": 0.4,
+          "comunicacao": 0.8
+        }
+      },
+      "F2_MESA": {
+        "nota": 60.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.65,
+          "idempotencia": 0.8,
+          "transformacao": 0.25,
+          "modelagem": 0.65,
+          "prototipo": 0.8
+        }
+      },
+      "F3_REPO": {
+        "nota": 70.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.4,
+          "codigo": 0.5,
+          "corretude": 1,
+          "ia": 0.9,
+          "documentacao": 0.65
+        }
+      },
+      "NEG": {
+        "nota": 57.666666666666664,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.5,
+          "solidez": 0.5333333333333333,
+          "dashboard": 0.7000000000000001,
+          "valor": 0.6,
+          "comunicacao": 0.6
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 63.95000000000001,
+        "pontos": 9.592500000000001,
+        "completa": true
+      },
+      "F2": {
+        "nota": 60.05000000000001,
+        "pontos": 12.010000000000002,
+        "completa": true
+      },
+      "F3": {
+        "nota": 70.25,
+        "pontos": 17.5625,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 57.666666666666664,
+        "pontos": 23.066666666666666,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 3,
+    "equipe": "00000000-0000-4000-8000-000000000007",
+    "final": 59.62166666666667,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      78.5,
+      0.6666666666666666,
+      0.4
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 42.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.65,
+          "escolhas": 0.65,
+          "raciocinio": 0,
+          "plano": 0.9,
+          "comunicacao": 0
+        }
+      },
+      "F1_MESA": {
+        "nota": 34.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 1,
+          "fontes": 0.65,
+          "exploratoria": 0,
+          "estrategia": 0
+        }
+      },
+      "F2_PITCH": {
+        "nota": 47.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 1,
+          "pipeline": 0,
+          "respostas": 0.5,
+          "dashboard": 0.4,
+          "comunicacao": 0.8
+        }
+      },
+      "F2_MESA": {
+        "nota": 45.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.65,
+          "idempotencia": 0.4,
+          "transformacao": 0.25,
+          "modelagem": 0.5,
+          "prototipo": 0.5
+        }
+      },
+      "F3_REPO": {
+        "nota": 78.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.75,
+          "codigo": 0.75,
+          "corretude": 0.8,
+          "ia": 1,
+          "documentacao": 0.5
+        }
+      },
+      "NEG": {
+        "nota": 62.666666666666664,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.6666666666666666,
+          "solidez": 0.3333333333333333,
+          "dashboard": 1,
+          "valor": 0.5,
+          "comunicacao": 0.6
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 37.8,
+        "pontos": 5.67,
+        "completa": true
+      },
+      "F2": {
+        "nota": 46.3,
+        "pontos": 9.26,
+        "completa": true
+      },
+      "F3": {
+        "nota": 78.5,
+        "pontos": 19.625,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 62.666666666666664,
+        "pontos": 25.066666666666666,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 4,
+    "equipe": "00000000-0000-4000-8000-000000000005",
+    "final": 59.035,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      68,
+      0.43333333333333335,
+      1
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 61.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.4,
+          "escolhas": 0.4,
+          "raciocinio": 1,
+          "plano": 0.5,
+          "comunicacao": 0.75
+        }
+      },
+      "F1_MESA": {
+        "nota": 67,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 1,
+          "fontes": 0,
+          "exploratoria": 1,
+          "estrategia": 0.9
+        }
+      },
+      "F2_PITCH": {
+        "nota": 72,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.5,
+          "pipeline": 0.9,
+          "respostas": 0.8,
+          "dashboard": 0.5,
+          "comunicacao": 0.8
+        }
+      },
+      "F2_MESA": {
+        "nota": 64.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.8,
+          "idempotencia": 1,
+          "transformacao": 0.5,
+          "modelagem": 0.4,
+          "prototipo": 0.4
+        }
+      },
+      "F3_REPO": {
+        "nota": 68,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 1,
+          "codigo": 1,
+          "corretude": 0.4,
+          "ia": 0.65,
+          "documentacao": 0.25
+        }
+      },
+      "NEG": {
+        "nota": 47,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.43333333333333335,
+          "solidez": 0.16666666666666666,
+          "dashboard": 0.6666666666666666,
+          "valor": 0.6,
+          "comunicacao": 0.5333333333333333
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 64.9,
+        "pontos": 9.735,
+        "completa": true
+      },
+      "F2": {
+        "nota": 67.5,
+        "pontos": 13.5,
+        "completa": true
+      },
+      "F3": {
+        "nota": 68,
+        "pontos": 17,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 47,
+        "pontos": 18.8,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 5,
+    "equipe": "00000000-0000-4000-8000-000000000003",
+    "final": 58.56666666666668,
+    "penalidades": -3,
+    "completa": true,
+    "desempate": [
+      61.5,
+      0.6666666666666666,
+      0.9
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 70.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.4,
+          "escolhas": 0.75,
+          "raciocinio": 0.9,
+          "plano": 0.75,
+          "comunicacao": 0.65
+        }
+      },
+      "F1_MESA": {
+        "nota": 20,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 0.5,
+          "fontes": 0,
+          "exploratoria": 0.5,
+          "estrategia": 0
+        }
+      },
+      "F2_PITCH": {
+        "nota": 79.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.65,
+          "pipeline": 0.75,
+          "respostas": 0.65,
+          "dashboard": 1,
+          "comunicacao": 1
+        }
+      },
+      "F2_MESA": {
+        "nota": 82.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.65,
+          "idempotencia": 0.9,
+          "transformacao": 0.8,
+          "modelagem": 1,
+          "prototipo": 0.9
+        }
+      },
+      "F3_REPO": {
+        "nota": 61.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.8,
+          "codigo": 0.5,
+          "corretude": 0.4,
+          "ia": 0.5,
+          "documentacao": 1
+        }
+      },
+      "NEG": {
+        "nota": 59.66666666666667,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.6666666666666666,
+          "solidez": 0.43333333333333335,
+          "dashboard": 0.7000000000000001,
+          "valor": 0.5,
+          "comunicacao": 0.7000000000000001
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 40.1,
+        "pontos": 6.015,
+        "completa": true
+      },
+      "F2": {
+        "nota": 81.54999999999998,
+        "pontos": 16.31,
+        "completa": true
+      },
+      "F3": {
+        "nota": 61.5,
+        "pontos": 15.375,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 59.66666666666667,
+        "pontos": 23.86666666666667,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 6,
+    "equipe": "00000000-0000-4000-8000-000000000004",
+    "final": 55.53583333333334,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      37.25,
+      0.5,
+      0.65
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 57.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.5,
+          "escolhas": 0.4,
+          "raciocinio": 0.5,
+          "plano": 0.65,
+          "comunicacao": 1
+        }
+      },
+      "F1_MESA": {
+        "nota": 82.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 0.4,
+          "fontes": 0.8,
+          "exploratoria": 0.9,
+          "estrategia": 1
+        }
+      },
+      "F2_PITCH": {
+        "nota": 51.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 1,
+          "pipeline": 0.25,
+          "respostas": 0.65,
+          "dashboard": 0.5,
+          "comunicacao": 0.25
+        }
+      },
+      "F2_MESA": {
+        "nota": 42.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.25,
+          "idempotencia": 0.65,
+          "transformacao": 0.25,
+          "modelagem": 0.75,
+          "prototipo": 0.4
+        }
+      },
+      "F3_REPO": {
+        "nota": 37.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.5,
+          "codigo": 0.4,
+          "corretude": 0.65,
+          "ia": 0.25,
+          "documentacao": 0
+        }
+      },
+      "NEG": {
+        "nota": 65.33333333333334,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.5,
+          "solidez": 0.7000000000000001,
+          "dashboard": 0.8333333333333334,
+          "valor": 0.9,
+          "comunicacao": 0.16666666666666666
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 72.4,
+        "pontos": 10.86,
+        "completa": true
+      },
+      "F2": {
+        "nota": 46.15,
+        "pontos": 9.23,
+        "completa": true
+      },
+      "F3": {
+        "nota": 37.25,
+        "pontos": 9.3125,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 65.33333333333334,
+        "pontos": 26.13333333333334,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 7,
+    "equipe": "00000000-0000-4000-8000-000000000006",
+    "final": 54.60583333333332,
+    "penalidades": -2,
+    "completa": false,
+    "desempate": [
+      55.75,
+      0.8666666666666667,
+      0.5
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 59.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.75,
+          "escolhas": 0.25,
+          "raciocinio": 0.65,
+          "plano": 0.8,
+          "comunicacao": 0.65
+        }
+      },
+      "F1_MESA": {
+        "nota": 52,
+        "avaliadores": 2,
+        "completa": false,
+        "mediaCriterio": {
+          "ambiente": 1,
+          "fontes": null,
+          "exploratoria": 0.4,
+          "estrategia": 0.9
+        }
+      },
+      "F2_PITCH": {
+        "nota": 63.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.5,
+          "pipeline": 0.75,
+          "respostas": 0.5,
+          "dashboard": 0.65,
+          "comunicacao": 0.8
+        }
+      },
+      "F2_MESA": {
+        "nota": 60,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.65,
+          "idempotencia": 0.5,
+          "transformacao": 0.75,
+          "modelagem": 1,
+          "prototipo": 0
+        }
+      },
+      "F3_REPO": {
+        "nota": 55.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.8,
+          "codigo": 0.25,
+          "corretude": 0.75,
+          "ia": 0.25,
+          "documentacao": 0.9
+        }
+      },
+      "NEG": {
+        "nota": 55.33333333333333,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.8666666666666667,
+          "solidez": 0,
+          "dashboard": 0.7000000000000001,
+          "valor": 0.7666666666666666,
+          "comunicacao": 0
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 54.9,
+        "pontos": 8.235,
+        "completa": false
+      },
+      "F2": {
+        "nota": 61.5,
+        "pontos": 12.3,
+        "completa": true
+      },
+      "F3": {
+        "nota": 55.75,
+        "pontos": 13.9375,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 55.33333333333333,
+        "pontos": 22.13333333333333,
+        "completa": true
+      }
+    }
+  },
+  {
+    "posicao": 8,
+    "equipe": "00000000-0000-4000-8000-000000000008",
+    "final": 53.935833333333335,
+    "penalidades": 0,
+    "completa": true,
+    "desempate": [
+      55.5,
+      0.9,
+      0.5
+    ],
+    "rubricas": {
+      "F1_PITCH": {
+        "nota": 45.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "problema": 0.25,
+          "escolhas": 0.5,
+          "raciocinio": 0.5,
+          "plano": 0.25,
+          "comunicacao": 0.8
+        }
+      },
+      "F1_MESA": {
+        "nota": 77.25,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ambiente": 0.9,
+          "fontes": 1,
+          "exploratoria": 0.75,
+          "estrategia": 0.5
+        }
+      },
+      "F2_PITCH": {
+        "nota": 49.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "evolucao": 0.75,
+          "pipeline": 0.4,
+          "respostas": 0.5,
+          "dashboard": 0.5,
+          "comunicacao": 0.4
+        }
+      },
+      "F2_MESA": {
+        "nota": 48.75,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "ingestao": 0.65,
+          "idempotencia": 0.5,
+          "transformacao": 0.75,
+          "modelagem": 0.25,
+          "prototipo": 0
+        }
+      },
+      "F3_REPO": {
+        "nota": 55.5,
+        "avaliadores": 2,
+        "completa": true,
+        "mediaCriterio": {
+          "reprodutibilidade": 0.5,
+          "codigo": 0.25,
+          "corretude": 0.8,
+          "ia": 0.5,
+          "documentacao": 0.8
+        }
+      },
+      "NEG": {
+        "nota": 51.33333333333333,
+        "avaliadores": 3,
+        "completa": true,
+        "mediaCriterio": {
+          "respondeu": 0.9,
+          "solidez": 0.5333333333333333,
+          "dashboard": 0.26666666666666666,
+          "valor": 0.3333333333333333,
+          "comunicacao": 0.16666666666666666
+        }
+      }
+    },
+    "fases": {
+      "F1": {
+        "nota": 64.65,
+        "pontos": 9.6975,
+        "completa": true
+      },
+      "F2": {
+        "nota": 49.15,
+        "pontos": 9.83,
+        "completa": true
+      },
+      "F3": {
+        "nota": 55.5,
+        "pontos": 13.875,
+        "completa": true
+      },
+      "NEG": {
+        "nota": 51.33333333333333,
+        "pontos": 20.53333333333333,
+        "completa": true
+      }
+    }
+  }
+]
