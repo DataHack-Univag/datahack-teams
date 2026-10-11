@@ -22,14 +22,15 @@ export function lerFormulario(fd: FormData): Record<string, string> {
  */
 export function criarAcao<E extends z.ZodType>(
   esquema: E,
-  executar: (dados: z.infer<E>, bruto: Record<string, string>) => Promise<Resultado>,
+  /** `formulario`: o FormData original, para campos repetidos (ex.: vários e-mails). */
+  executar: (dados: z.infer<E>, bruto: Record<string, string>, formulario: FormData) => Promise<Resultado>,
 ): Acao {
   return async (_estado, fd) => {
     const bruto = lerFormulario(fd);
     const lido = esquema.safeParse(bruto);
     if (!lido.success) return falha(lido.error.issues[0]?.message ?? "Confira os campos do formulário.");
     try {
-      return await executar(lido.data, bruto);
+      return await executar(lido.data, bruto, fd);
     } catch (e) {
       unstable_rethrow(e);
       console.error(e);

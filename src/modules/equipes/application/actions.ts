@@ -6,20 +6,34 @@ import { normalizarRepo } from "@/modules/equipes/domain/github";
 import { CATEGORIAS_LINK, rotuloCategoria } from "@/modules/equipes/domain/tipos";
 import { repoEhPublico } from "@/modules/equipes/infra/github";
 import * as repo from "@/modules/equipes/infra/repositorio";
+import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { emailNormalizado } from "@/modules/pessoas/infra/repositorio";
 import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
-import { email, id, inteiroOpcional, caixa, texto, textoOpcional, umDe, url } from "@/shared/acao/campos";
+import { email, id, sim, texto, textoOpcional, umDe, url } from "@/shared/acao/campos";
 import { falha, SEM_PERMISSAO, sucesso } from "@/shared/acao/resultado";
 import { traduzirErro } from "@/shared/db/erros";
 import { clienteServidor } from "@/shared/db/servidor";
 
-// Toda autorização real é do banco (RLS + triggers). Aqui: validar, chamar o repositório,
+// Toda autorização real é do banco (RLS + funções). Aqui: validar, chamar o repositório,
 // traduzir o erro e atualizar as telas.
 
 const repositorio = z
   .string()
   .transform((v) => normalizarRepo(v ?? ""))
   .refine((v): v is string => v !== null, "Informe o link do repositório no formato https://github.com/usuario/repositorio");
+
+const repositorioOpcional = z
+  .string()
+  .optional()
+  .transform((v) => (v?.trim() ? normalizarRepo(v) : ""))
+  .refine((v) => v !== null, "Informe o link do repositório no formato https://github.com/usuario/repositorio")
+  .transform((v) => v || null);
+
+// "como": e-mail do aluno no modo "ver como" da organização (o banco ignora quando quem age é aluno).
+const como = z
+  .string()
+  .optional()
+  .transform((v) => v?.trim().toLowerCase() || undefined);
 
 const carimbo = (publico: boolean | null) => ({
   repo_publico: publico,
@@ -29,8 +43,8 @@ const carimbo = (publico: boolean | null) => ({
 export const criarEquipe = criarAcao(
   z.object({ nome: texto("o nome da equipe", { min: 2, max: 60 }), repo_github: repositorio, redirecionar: z.string().optional() }),
   async (d) => {
-    const cliente = await clienteServidor();
-    const { data: novoId, error } = await repo.criarEquipe(cliente, d.nome, d.repo_github);
+    const { cliente, edicao } = await sessaoAtual();
+    const { data: novoId, error } = await repo.criarEquipe(cliente, edicao.id, d.nome, d.repo_github);
     if (error) return falha(traduzirErro(error));
     // A checagem de repositório público só informa; não impede a criação.
     await repo.atualizarEquipe(cliente, novoId, carimbo(await repoEhPublico(d.repo_github)));
@@ -45,9 +59,7 @@ export const atualizarEquipe = criarAcao(
   async (d) => {
     // Só consulta o GitHub (lento) se o link mudou.
     const mudouRepo = d.repo_github !== normalizarRepo(d.repo_atual ?? "");
-    const dados = mudouRepo
-      ? { nome: d.nome, repo_github: d.repo_github, ...carimbo(await repoEhPublico(d.repo_github)) }
-      : { nome: d.nome };
+    const dados = mudouRepo ? { nome: d.nome, repo_github: d.repo_github, ...carimbo(await repoEhPublico(d.repo_github)) } : { nome: d.nome };
     const { alterou, error } = await repo.atualizarEquipe(await clienteServidor(), d.id, dados);
     if (error) return falha(traduzirErro(error));
     if (!alterou) return SEM_PERMISSAO;
@@ -74,27 +86,27 @@ export const verificarRepo = criarAcao(z.object({ id }), async (d) => {
       );
 });
 
-export const excluirEquipe = criarAcao(z.object({ id }), async (d) => {
-  const { alterou, error } = await repo.excluirEquipe(await clienteServidor(), d.id);
+/** Arquiva a equipe (nada é apagado: integrantes saem e tudo fica no histórico). */
+export const arquivarEquipe = criarAcao(z.object({ id }), async (d) => {
+  const { error } = await repo.arquivarEquipe(await clienteServidor(), d.id);
   if (error) return falha(traduzirErro(error));
-  if (!alterou) return SEM_PERMISSAO;
   atualizarTelas();
-  redirect("/admin/equipes?excluida=1");
+  redirect("/admin/equipes?arquivada=1");
 });
 
 // ---------------------------------------------------------------- integrantes e líder
 
 export const adicionarMembro = criarAcao(z.object({ equipe_id: id, email }), async (d) => {
-  const { error } = await repo.adicionarMembro(await clienteServidor(), d.equipe_id, d.email);
+  const { cliente, edicao } = await sessaoAtual();
+  const { error } = await repo.adicionarMembro(cliente, edicao.id, d.equipe_id, d.email);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
   return sucesso("Integrante adicionado.");
 });
 
 export const removerMembro = criarAcao(z.object({ equipe_id: id, email, nome: z.string().optional() }), async (d) => {
-  const { alterou, error } = await repo.removerMembro(await clienteServidor(), d.equipe_id, d.email);
+  const { error } = await repo.removerMembro(await clienteServidor(), d.equipe_id, d.email);
   if (error) return falha(traduzirErro(error));
-  if (!alterou) return SEM_PERMISSAO;
   atualizarTelas();
   // Desfazer = adicionar de volta na mesma equipe.
   return sucesso(`${d.nome || "Integrante"} saiu da equipe.`, { equipe_id: d.equipe_id, email: d.email });
@@ -133,7 +145,8 @@ export const adicionarLink = criarAcao(
 );
 
 export const removerLink = criarAcao(z.object({ id }), async (d) => {
-  const { removido, error } = await repo.removerLink(await clienteServidor(), d.id);
+  const cliente = await clienteServidor();
+  const { removido, error } = await repo.removerLink(cliente, d.id, await emailNormalizado(cliente));
   if (error) return falha(traduzirErro(error));
   if (!removido) return SEM_PERMISSAO;
   atualizarTelas();
@@ -145,30 +158,59 @@ export const removerLink = criarAcao(z.object({ id }), async (d) => {
   });
 });
 
-// ---------------------------------------------------------------- configuração do evento
-
-export const salvarConfiguracao = criarAcao(
-  z.object({
-    max_membros: inteiroOpcional("O limite de integrantes", 1, 20).refine((v) => v !== null, "Informe o limite de integrantes."),
-    edicao_bloqueada: caixa,
-  }),
-  async (d) => {
-    const { alterou, error } = await repo.salvarConfiguracao(await clienteServidor(), {
-      max_membros: d.max_membros!,
-      edicao_bloqueada: d.edicao_bloqueada,
-    });
-    if (error) return falha(traduzirErro(error));
-    if (!alterou) return SEM_PERMISSAO;
-    atualizarTelas();
-    return sucesso(d.edicao_bloqueada ? "Configuração salva. A edição pelos alunos está bloqueada." : "Configuração salva.");
-  },
-);
-
 /** Grava as equipes montadas pelo gerador (chamada direta, não por formulário). */
 export async function aplicarEquipesGeradas(equipes: { nome: string; emails: string[] }[], substituir: boolean) {
   if (!equipes.length) return falha("Nenhuma equipe para salvar.");
-  const { data, error } = await repo.aplicarEquipes(await clienteServidor(), equipes, substituir);
+  const { cliente, edicao } = await sessaoAtual();
+  const { data, error } = await repo.aplicarEquipes(cliente, edicao.id, equipes, substituir);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
   return sucesso(`${data} equipe(s) salvas. Os alunos já veem a equipe ao entrar e devem cadastrar o repositório.`);
 }
+
+// ---------------------------------------------------------------- proposta de equipe (alunos)
+
+/** Aluno propõe a equipe e convida os colegas (campo "colegas" repetido, um e-mail por campo). */
+export const proporEquipe = criarAcao(
+  z.object({ nome: texto("o nome da equipe", { min: 2, max: 60 }), repo_github: repositorioOpcional, como }),
+  async (d, bruto, formulario) => {
+    const colegas = [...new Set(formulario.getAll("colegas").map((v) => String(v).trim().toLowerCase()).filter(Boolean))];
+    const { error } = await repo.proporEquipe(await clienteServidor(), d.nome, colegas, d.repo_github, d.como);
+    if (error) return falha(traduzirErro(error));
+    atualizarTelas();
+    return sucesso(
+      colegas.length
+        ? `Equipe “${d.nome}” proposta. Os colegas convidados precisam confirmar; depois a organização aprova.`
+        : `Equipe “${d.nome}” proposta. Convide os colegas para completar a equipe.`,
+    );
+  },
+);
+
+export const convidarIntegrante = criarAcao(z.object({ equipe_id: id, email, como }), async (d) => {
+  const { error } = await repo.convidarIntegrante(await clienteServidor(), d.equipe_id, d.email, d.como);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso("Convite enviado. A pessoa vê o convite ao entrar no sistema.");
+});
+
+export const responderConvite = criarAcao(z.object({ equipe_id: id, aceitar: sim, como }), async (d) => {
+  const { error } = await repo.responderConvite(await clienteServidor(), d.equipe_id, d.aceitar, d.como);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso(d.aceitar ? "Você confirmou: agora está nesta equipe." : "Convite recusado.");
+});
+
+export const cancelarProposta = criarAcao(z.object({ equipe_id: id, como }), async (d) => {
+  const { error } = await repo.cancelarProposta(await clienteServidor(), d.equipe_id, d.como);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso("Proposta cancelada. Os colegas ficaram livres para outras equipes.");
+});
+
+/** Organização aprova ou recusa (com motivo) uma equipe proposta pelos alunos. */
+export const analisarEquipe = criarAcao(z.object({ equipe_id: id, aprovar: sim, motivo: textoOpcional(500) }), async (d) => {
+  const { error } = await repo.analisarEquipe(await clienteServidor(), d.equipe_id, d.aprovar, d.motivo);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso(d.aprovar ? "Equipe aprovada. Os integrantes já veem a equipe." : "Equipe recusada. Os integrantes podem propor outra.");
+});

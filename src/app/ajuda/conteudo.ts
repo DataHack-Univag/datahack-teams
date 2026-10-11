@@ -7,7 +7,19 @@ export const TOPICOS: Topico[] = [
   // ------------------------------------------------ aluno
   {
     pergunta: "Onde vejo a minha equipe?",
-    resposta: "Na aba “Minha equipe”: colegas, líder, repositório no GitHub e links de entrega. Quem monta as equipes é a organização.",
+    resposta: "Na aba “Minha equipe”: colegas, líder, repositório no GitHub e links de entrega. Dependendo da edição, quem monta as equipes é a organização ou os próprios alunos.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Como monto a minha equipe (quando os alunos formam as equipes)?",
+    resposta:
+      "Em “Minha equipe”, dê um nome, convide os colegas e envie. Cada colega confirma no sistema; com todos confirmados, a organização aprova. Quem propõe começa como líder e pode desistir enquanto a proposta não for analisada.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Recebi um convite para uma equipe. E agora?",
+    resposta:
+      "O convite aparece em “Minha equipe”. Confirme para entrar ou recuse. Enquanto o convite estiver aguardando, você não pode entrar em outra equipe.",
     publicos: ["aluno"],
   },
   {
@@ -24,7 +36,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Quero mudar de equipe. Como faço?",
     resposta:
-      "Na aba “Trocas”, escolha a equipe e envie o pedido. Qualquer integrante da equipe de destino pode aceitar; quem aceitar troca de lugar com você. Você pode cancelar enquanto estiver pendente.",
+      "Na aba “Trocas” (quando a edição permite), escolha a equipe e envie o pedido. Qualquer integrante da equipe de destino pode aceitar; quem aceitar troca de lugar com você. Você pode cancelar enquanto estiver pendente.",
     publicos: ["aluno"],
   },
   {
@@ -69,7 +81,7 @@ export const TOPICOS: Topico[] = [
   },
   {
     pergunta: "Como vejo exatamente o que um aluno vê?",
-    resposta: "Abra a equipe e use “Ver como este aluno”, ou procure “Ver como” na busca rápida (Ctrl+K). Tudo que você fizer na simulação fica registrado como organização.",
+    resposta: "Em Pessoas (ou na equipe), abra a pessoa e use “Ver como”, ou procure “Ver como” na busca rápida (Ctrl+K). Vendo como aluno, o que você fizer fica registrado como organização; vendo como banca, as fichas ficam só para consulta.",
     publicos: ["organizacao"],
   },
   {
@@ -85,6 +97,24 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como mostro o ranking no telão?",
     resposta: "Na aba Ranking, escolha Top 3, Top 5 ou Todos e use o modo revelação: cada clique revela uma posição, da última para a primeira.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Como preparo a próxima edição do evento?",
+    resposta:
+      "Em Mais → Edições, crie a edição copiando o regulamento e a organização da anterior. Ajuste datas, formato e regras das equipes, cadastre alunos e bancas em Pessoas (com a edição nova escolhida no topo) e, quando o evento começar, use “Tornar a edição atual”.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Por que não existe “apagar”?",
+    resposta:
+      "Para nada se perder entre edições: remover uma equipe, um link, uma ficha ou uma pessoa arquiva o registro, e toda alteração fica no histórico. As listas mostram só o que está ativo.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Como confiro se as telas das bancas estão certas sem criar contas falsas?",
+    resposta:
+      "Em Pessoas, abra qualquer aluno ou avaliador e use “Ver como esta pessoa”. Você navega exatamente como ela; nas fichas das bancas nada é salvo durante a simulação.",
     publicos: ["organizacao"],
   },
   // ------------------------------------------------ todos

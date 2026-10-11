@@ -134,6 +134,8 @@ out += `${ind(2)}};
 ${ind(2)}Views: { [_ in never]: never };
 ${ind(2)}Functions: {
 `;
+// Funções sobrecarregadas (ex.: minha_equipe() e minha_equipe(p_edicao)) viram uma união de assinaturas.
+const assinaturas = new Map();
 for (const f of funcoes) {
   const tipos = f.tipos_args ?? [];
   const nomes = f.nomes_args ?? [];
@@ -142,8 +144,9 @@ for (const f of funcoes) {
     ? `{ ${tipos.map((t, i) => `${nomes[i] || `arg${i}`}${i >= opcionais ? "?" : ""}: ${tipoFormatado(t)}`).join("; ")} }`
     : "Record<PropertyKey, never>";
   const ret = tipoFormatado(f.retorno);
-  out += `${ind(3)}${f.nome}: { Args: ${args}; Returns: ${f.conjunto ? `${ret}[]` : ret} };\n`;
+  assinaturas.set(f.nome, [...(assinaturas.get(f.nome) ?? []), `{ Args: ${args}; Returns: ${f.conjunto ? `${ret}[]` : ret} }`]);
 }
+for (const [nome, lista] of assinaturas) out += `${ind(3)}${nome}: ${lista.join(" | ")};\n`;
 out += `${ind(2)}};
 ${ind(2)}Enums: { [_ in never]: never };
 ${ind(2)}CompositeTypes: { [_ in never]: never };

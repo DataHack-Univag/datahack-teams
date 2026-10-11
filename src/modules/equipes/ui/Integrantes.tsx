@@ -64,6 +64,7 @@ export function Integrantes({
                   <span className="truncate">{nome}</span>
                   {souEu && <span className="text-xs text-suave">(você)</span>}
                   {ehLider && <Selo tom="alerta">★ Líder</Selo>}
+                  {m.situacao === "convidado" && <Selo tom="info">convite aguardando</Selo>}
                 </p>
                 <p className="truncate text-xs text-suave">
                   {[m.inscritos?.curso, m.inscritos?.semestre && `${m.inscritos.semestre}º semestre`, organizador && m.email]
@@ -133,7 +134,7 @@ export function Integrantes({
 
       {p.podeGerirMembros &&
         (p.lotada ? (
-          <Aviso tom="neutro">A equipe chegou ao limite de {config.max_membros} integrantes (ajuste em Equipes → Configuração).</Aviso>
+          <Aviso tom="neutro">A equipe chegou ao limite de {config.max_membros} integrantes (ajuste em Equipes → Regras das equipes).</Aviso>
         ) : disponiveis.length === 0 ? (
           <Aviso tom="neutro">Todos os alunos já têm equipe.</Aviso>
         ) : (

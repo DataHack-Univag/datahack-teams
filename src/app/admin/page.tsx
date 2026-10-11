@@ -11,8 +11,8 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Painel da organização: o estado do evento e o que precisa de atenção agora.
 export default async function PainelOrganizacao() {
-  const { cliente, usuario } = await sessaoAtual();
-  const { resumo, pendencias, andamento, encerrada } = await carregarPainel(cliente);
+  const { cliente, usuario, edicao } = await sessaoAtual();
+  const { resumo, pendencias, andamento, encerrada } = await carregarPainel(cliente, edicao);
 
   return (
     <Pagina>

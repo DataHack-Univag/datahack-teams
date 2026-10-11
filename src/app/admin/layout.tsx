@@ -10,10 +10,14 @@ import type { Comando } from "@/shared/ui/PaletaComandos";
 
 // Área da organização (só organizadores). Cada aba é uma rota em /admin/*.
 export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
-  const { cliente, usuario, avatar, organizador } = await sessaoAtual();
+  const { cliente, usuario, avatar, organizador, edicao } = await sessaoAtual();
   if (!organizador) redirect("/");
 
-  const [equipes, pessoas, trocas] = await Promise.all([listarResumo(cliente), listarPessoasResumo(cliente), trocasPendentes(cliente)]);
+  const [equipes, pessoas, trocas] = await Promise.all([
+    listarResumo(cliente, edicao.id),
+    listarPessoasResumo(cliente, edicao.id),
+    trocasPendentes(cliente, edicao.id),
+  ]);
   const nav = navOrganizacao({ trocas: trocas.length });
   const comandos: Comando[] = [
     ...comandosDasAbas([...nav.itens, ...nav.mais]),

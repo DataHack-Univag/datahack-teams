@@ -1,7 +1,6 @@
-import { rubricasDaBanca, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
+import { nomeBanca, rubricasDaBanca, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
 import { notaFicha } from "@/modules/avaliacao/domain/nota";
-import { BANCAS } from "@/modules/avaliacao/domain/rubricas";
-import { avaliacaoEncerrada, listarFichas } from "@/modules/avaliacao/infra/repositorio";
+import { carregarRegulamento, listarFichas } from "@/modules/avaliacao/infra/repositorio";
 import { AjudaCalculo } from "@/modules/avaliacao/ui/AjudaCalculo";
 import { ListaAvaliar } from "@/modules/avaliacao/ui/ListaAvaliar";
 import { listarEquipes } from "@/modules/equipes/infra/repositorio";
@@ -13,15 +12,15 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Lista das equipes para a banca avaliar, com o andamento das fichas do avaliador logado.
 export default async function Avaliar() {
-  const { cliente, usuario, organizador, banca } = await sessaoAtual();
-  // A lista mostra só as rubricas da própria banca; na ficha a organização pode abrir as outras.
-  const minhas = rubricasDaBanca(banca);
-
-  const [equipes, fichas, encerrada] = await Promise.all([
-    listarEquipes(cliente),
-    listarFichas(cliente, { avaliador: usuario.email }),
-    avaliacaoEncerrada(cliente),
+  const { cliente, usuario, organizador, banca, edicao } = await sessaoAtual();
+  const [reg, equipes, fichas] = await Promise.all([
+    carregarRegulamento(cliente, edicao.id),
+    listarEquipes(cliente, edicao.id),
+    listarFichas(cliente, edicao.id, { avaliador: usuario.email }),
   ]);
+  const encerrada = edicao.avaliacao_encerrada || edicao.situacao === "encerrada";
+  // A lista mostra só as rubricas da própria banca; na ficha a organização pode abrir as outras.
+  const minhas = rubricasDaBanca(reg, banca);
 
   const ficha = (equipeId: string, rubrica: string) => fichas.find((f) => f.equipe_id === equipeId && f.rubrica === rubrica);
   const total = equipes.length * minhas.length;
@@ -37,11 +36,11 @@ export default async function Avaliar() {
   return (
     <Pagina>
       <CabecalhoPagina
-        trilha={[{ rotulo: banca ? BANCAS[banca] : "Avaliação" }, { rotulo: "Avaliar" }]}
+        trilha={[{ rotulo: nomeBanca(reg, banca) || "Avaliação" }, { rotulo: "Avaliar" }]}
         titulo="Avaliar equipes"
         destaque="equipes"
         descricao={`Suas rubricas: ${minhas.map((r) => `${r.curto} (${r.pesoFinal}%)`).join(" · ")}`}
-        acoes={<AjudaCalculo />}
+        acoes={<AjudaCalculo reg={reg} />}
       />
 
       <div className="grid grid-cols-2 gap-3 sm:max-w-md">

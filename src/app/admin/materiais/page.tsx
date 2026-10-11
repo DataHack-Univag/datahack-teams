@@ -5,8 +5,8 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Aba "Materiais": tudo que a organização publica aqui aparece para todos os alunos.
 export default async function AdminMateriais() {
-  const { cliente } = await sessaoAtual();
-  const materiais = await listarMateriais(cliente);
+  const { cliente, edicao } = await sessaoAtual();
+  const materiais = await listarMateriais(cliente, edicao.id);
 
   return (
     <Pagina>

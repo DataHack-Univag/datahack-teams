@@ -1,5 +1,4 @@
 import { carregarRanking } from "@/modules/avaliacao/application/consultas";
-import { FASES } from "@/modules/avaliacao/domain/rubricas";
 import { AjudaCalculo } from "@/modules/avaliacao/ui/AjudaCalculo";
 import { Podio, type LinhaRanking as LinhaPodio } from "@/modules/avaliacao/ui/Podio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -10,8 +9,8 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Aba "Ranking": classificação final com pódio, pronta para o telão.
 export default async function AdminRanking() {
-  const { cliente } = await sessaoAtual();
-  const { equipes, encerrada, linhas } = await carregarRanking(cliente);
+  const { cliente, edicao } = await sessaoAtual();
+  const { reg, equipes, encerrada, linhas } = await carregarRanking(cliente, edicao);
 
   // Só entra no pódio quem já tem alguma nota.
   const podio: LinhaPodio[] = linhas
@@ -23,7 +22,8 @@ export default async function AdminRanking() {
       completa: r.completa,
       penalidades: r.penalidades,
       integrantes: equipe.integrantes.map(primeiroNome),
-      fases: FASES.map((f) => ({ id: f.id, nota: r.fases[f.id].nota })),
+      // Rótulo curto da fase no telão ("Fase 1", "Negócio").
+      fases: reg.fases.map((f) => ({ id: f.nome.split(" · ")[0], nota: r.fases[f.id].nota })),
     }));
   const semNota = equipes.length - podio.length;
 
@@ -41,7 +41,7 @@ export default async function AdminRanking() {
         }
         acoes={
           <>
-            <AjudaCalculo />
+            <AjudaCalculo reg={reg} />
             <BotaoLink href="/admin/avaliacao" icone="avaliacao">
               Detalhe das notas
             </BotaoLink>

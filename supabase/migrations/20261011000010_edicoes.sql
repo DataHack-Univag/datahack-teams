@@ -1285,8 +1285,7 @@ create or replace function public.criar_edicao(p_dados jsonb, p_copiar_de uuid d
 returns uuid language plpgsql security definer set search_path = public
 as $$
 declare
-  v_id   uuid;
-  v_base uuid := coalesce(p_copiar_de, edicao_atual());
+  v_id uuid;
 begin
   if not eh_organizador() then
     raise exception 'Só a organização cria edições.';
@@ -1305,13 +1304,16 @@ begin
     perform importar_regulamento(v_id, exportar_regulamento(p_copiar_de));
   end if;
 
-  -- Quem cria e os organizadores da edição de base continuam organizando.
+  -- Copiando de outra edição, os organizadores dela continuam organizando; quem cria sempre organiza.
+  if p_copiar_de is not null then
+    insert into participacoes (edicao_id, email, papel, banca_id)
+    select v_id, p.email, 'organizador', (select id from bancas where edicao_id = v_id and da_organizacao limit 1)
+      from participacoes p
+     where p.edicao_id = p_copiar_de and p.papel = 'organizador' and p.removido_em is null
+    on conflict do nothing;
+  end if;
   insert into participacoes (edicao_id, email, papel, banca_id)
-  select v_id, p.email, 'organizador', (select id from bancas where edicao_id = v_id and da_organizacao limit 1)
-    from participacoes p
-   where p.edicao_id = v_base and p.papel = 'organizador' and p.removido_em is null
-  on conflict do nothing;
-  insert into participacoes (edicao_id, email, papel) values (v_id, email_atual(), 'organizador')
+  values (v_id, email_atual(), 'organizador', (select id from bancas where edicao_id = v_id and da_organizacao limit 1))
   on conflict do nothing;
   return v_id;
 end $$;

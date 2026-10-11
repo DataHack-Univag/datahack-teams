@@ -8,12 +8,12 @@ import { Icone } from "@/shared/ui/Icone";
 
 // Confirmação do "ver como" (a simulação só começa com o clique, nunca ao abrir um link).
 export default async function VerComo({ searchParams }: PageProps<"/ver-como">) {
-  const { cliente, real } = await sessaoAtual();
+  const { cliente, real, edicao } = await sessaoAtual();
   if (real.papel !== "organizador") redirect("/");
 
   const { email } = await searchParams;
   if (typeof email !== "string" || !email) redirect("/admin/pessoas");
-  const alvo = await buscarInscrito(cliente, email.toLowerCase());
+  const alvo = await buscarInscrito(cliente, email.toLowerCase(), edicao.id);
   if (!alvo) notFound();
   if (alvo.papel === "organizador") redirect("/admin/pessoas?filtro=organizador");
   const papel = PAPEIS.find((p) => p.valor === alvo.papel);

@@ -15,6 +15,7 @@ export function navOrganizacao(contagens: { trocas?: number } = {}): { itens: It
     mais: [
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
+      { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes"] },
       { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
     ],
   };
@@ -47,6 +48,9 @@ export function comandosDasAbas(itens: ItemNav[], grupo = "Telas"): Comando[] {
 export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Gerador de equipes", href: "/admin/equipes/gerador", icone: "gerador" },
   { grupo: "Telas", rotulo: "Histórico de trocas", href: "/admin/equipes/trocas", icone: "trocas" },
+  { grupo: "Telas", rotulo: "Propostas de equipe", href: "/admin/equipes/propostas", icone: "equipe" },
+  { grupo: "Telas", rotulo: "Nova edição", href: "/admin/edicoes#nova", icone: "mais_novo" },
+  { grupo: "Telas", rotulo: "Regulamento da edição", href: "/admin/edicoes/regulamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Andamento das fichas", href: "/admin/avaliacao?aba=andamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },

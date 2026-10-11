@@ -11,11 +11,11 @@ import { CabecalhoPagina, Pagina, SubAbas } from "@/shared/ui/Pagina";
 export default async function AdminTrocas({ searchParams }: PageProps<"/admin/equipes/trocas">) {
   const { status } = await searchParams;
   const filtro = STATUS_TROCA.find((s) => s.valor === status)?.valor ?? null;
-  const { cliente } = await sessaoAtual();
-  const [historico, equipes] = await Promise.all([historicoTrocas(cliente), listarResumo(cliente)]);
-  // Nome atual da equipe; se ela foi apagada, usa a cópia guardada no pedido.
+  const { cliente, edicao } = await sessaoAtual();
+  const [historico, equipes] = await Promise.all([historicoTrocas(cliente, edicao.id), listarResumo(cliente, edicao.id)]);
+  // Nome atual da equipe; se ela foi arquivada, usa a cópia guardada no pedido.
   const nomeEquipe = (id: string | null, copia?: string | null) =>
-    equipes.find((e) => e.id === id)?.nome ?? (copia ? `${copia} (excluída)` : "(equipe excluída)");
+    equipes.find((e) => e.id === id)?.nome ?? (copia ? `${copia} (arquivada)` : "(equipe arquivada)");
   const conta = (v: string) => historico.filter((t) => t.status === v).length;
   const lista = filtro ? historico.filter((t) => t.status === filtro) : historico;
 

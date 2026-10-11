@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { ReactNode } from "react";
 import { sair } from "@/modules/pessoas/application/actions";
 import { rotuloPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { primeiroNome } from "@/shared/lib/texto";
@@ -15,6 +16,7 @@ export function Cabecalho({
   avatar,
   inicio,
   simulacao = false,
+  edicao,
 }: {
   nome: string;
   papel: Papel;
@@ -22,6 +24,8 @@ export function Cabecalho({
   inicio: string;
   /** Modo "ver como": cabeçalho da pessoa simulada, sem o botão de sair da conta da organização. */
   simulacao?: boolean;
+  /** Seletor da edição (só a organização). */
+  edicao?: ReactNode;
 }) {
   return (
     <header
@@ -32,7 +36,8 @@ export function Cabecalho({
           <Logo className="w-28 sm:w-32" />
         </Link>
 
-        {papel !== "aluno" && <span className="chip hidden md:inline-flex">{rotuloPapel(papel)}</span>}
+        {edicao}
+        {papel !== "aluno" && !edicao && <span className="chip hidden md:inline-flex">{rotuloPapel(papel)}</span>}
         <BotaoBusca />
 
         <div className="flex items-center gap-2" title={nome}>

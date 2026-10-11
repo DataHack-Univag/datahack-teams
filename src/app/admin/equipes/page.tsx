@@ -1,31 +1,34 @@
 import Link from "next/link";
 import { SubAbasEquipes } from "@/app/admin/equipes/SubAbasEquipes";
+import { rotuloModo } from "@/modules/edicoes/domain/tipos";
 import { pendenciasEquipe } from "@/modules/equipes/domain/permissoes";
-import { lerConfiguracao, listarEquipes } from "@/modules/equipes/infra/repositorio";
+import { listarEquipes, listarPropostas } from "@/modules/equipes/infra/repositorio";
 import { CartaoEquipe } from "@/modules/equipes/ui/CartaoEquipe";
-import { CriarEquipe, FormConfiguracao } from "@/modules/equipes/ui/FormulariosOrganizacao";
+import { CriarEquipe, FormRegrasEquipes } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
+import { Aviso } from "@/shared/ui/Aviso";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { Menu } from "@/shared/ui/Menu";
 import { CabecalhoPagina, Pagina, SubAbas } from "@/shared/ui/Pagina";
 
-// Aba "Equipes": todas as equipes, quem está sem equipe, criar equipe e configuração.
+// Aba "Equipes": equipes aprovadas da edição, quem está sem equipe, criar equipe e regras.
 export default async function AdminEquipes({ searchParams }: PageProps<"/admin/equipes">) {
-  const { filtro } = await searchParams;
+  const { filtro, arquivada } = await searchParams;
   const soPendentes = filtro === "pendentes";
-  const { cliente } = await sessaoAtual();
-  const [config, equipes, semEquipe, trocas] = await Promise.all([
-    lerConfiguracao(cliente),
-    listarEquipes(cliente),
-    listarSemEquipe(cliente),
-    trocasPendentes(cliente),
+  const { cliente, edicao } = await sessaoAtual();
+  const [equipes, propostas, semEquipe, trocas] = await Promise.all([
+    listarEquipes(cliente, edicao.id),
+    listarPropostas(cliente, edicao.id),
+    listarSemEquipe(cliente, edicao.id),
+    trocasPendentes(cliente, edicao.id),
   ]);
   const comPendencia = equipes.filter((e) => pendenciasEquipe(e).length > 0);
   const lista = soPendentes ? comPendencia : equipes;
+  const porProposta = edicao.modo_formacao === "alunos_propoem";
 
   return (
     <Pagina>
@@ -33,19 +36,20 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Equipes" }]}
         titulo="As equipes"
         destaque="equipes"
-        descricao="Integrantes, repositórios e links de entrega de cada equipe."
+        descricao={`Integrantes, repositórios e links de entrega. Formação nesta edição: ${rotuloModo(edicao.modo_formacao).toLowerCase()}.`}
         acoes={
           <>
             <BotaoAjuda titulo="Equipes">
               <ul>
                 <li>
-                  Para montar várias equipes de uma vez, equilibradas por semestre e nota, use o <strong>Gerador de equipes</strong>.
+                  O jeito de formar as equipes é escolhido por edição em <strong>Regras das equipes</strong> (gerador, à mão ou
+                  proposta pelos alunos).
                 </li>
                 <li>Abra uma equipe para adicionar ou remover integrantes, trocar o líder ou editar o repositório.</li>
                 <li>
-                  Os alunos pedem troca de equipe pelo sistema; acompanhe em <strong>Trocas</strong>.
+                  Nada é apagado: arquivar uma equipe tira ela das listas, mas o histórico continua guardado.
                 </li>
-                <li>No fim do prazo, marque “Bloquear a edição pelos alunos” na configuração.</li>
+                <li>No fim do prazo, marque “Bloquear a edição pelos alunos”.</li>
               </ul>
             </BotaoAjuda>
             <Menu
@@ -54,13 +58,21 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
               titulo="Planilha (CSV)"
               itens={[{ rotulo: "Equipes e integrantes", descricao: "Uma linha por integrante, com repositório e links.", href: "/admin/equipes/exportar", icone: "baixar", baixar: true }]}
             />
-            <BotaoLink href="/admin/equipes/gerador" variante="primario" icone="gerador">
-              Gerar equipes
-            </BotaoLink>
+            {porProposta ? (
+              <BotaoLink href="/admin/equipes/propostas" variante="primario" icone="equipe">
+                Ver propostas
+              </BotaoLink>
+            ) : (
+              <BotaoLink href="/admin/equipes/gerador" variante="primario" icone="gerador">
+                Gerar equipes
+              </BotaoLink>
+            )}
           </>
         }
       />
-      <SubAbasEquipes ativa="lista" trocas={trocas.length} equipes={equipes.length} />
+      <SubAbasEquipes ativa="lista" trocas={trocas.length} equipes={equipes.length} propostas={propostas.length} />
+
+      {arquivada && <Aviso tom="sucesso">Equipe arquivada. Ela continua no histórico.</Aviso>}
 
       {equipes.length > 0 && (
         <SubAbas
@@ -75,15 +87,26 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
       {lista.length === 0 ? (
         <EstadoVazio
           icone="equipe"
-          titulo={soPendentes ? "Nenhuma equipe com pendência" : "Nenhuma equipe ainda"}
-          acao={!soPendentes && <BotaoLink href="/admin/equipes/gerador" variante="primario" icone="gerador">Abrir o gerador</BotaoLink>}
+          titulo={soPendentes ? "Nenhuma equipe com pendência" : "Nenhuma equipe aprovada ainda"}
+          acao={
+            !soPendentes &&
+            (porProposta ? (
+              <BotaoLink href="/admin/equipes/propostas" variante="primario">Ver propostas</BotaoLink>
+            ) : (
+              <BotaoLink href="/admin/equipes/gerador" variante="primario" icone="gerador">Abrir o gerador</BotaoLink>
+            ))
+          }
         >
-          {soPendentes ? "Todas têm líder e repositório público." : "Monte as equipes com o gerador ou crie uma à mão logo abaixo."}
+          {soPendentes
+            ? "Todas têm líder e repositório público."
+            : porProposta
+              ? "Nesta edição os alunos propõem as equipes; aprove as propostas para elas aparecerem aqui."
+              : "Monte as equipes com o gerador ou crie uma à mão logo abaixo."}
         </EstadoVazio>
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {lista.map((e, i) => (
-            <CartaoEquipe key={e.id} equipe={e} maxMembros={config.max_membros} indice={i} />
+            <CartaoEquipe key={e.id} equipe={e} maxMembros={edicao.max_membros} indice={i} />
           ))}
         </div>
       )}
@@ -104,11 +127,16 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
                 ))}
               </ul>
               <p className="text-xs text-suave">
-                Para colocar alguém numa equipe, abra a equipe e use “Adicionar integrante”, ou{" "}
-                <Link href="/admin/equipes/gerador" className="text-marca underline">
-                  gere equipes só com quem está sem equipe
-                </Link>
-                .
+                Para colocar alguém numa equipe, abra a equipe e use “Adicionar integrante”
+                {porProposta ? "." : (
+                  <>
+                    , ou{" "}
+                    <Link href="/admin/equipes/gerador" className="text-marca underline">
+                      gere equipes só com quem está sem equipe
+                    </Link>
+                    .
+                  </>
+                )}
               </p>
             </>
           )}
@@ -119,9 +147,9 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
             <h2 className="text-lg font-semibold">Criar equipe à mão</h2>
             <CriarEquipe />
           </section>
-          <section id="configuracao" className="card scroll-mt-24 space-y-3">
-            <h2 className="text-lg font-semibold">Configuração</h2>
-            <FormConfiguracao config={config} />
+          <section id="regras" className="card scroll-mt-24 space-y-3">
+            <h2 className="text-lg font-semibold">Regras das equipes nesta edição</h2>
+            <FormRegrasEquipes edicao={edicao} />
           </section>
         </div>
       </div>

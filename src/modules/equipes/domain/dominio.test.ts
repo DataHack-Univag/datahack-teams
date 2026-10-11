@@ -16,7 +16,7 @@ describe("normalizarRepo", () => {
   );
 });
 
-const membro = (email: string) => ({ email, inscritos: { nome: email.split("@")[0], curso: null, semestre: null } });
+const membro = (email: string) => ({ email, situacao: "confirmado" as const, inscritos: { nome: email.split("@")[0], curso: null, semestre: null } });
 const equipe = (extra: Partial<Equipe> = {}): Equipe =>
   ({
     id: "e1",
@@ -28,7 +28,7 @@ const equipe = (extra: Partial<Equipe> = {}): Equipe =>
     links: [],
     ...extra,
   }) as Equipe;
-const config = { max_membros: 2, edicao_bloqueada: false };
+const config = { max_membros: 2, min_membros: 1, edicao_bloqueada: false, permite_trocas: true, modo_formacao: "gerador" as const };
 
 describe("permissoesEquipe", () => {
   it("sem líder: qualquer integrante escolhe o líder, mas não edita os dados", () => {
