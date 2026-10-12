@@ -14,25 +14,17 @@ import { Avatar } from "@/shared/ui/Avatar";
 import { AreaTexto, Campo } from "@/shared/ui/Campo";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
+import { EscolherPessoas, type OpcaoPessoa } from "@/shared/ui/EscolherPessoas";
 import { Selo } from "@/shared/ui/Selo";
 
 // Fluxo "alunos propõem a equipe": quem propõe convida os colegas, cada um confirma e,
 // com todos confirmados (e o mínimo de integrantes), a organização aprova ou recusa.
 
-/** Lista de colegas sugeridos (datalist): busca por nome sem precisar lembrar o e-mail. */
-function SugestoesColegas({ id, colegas }: { id: string; colegas: Inscrito[] }) {
-  return (
-    <datalist id={id}>
-      {colegas.map((i) => (
-        <option key={i.email} value={i.email}>
-          {i.nome}
-          {i.curso ? ` · ${i.curso}` : ""}
-          {i.semestre ? ` · ${i.semestre}º sem.` : ""}
-        </option>
-      ))}
-    </datalist>
-  );
-}
+/** Colegas livres (sem equipe e sem convite aguardando) no formato do seletor. */
+const paraOpcoes = (colegas: Inscrito[]): OpcaoPessoa[] =>
+  colegas.map((i) => ({ email: i.email, nome: i.nome, detalhe: [i.curso, i.semestre && `${i.semestre}º sem.`].filter(Boolean).join(" · ") }));
+
+const SEM_COLEGAS = "Todos os alunos desta edição já estão numa equipe ou têm convite aguardando.";
 
 /** Integrantes de uma proposta com a situação de cada um. */
 function MembrosDaProposta({ equipe, meuEmail }: { equipe: Equipe; meuEmail?: string }) {
@@ -77,24 +69,14 @@ export function ProporEquipe({ colegas, config, meuEmail }: { colegas: Inscrito[
           <Campo rotulo="Nome da equipe" name="nome" required maxLength={60} placeholder="Ex.: Os Evadidos" />
           <Campo rotulo="Repositório GitHub (pode cadastrar depois)" name="repo_github" inputMode="url" placeholder="https://github.com/usuario/repositorio" />
         </div>
-        <fieldset className="space-y-2">
-          <legend className="text-sm font-semibold">Colegas convidados</legend>
-          <div className="grid gap-2 sm:grid-cols-2">
-            {Array.from({ length: vagas }, (_, i) => (
-              <Campo
-                key={i}
-                rotulo={`Colega ${i + 1}`}
-                rotuloOculto
-                name="colegas"
-                list="colegas-disponiveis"
-                placeholder={`Colega ${i + 1}: comece a digitar o nome…`}
-                autoComplete="off"
-              />
-            ))}
-          </div>
-          <SugestoesColegas id="colegas-disponiveis" colegas={outros} />
-          <p className="text-xs text-suave">Só aparecem alunos desta edição que ainda não estão em equipe nem têm convite aguardando ({outros.length}).</p>
-        </fieldset>
+        <EscolherPessoas
+          name="colegas"
+          rotulo="Colegas convidados"
+          opcoes={paraOpcoes(outros)}
+          maximo={vagas}
+          vazio={SEM_COLEGAS}
+          dica="Só aparecem alunos que ainda não estão numa equipe nem foram convidados por outra."
+        />
         <BotaoEnviar icone="equipe">Propor equipe</BotaoEnviar>
       </Formulario>
     </section>
@@ -161,19 +143,17 @@ export function MinhaProposta({ equipe, meuEmail, colegas, config }: { equipe: E
       {souQuemPropos && (
         <div className="space-y-3 border-t border-borda pt-3">
           {cabe && (
-            <Formulario action={convidarIntegrante} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+            <Formulario action={convidarIntegrante} className="flex flex-col gap-2 sm:flex-row sm:items-start">
               <Ocultos valores={{ equipe_id: equipe.id, como: meuEmail }} />
-              <Campo
-                rotulo="Convidar mais um colega"
+              <EscolherPessoas
                 name="email"
-                list="colegas-convite"
-                required
-                autoComplete="off"
-                placeholder="Comece a digitar o nome…"
+                rotulo="Convidar mais um colega"
+                opcoes={paraOpcoes(colegas.filter((c) => c.email !== meuEmail))}
+                maximo={1}
+                vazio={SEM_COLEGAS}
                 className="sm:flex-1"
               />
-              <SugestoesColegas id="colegas-convite" colegas={colegas.filter((c) => c.email !== meuEmail)} />
-              <BotaoEnviar variante="secundario" icone="mais_novo" className="sm:mb-5">
+              <BotaoEnviar variante="secundario" icone="mais_novo" className="sm:mt-6">
                 Convidar
               </BotaoEnviar>
             </Formulario>

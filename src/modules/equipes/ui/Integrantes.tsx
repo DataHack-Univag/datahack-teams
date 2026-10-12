@@ -5,8 +5,8 @@ import { nomeMembro, type Configuracao, type Equipe } from "@/modules/equipes/do
 import type { Inscrito } from "@/modules/pessoas/domain/tipos";
 import { Aviso } from "@/shared/ui/Aviso";
 import { Avatar } from "@/shared/ui/Avatar";
-import { Campo } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
+import { EscolherPessoas } from "@/shared/ui/EscolherPessoas";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
 
@@ -138,29 +138,22 @@ export function Integrantes({
         ) : disponiveis.length === 0 ? (
           <Aviso tom="neutro">Todos os alunos já têm equipe.</Aviso>
         ) : (
-          <Formulario action={adicionarMembro} className="flex flex-col gap-2 sm:flex-row sm:items-end">
+          <Formulario action={adicionarMembro} className="flex flex-col gap-2 sm:flex-row sm:items-start">
             <Ocultos valores={{ equipe_id: equipe.id }} />
-            {/* Busca por nome com sugestões (heurística 6): não precisa lembrar o e-mail. */}
-            <Campo
-              rotulo="Adicionar integrante"
+            {/* Busca por nome (heurística 6): não precisa lembrar o e-mail; só aparece quem está livre. */}
+            <EscolherPessoas
               name="email"
-              list={`sem-equipe-${equipe.id}`}
-              required
-              placeholder="Comece a digitar o nome…"
-              autoComplete="off"
-              className="sm:flex-1"
+              rotulo="Adicionar integrante"
+              opcoes={disponiveis.map((i) => ({
+                email: i.email,
+                nome: i.nome,
+                detalhe: [i.curso, i.semestre && `${i.semestre}º sem.`].filter(Boolean).join(" · "),
+              }))}
+              maximo={1}
               dica={`${disponiveis.length} aluno(s) sem equipe.`}
+              className="sm:flex-1"
             />
-            <datalist id={`sem-equipe-${equipe.id}`}>
-              {disponiveis.map((i) => (
-                <option key={i.email} value={i.email}>
-                  {i.nome}
-                  {i.curso ? ` · ${i.curso}` : ""}
-                  {i.semestre ? ` · ${i.semestre}º sem.` : ""}
-                </option>
-              ))}
-            </datalist>
-            <BotaoEnviar icone="mais_novo" className="sm:mb-5">
+            <BotaoEnviar icone="mais_novo" className="sm:mt-6">
               Adicionar
             </BotaoEnviar>
           </Formulario>
