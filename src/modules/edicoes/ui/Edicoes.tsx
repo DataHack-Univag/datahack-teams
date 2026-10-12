@@ -1,4 +1,4 @@
-import { criarEdicao, importarRegulamento, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
+import { criarEdicao, escolherEdicao, importarRegulamento, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
 import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, SITUACOES_EDICAO, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
@@ -49,6 +49,15 @@ export function CartaoEdicao({
         Equipes: {rotuloModo(edicao.modo_formacao).toLowerCase()} · {edicao.min_membros} a {edicao.max_membros} integrantes ·{" "}
         {edicao.permite_trocas ? "com trocas" : "sem trocas"}
       </p>
+      {!vendo && (
+        // Trocar de edição também por aqui: no celular o seletor do cabeçalho fica escondido (heurística 7).
+        <form action={escolherEdicao}>
+          <Ocultos valores={{ edicao: edicao.id, voltar: "/admin" }} />
+          <BotaoEnviar variante="secundario" tamanho="pequeno" icone="olho">
+            Administrar esta edição
+          </BotaoEnviar>
+        </form>
+      )}
       {!edicao.atual && (
         <Formulario
           action={tornarAtual}

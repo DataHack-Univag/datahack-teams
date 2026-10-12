@@ -7,7 +7,8 @@ import { CATEGORIAS_LINK, rotuloCategoria } from "@/modules/equipes/domain/tipos
 import { repoEhPublico } from "@/modules/equipes/infra/github";
 import * as repo from "@/modules/equipes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
-import { emailNormalizado } from "@/modules/pessoas/infra/repositorio";
+import { emailNormalizado, listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
+import { semAcento } from "@/shared/lib/texto";
 import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
 import { email, id, sim, texto, textoOpcional, umDe, url } from "@/shared/acao/campos";
 import { falha, SEM_PERMISSAO, sucesso } from "@/shared/acao/resultado";
@@ -34,6 +35,35 @@ const como = z
   .string()
   .optional()
   .transform((v) => v?.trim().toLowerCase() || undefined);
+
+/**
+ * Colegas digitados na proposta: aceita o e-mail (escolhido na lista) ou o nome completo.
+ * Diz exatamente quem não foi encontrado, em vez do erro genérico do banco (heurísticas 5 e 9).
+ */
+async function resolverColegas(entradas: string[]): Promise<{ emails: string[] } | { erro: string }> {
+  if (!entradas.length) return { emails: [] };
+  const { cliente, edicao } = await sessaoAtual();
+  const livres = await listarSemEquipe(cliente, edicao.id);
+  const emails: string[] = [];
+  for (const entrada of entradas) {
+    const alvo = entrada.trim().toLowerCase();
+    const porEmail = livres.find((p) => p.email === alvo);
+    if (porEmail) {
+      emails.push(porEmail.email);
+      continue;
+    }
+    const porNome = livres.filter((p) => semAcento(p.nome) === semAcento(alvo));
+    if (porNome.length === 1) {
+      emails.push(porNome[0].email);
+      continue;
+    }
+    if (porNome.length > 1) return { erro: `Há mais de um aluno chamado “${entrada}”. Escolha o colega certo na lista de sugestões.` };
+    return {
+      erro: `Não encontramos “${entrada}” entre os alunos desta edição sem equipe. Escolha o colega na lista de sugestões (quem já está numa equipe ou tem convite aguardando não aparece).`,
+    };
+  }
+  return { emails: [...new Set(emails)] };
+}
 
 const carimbo = (publico: boolean | null) => ({
   repo_publico: publico,
@@ -174,7 +204,10 @@ export async function aplicarEquipesGeradas(equipes: { nome: string; emails: str
 export const proporEquipe = criarAcao(
   z.object({ nome: texto("o nome da equipe", { min: 2, max: 60 }), repo_github: repositorioOpcional, como }),
   async (d, bruto, formulario) => {
-    const colegas = [...new Set(formulario.getAll("colegas").map((v) => String(v).trim().toLowerCase()).filter(Boolean))];
+    const digitados = formulario.getAll("colegas").map((v) => String(v).trim()).filter(Boolean);
+    const r = await resolverColegas(digitados);
+    if ("erro" in r) return falha(r.erro);
+    const colegas = r.emails;
     const { error } = await repo.proporEquipe(await clienteServidor(), d.nome, colegas, d.repo_github, d.como);
     if (error) return falha(traduzirErro(error));
     atualizarTelas();
@@ -186,8 +219,10 @@ export const proporEquipe = criarAcao(
   },
 );
 
-export const convidarIntegrante = criarAcao(z.object({ equipe_id: id, email, como }), async (d) => {
-  const { error } = await repo.convidarIntegrante(await clienteServidor(), d.equipe_id, d.email, d.como);
+export const convidarIntegrante = criarAcao(z.object({ equipe_id: id, email: texto("o colega", { min: 2, max: 200 }), como }), async (d) => {
+  const r = await resolverColegas([d.email]);
+  if ("erro" in r) return falha(r.erro);
+  const { error } = await repo.convidarIntegrante(await clienteServidor(), d.equipe_id, r.emails[0], d.como);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
   return sucesso("Convite enviado. A pessoa vê o convite ao entrar no sistema.");

@@ -115,6 +115,8 @@ export const criarEdicao = criarAcao(
     copiar_de: z.string().optional().transform((v) => v || undefined),
   }),
   async (d) => {
+    if (d.data_inicio && d.data_fim && d.data_fim < d.data_inicio) return falha("A data de fim precisa ser depois da data de início.");
+    if (d.min_membros > d.max_membros) return falha("O mínimo de integrantes não pode passar do máximo.");
     const { cliente } = await sessaoAtual();
     const { copiar_de, ...dados } = d;
     const { data: novoId, error } = await repo.criarEdicao(cliente, dados, copiar_de);
