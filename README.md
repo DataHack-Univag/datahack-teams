@@ -117,6 +117,8 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 10. `…10_edicoes` — edições, pessoas + participações, regulamento no banco, propostas de equipe,
     fichas por critério, histórico e "nada é apagado". A edição de 2026 vira a Edição 1 com todos
     os dados; as tabelas antigas ficam guardadas como `*_legado`.
+11. `…11_presenca` — presença no evento por participação (presente/ausente, quando e quem marcou)
+    e o motivo de saída "ausente" para quem estava numa equipe e não compareceu.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`

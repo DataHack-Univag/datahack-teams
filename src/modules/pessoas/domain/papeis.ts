@@ -1,18 +1,22 @@
 // Papel de cada pessoa numa edição. Avaliadores pertencem a uma banca do regulamento da edição
 // (ex.: banca de professores, jurados de negócio); a organização tem a banca dela.
 
-export type Papel = "aluno" | "organizador" | "avaliador";
+export type Papel = "aluno" | "organizador" | "avaliador" | "mentor";
 
 /** Papéis com o nome e a explicação que a tela mostra (heurística 2: sem os códigos internos). */
 export const PAPEIS: { valor: Papel; rotulo: string; descricao: string }[] = [
   { valor: "aluno", rotulo: "Aluno", descricao: "Participa de uma equipe e faz as entregas." },
   { valor: "organizador", rotulo: "Organização", descricao: "Vê e edita tudo da edição e avalia pela banca da organização." },
   { valor: "avaliador", rotulo: "Avaliador", descricao: "Avalia as rubricas da banca dele." },
+  { valor: "mentor", rotulo: "Mentoria", descricao: "Ajuda as equipes no evento. Fica no registro da edição; não avalia nem tem área no sistema." },
 ];
 
 export const VALORES_PAPEL = PAPEIS.map((p) => p.valor);
 
 export const ehAvaliador = (p: Papel) => p === "avaliador";
+
+/** Papéis que entram no sistema (mentoria só fica registrada na edição). */
+export const temArea = (p: Papel) => p !== "mentor";
 
 /** Para onde cada papel vai ao entrar. */
 export function inicioDoPapel(p: Papel): string {
@@ -33,7 +37,7 @@ export type BancaResumo = { codigo: string; nome: string; daOrganizacao: boolean
 export const funcaoDe = (papel: Papel, banca: string | null) => (papel === "avaliador" && banca ? `avaliador:${banca}` : papel);
 
 export function lerFuncao(valor: string): { papel: Papel; banca: string | null } | null {
-  if (valor === "aluno" || valor === "organizador") return { papel: valor, banca: null };
+  if (valor === "aluno" || valor === "organizador" || valor === "mentor") return { papel: valor, banca: null };
   const m = valor.match(/^avaliador:([a-z0-9_]+)$/);
   return m ? { papel: "avaliador", banca: m[1] } : null;
 }
@@ -43,6 +47,7 @@ export function opcoesFuncao(bancas: BancaResumo[]): { valor: string; rotulo: st
     { valor: "aluno", rotulo: "Aluno", descricao: PAPEIS[0].descricao },
     { valor: "organizador", rotulo: "Organização", descricao: PAPEIS[1].descricao },
     ...bancas.filter((b) => !b.daOrganizacao).map((b) => ({ valor: `avaliador:${b.codigo}`, rotulo: b.nome, descricao: "Avalia as rubricas desta banca." })),
+    { valor: "mentor", rotulo: "Mentoria", descricao: PAPEIS[3].descricao },
   ];
 }
 

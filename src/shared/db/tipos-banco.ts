@@ -813,6 +813,9 @@ export type Database = {
           semestre: number | null;
           criado_em: string;
           removido_em: string | null;
+          presenca: string | null;
+          presenca_em: string | null;
+          presenca_por: string | null;
         };
         Insert: {
           edicao_id: string;
@@ -823,6 +826,9 @@ export type Database = {
           semestre?: number | null;
           criado_em?: string;
           removido_em?: string | null;
+          presenca?: string | null;
+          presenca_em?: string | null;
+          presenca_por?: string | null;
         };
         Update: {
           edicao_id?: string;
@@ -833,6 +839,9 @@ export type Database = {
           semestre?: number | null;
           criado_em?: string;
           removido_em?: string | null;
+          presenca?: string | null;
+          presenca_em?: string | null;
+          presenca_por?: string | null;
         };
         Relationships: [
           {
@@ -852,6 +861,13 @@ export type Database = {
           {
             foreignKeyName: "participacoes_email_fkey";
             columns: ["email"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "participacoes_presenca_por_fkey";
+            columns: ["presenca_por"];
             isOneToOne: false;
             referencedRelation: "pessoas";
             referencedColumns: ["email"];
@@ -1267,7 +1283,7 @@ export type Database = {
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
+      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador: { Args: Record<PropertyKey, never>; Returns: boolean };

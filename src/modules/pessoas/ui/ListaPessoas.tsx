@@ -22,6 +22,7 @@ function filtrosDa(bancas: BancaResumo[]): Filtro[] {
     ...opcoesFuncao(bancas).map((x) => ({ id: x.valor, rotulo: x.rotulo, teste: (p: Participante) => funcaoDe(p.papel, p.banca) === x.valor })),
     { id: "sem_equipe", rotulo: "Alunos sem equipe", teste: (p) => p.papel === "aluno" && !p.equipe_id },
     { id: "sem_nota", rotulo: "Alunos sem nota", teste: (p) => p.papel === "aluno" && p.nota == null },
+    { id: "ausentes", rotulo: "Ausentes no evento", teste: (p) => p.presenca === "ausente" },
   ];
 }
 
@@ -87,6 +88,8 @@ export function ListaPessoas({
         {FILTROS.map((f) => {
           const n = pessoas.filter(f.teste).length;
           const atual = f.id === filtro;
+          // "Ausentes" só aparece quando a presença da edição foi registrada (heurística 8).
+          if (f.id === "ausentes" && n === 0 && !atual) return null;
           return (
             <button
               key={f.id}
@@ -131,6 +134,11 @@ export function ListaPessoas({
                       <span className="truncate">{p.nome}</span>
                       {p.email === meuEmail && <span className="text-xs text-suave">(você)</span>}
                       {p.papel !== "aluno" && <Selo tom="marca">{rotuloFuncao(p.papel, p.banca, bancas)}</Selo>}
+                      {p.presenca === "ausente" && (
+                        <Selo tom="alerta" title="Registrada como ausente no evento (continua inscrita na edição)">
+                          Ausente
+                        </Selo>
+                      )}
                     </p>
                     <p className="truncate text-xs text-suave">
                       {[p.curso, p.semestre && `${p.semestre}º sem.`, p.email].filter(Boolean).join(" · ")}
@@ -148,7 +156,7 @@ export function ListaPessoas({
                 {abertoAqui && (
                   <div className="mt-2 space-y-3 rounded-xl border border-borda p-3" style={{ animation: "dh-sobe .2s both" }}>
                     <div className="flex flex-wrap gap-2">
-                      {p.papel !== "organizador" && (
+                      {p.papel !== "organizador" && p.papel !== "mentor" && (
                         <Link href={`/ver-como?email=${encodeURIComponent(p.email)}`} className="btn-secundario min-h-9 px-3 text-xs">
                           <Icone nome="olho" className="size-4" /> Ver como esta pessoa
                         </Link>
