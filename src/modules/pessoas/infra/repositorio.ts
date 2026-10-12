@@ -16,7 +16,7 @@ type LinhaParticipacao = {
   presenca: Presenca | null;
 };
 
-const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas(nome), banca:bancas(codigo)";
+const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas!participacoes_email_fkey(nome), banca:bancas(codigo)";
 
 const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   email: p.email,
@@ -28,15 +28,19 @@ const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   presenca: p.presenca ?? null,
 });
 
-/** A pessoa como participante de uma edição (null se não participa). */
+/**
+ * A pessoa como participante de uma edição (null se não participa).
+ * Erro do banco vira a tela de erro (heurística 9), e não "você não está inscrito".
+ */
 export async function buscarInscrito(cliente: Cliente, email: string, edicaoId: string): Promise<Inscrito | null> {
-  const { data } = await cliente
+  const r = await cliente
     .from("participacoes")
     .select(SELECT_PARTICIPACAO)
     .eq("edicao_id", edicaoId)
     .eq("email", email)
     .is("removido_em", null)
     .maybeSingle<LinhaParticipacao>();
+  const data = exigir(r, "o seu cadastro nesta edição");
   return data ? paraInscrito(data) : null;
 }
 
