@@ -360,7 +360,10 @@ alter table public.equipes
   add column motivo_analise text check (motivo_analise is null or char_length(motivo_analise) <= 500),
   add column removido_em    timestamptz,
   add column removido_por   text references public.pessoas (email) on update cascade;
+-- Sem tocar em atualizado_em: a data da última alteração de cada equipe é preservada.
+alter table public.equipes disable trigger equipes_atualizado_em;
 update public.equipes set edicao_id = (select id from public.edicoes where numero = 1), origem = 'migracao';
+alter table public.equipes enable trigger equipes_atualizado_em;
 alter table public.equipes alter column edicao_id set not null;
 create index equipes_edicao_idx on public.equipes (edicao_id);
 
