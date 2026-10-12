@@ -16,7 +16,7 @@ type LinhaParticipacao = {
   presenca: Presenca | null;
 };
 
-const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas(nome), banca:bancas(codigo)";
+const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas!participacoes_email_fkey(nome), banca:bancas(codigo)";
 
 const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   email: p.email,
