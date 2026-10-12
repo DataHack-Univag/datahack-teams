@@ -112,6 +112,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "O que é o selo “Ausente” em Pessoas?",
+    resposta:
+      "É quem estava inscrito mas não compareceu ao evento. A pessoa continua na edição e no histórico (ausência não é remoção); se estava numa equipe, saiu dela com o motivo “ausente”. Use o filtro “Ausentes no evento” para ver a lista.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Como confiro se as telas das bancas estão certas sem criar contas falsas?",
     resposta:
       "Em Pessoas, abra qualquer aluno ou avaliador e use “Ver como esta pessoa”. Você navega exatamente como ela; nas fichas das bancas nada é salvo durante a simulação.",

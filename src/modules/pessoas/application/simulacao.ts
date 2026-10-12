@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
-import { inicioDoPapel } from "@/modules/pessoas/domain/papeis";
+import { inicioDoPapel, temArea } from "@/modules/pessoas/domain/papeis";
 import { buscarInscrito } from "@/modules/pessoas/infra/repositorio";
 import { apagarSimulacao, gravarSimulacao } from "@/shared/auth/simulacao";
 
@@ -12,7 +12,7 @@ export async function iniciarSimulacao(formulario: FormData) {
   const { cliente, real, edicao } = await sessaoAtual();
   if (real.papel !== "organizador") redirect("/");
   const alvo = email ? await buscarInscrito(cliente, email, edicao.id) : null;
-  if (!alvo || alvo.papel === "organizador") redirect("/admin/pessoas");
+  if (!alvo || alvo.papel === "organizador" || !temArea(alvo.papel)) redirect("/admin/pessoas");
   await gravarSimulacao(alvo.email);
   redirect(inicioDoPapel(alvo.papel));
 }

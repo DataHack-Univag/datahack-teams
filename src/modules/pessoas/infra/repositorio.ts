@@ -2,7 +2,7 @@
 // + nota média por edição (notas). Única parte do módulo que conhece o Supabase.
 
 import type { Papel } from "@/modules/pessoas/domain/papeis";
-import type { Inscrito, Participante } from "@/modules/pessoas/domain/tipos";
+import type { Inscrito, Participante, Presenca } from "@/modules/pessoas/domain/tipos";
 import { exigir, type ErroBanco } from "@/shared/db/erros";
 import type { Cliente } from "@/shared/db/servidor";
 
@@ -13,9 +13,10 @@ type LinhaParticipacao = {
   semestre: number | null;
   pessoa: { nome: string } | null;
   banca: { codigo: string } | null;
+  presenca: Presenca | null;
 };
 
-const SELECT_PARTICIPACAO = "email, papel, curso, semestre, pessoa:pessoas(nome), banca:bancas(codigo)";
+const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas(nome), banca:bancas(codigo)";
 
 const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   email: p.email,
@@ -24,6 +25,7 @@ const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   semestre: p.semestre,
   papel: p.papel,
   banca: p.banca?.codigo ?? null,
+  presenca: p.presenca ?? null,
 });
 
 /** A pessoa como participante de uma edição (null se não participa). */

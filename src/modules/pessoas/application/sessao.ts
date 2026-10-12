@@ -38,13 +38,18 @@ export const sessaoAtual = cache(async () => {
     await encerrarSessao(cliente);
     redirect("/login?erro=nao_inscrito");
   }
+  // Mentoria fica só no registro da edição: não tem área no sistema.
+  if (inscrito.papel === "mentor") {
+    await encerrarSessao(cliente);
+    redirect("/login?erro=mentoria");
+  }
 
   // "Ver como": o organizador passa a ver o sistema como a pessoa escolhida (na mesma edição).
   let simulado: Inscrito | null = null;
   if (inscrito.papel === "organizador") {
     const alvo = await emailSimulado();
     const pessoa = alvo ? await buscarInscrito(cliente, alvo, edicao.id) : null;
-    if (pessoa && pessoa.papel !== "organizador") simulado = pessoa;
+    if (pessoa && pessoa.papel !== "organizador" && pessoa.papel !== "mentor") simulado = pessoa;
   }
   const usuario = simulado ?? inscrito;
 

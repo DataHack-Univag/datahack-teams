@@ -16,6 +16,8 @@ export default async function VerComo({ searchParams }: PageProps<"/ver-como">) 
   const alvo = await buscarInscrito(cliente, email.toLowerCase(), edicao.id);
   if (!alvo) notFound();
   if (alvo.papel === "organizador") redirect("/admin/pessoas?filtro=organizador");
+  // Mentoria não tem área no sistema: não há o que simular.
+  if (alvo.papel === "mentor") redirect("/admin/pessoas?filtro=mentor");
   const papel = PAPEIS.find((p) => p.valor === alvo.papel);
 
   return (

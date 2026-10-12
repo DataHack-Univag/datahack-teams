@@ -9,6 +9,7 @@ const MENSAGENS: Record<string, string> = {
   nao_inscrito:
     "Esse e-mail não está na lista de inscritos do DataHack. Use o e-mail da inscrição ou procure a organização.",
   falha: "Não foi possível concluir o login. Tente novamente.",
+  mentoria: "A mentoria fica registrada na edição, mas não tem uma área no sistema. Se precisar de acesso, fale com a organização.",
   link_invalido:
     "Link de redefinição inválido ou expirado. Peça um novo em \"Esqueci a senha\" (e abra o link no mesmo navegador).",
 };
