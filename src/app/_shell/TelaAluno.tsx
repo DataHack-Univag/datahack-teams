@@ -1,12 +1,15 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 import { Area } from "@/app/_shell/Area";
 import { comandosDasAbas, navAluno } from "@/app/_shell/menus";
-import { equipeDoAluno, lerConfiguracao, listarResumo } from "@/modules/equipes/infra/repositorio";
+import type { Edicao } from "@/modules/edicoes/domain/tipos";
+import { configuracaoDa } from "@/modules/equipes/domain/tipos";
+import { equipeDoAluno, listarResumo, ultimaRecusa } from "@/modules/equipes/infra/repositorio";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
+import { ConviteRecebido, MinhaProposta, ProporEquipe, PropostaRecusada } from "@/modules/equipes/ui/Propostas";
 import { listarMateriais } from "@/modules/materiais/infra/repositorio";
 import { ListaMateriais } from "@/modules/materiais/ui/Materiais";
 import type { Inscrito } from "@/modules/pessoas/domain/tipos";
+import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
 import { separarTrocas } from "@/modules/trocas/domain/tipos";
 import { trocasDoAluno } from "@/modules/trocas/infra/repositorio";
 import { PedidosRecebidos, PedirTroca } from "@/modules/trocas/ui/Trocas";
@@ -22,58 +25,65 @@ export type AbaAluno = "equipe" | "trocas" | "materiais";
 export const abaDoAluno = (v: unknown): AbaAluno => (v === "trocas" || v === "materiais" ? v : "equipe");
 
 /**
- * Tela do aluno com as três abas (Minha equipe · Trocas · Materiais).
- * Usada na tela real ("/") e no "ver como aluno" da organização: mesma tela e mesmos botões;
- * na simulação quem age é o organizador (o banco registra assim).
+ * Tela do aluno na edição: Minha equipe · Trocas (se a edição permitir) · Materiais.
+ * No "ver como" da organização é a mesma tela, com os mesmos botões; quem age é o
+ * organizador (o banco registra assim).
  */
 export async function TelaAluno({
   cliente,
   aluno,
   avatar,
-  aba,
-  simulacao,
+  aba: abaPedida,
+  edicao,
+  simulacao = false,
 }: {
   cliente: Cliente;
   aluno: Inscrito;
   avatar: string | null;
   aba: AbaAluno;
-  /** Faixa "Vendo como…" (só no modo ver como). */
-  simulacao?: ReactNode;
+  edicao: Edicao;
+  simulacao?: boolean;
 }) {
+  const config = configuracaoDa(edicao);
+  const porProposta = edicao.modo_formacao === "alunos_propoem";
   // Tudo em paralelo: uma única "rodada" até o banco.
-  const [config, materiais, equipe, equipes, trocas] = await Promise.all([
-    lerConfiguracao(cliente),
-    listarMateriais(cliente),
-    equipeDoAluno(cliente, aluno.email),
-    listarResumo(cliente),
-    trocasDoAluno(cliente, aluno.email),
+  const [materiais, equipe, equipes, trocas, colegasLivres, recusa] = await Promise.all([
+    listarMateriais(cliente, edicao.id),
+    equipeDoAluno(cliente, aluno.email, edicao.id),
+    listarResumo(cliente, edicao.id),
+    edicao.permite_trocas ? trocasDoAluno(cliente, aluno.email, edicao.id) : Promise.resolve([]),
+    porProposta ? listarSemEquipe(cliente, edicao.id) : Promise.resolve([]),
+    porProposta ? ultimaRecusa(cliente, aluno.email, edicao.id) : Promise.resolve(null),
   ]);
-  const troca = equipe ? separarTrocas(trocas, aluno.email, equipe.id) : null;
+
+  const meuVinculo = equipe?.membros.find((m) => m.email === aluno.email);
+  const convidado = meuVinculo?.situacao === "convidado";
+  const aprovada = equipe?.situacao === "aprovada" && !convidado;
+  const troca = aprovada && equipe && edicao.permite_trocas ? separarTrocas(trocas, aluno.email, equipe.id) : null;
   const souLider = !!equipe && equipe.lider_email === aluno.email;
 
-  const base = simulacao ? `/ver-como?email=${encodeURIComponent(aluno.email)}` : "/";
-  const itens = navAluno(base, { trocas: troca?.recebidos.length }, !simulacao);
+  const itens = navAluno("/", { trocas: troca?.recebidos.length }).filter((i) => i.aba !== "trocas" || edicao.permite_trocas);
+  const aba: AbaAluno = abaPedida === "trocas" && !edicao.permite_trocas ? "equipe" : abaPedida;
   const destaques = materiais.filter((m) => m.destaque);
+  const podeFormar = porProposta && !config.edicao_bloqueada;
 
   return (
-    <Area
-      nome={aluno.nome}
-      papel={aluno.papel}
-      avatar={avatar}
-      itens={itens}
-      comandos={comandosDasAbas(itens)}
-      faixa={simulacao}
-      simulacao={!!simulacao}
-    >
-      {/* Pedidos de troca e mudanças da organização chegam sem recarregar. */}
+    <Area nome={aluno.nome} papel={aluno.papel} avatar={avatar} itens={itens} comandos={comandosDasAbas(itens)}>
+      {/* Convites, trocas e decisões da organização chegam sem recarregar. */}
       <AutoAtualizar segundos={30} />
       <Pagina estreita>
         {aba === "equipe" && (
           <>
             {!simulacao && (
-              <BoasVindas id="aluno-v1" titulo={`Bem-vindo, ${primeiroNome(aluno.nome)}!`}>
-                Aqui fica a sua equipe: colegas, repositório e links de entrega. Em <strong>Trocas</strong> você pede para
-                mudar de equipe e em <strong>Materiais</strong> estão os desafios e as bases de dados.
+              <BoasVindas id={`aluno-${edicao.slug}`} titulo={`Bem-vindo à ${edicao.nome}, ${primeiroNome(aluno.nome)}!`}>
+                Aqui fica a sua equipe: colegas, repositório e links de entrega.
+                {edicao.permite_trocas && (
+                  <>
+                    {" "}
+                    Em <strong>Trocas</strong> você pede para mudar de equipe.
+                  </>
+                )}{" "}
+                Em <strong>Materiais</strong> estão os desafios e as bases de dados.
               </BoasVindas>
             )}
             {troca && troca.recebidos.length > 0 && (
@@ -85,8 +95,18 @@ export async function TelaAluno({
                 <ListaMateriais materiais={destaques} />
               </section>
             )}
-            {equipe ? (
+
+            {equipe && convidado ? (
+              <ConviteRecebido equipe={equipe} meuEmail={aluno.email} />
+            ) : equipe && !aprovada ? (
+              <MinhaProposta equipe={equipe} meuEmail={aluno.email} colegas={colegasLivres} config={config} />
+            ) : equipe ? (
               <PainelEquipe equipe={equipe} config={config} meuEmail={aluno.email} organizador={false} />
+            ) : podeFormar ? (
+              <>
+                {recusa && <PropostaRecusada nome={recusa.nome} motivo={recusa.motivo} />}
+                <ProporEquipe colegas={colegasLivres} config={config} meuEmail={aluno.email} />
+              </>
             ) : (
               <EstadoVazio
                 icone="equipe"
@@ -97,7 +117,9 @@ export async function TelaAluno({
                   </BotaoLink>
                 }
               >
-                As equipes são formadas pela organização; assim que a sua for montada, ela aparece aqui com os colegas.
+                {porProposta
+                  ? "A formação de equipes está fechada no momento. Fale com a organização."
+                  : "As equipes são formadas pela organização; assim que a sua for montada, ela aparece aqui com os colegas."}{" "}
                 Enquanto isso, crie uma conta no GitHub: a equipe vai precisar de um repositório <strong>público</strong>.
               </EstadoVazio>
             )}
@@ -122,7 +144,7 @@ export async function TelaAluno({
               </>
             ) : (
               <EstadoVazio icone="trocas" titulo="Você ainda não tem equipe">
-                Trocas só ficam disponíveis depois que a organização montar as equipes.
+                Trocas só ficam disponíveis depois que a sua equipe estiver aprovada.
               </EstadoVazio>
             )}
           </>

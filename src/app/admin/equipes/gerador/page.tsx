@@ -6,8 +6,8 @@ import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 
 // Equipes → Gerador: monta equipes equilibradas por semestre e nota e cadastra a combinação escolhida.
 export default async function AdminGerador() {
-  const { cliente } = await sessaoAtual();
-  const [participantes, totalEquipes] = await Promise.all([listarParticipantes(cliente), contarEquipes(cliente)]);
+  const { cliente, edicao } = await sessaoAtual();
+  const [participantes, totalEquipes] = await Promise.all([listarParticipantes(cliente, edicao.id), contarEquipes(cliente, edicao.id)]);
 
   const alunosTodos = participantes.filter((p) => p.papel === "aluno");
   const alunos: AlunoComEquipe[] = alunosTodos

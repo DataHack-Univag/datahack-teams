@@ -1,4 +1,4 @@
-import { removerMaterial, salvarMaterial } from "@/modules/materiais/application/actions";
+import { removerMaterial, restaurarMaterial, salvarMaterial } from "@/modules/materiais/application/actions";
 import { CATEGORIAS_MATERIAL, rotuloMaterial, type Material } from "@/modules/materiais/domain/tipos";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
@@ -48,7 +48,7 @@ export function ListaMateriais({ materiais, editavel = false }: { materiais: Mat
                   <FormMaterial m={m} />
                 </div>
               </details>
-              <Formulario action={removerMaterial} acaoDesfazer={salvarMaterial}>
+              <Formulario action={removerMaterial} acaoDesfazer={restaurarMaterial}>
                 <Ocultos valores={{ id: m.id }} />
                 <BotaoEnviar variante="perigo" tamanho="pequeno" icone="lixo">
                   Remover

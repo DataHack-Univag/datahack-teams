@@ -44,8 +44,11 @@ export function listarPendencias({
   andamento,
   config,
   encerrada,
+  propostas = [],
 }: {
   equipes: Equipe[];
+  /** Equipes propostas pelos alunos ainda não aprovadas. */
+  propostas?: Equipe[];
   semEquipe: Inscrito[];
   trocas: Troca[];
   andamento: Andamento[];
@@ -55,8 +58,22 @@ export function listarPendencias({
   const p: Pendencia[] = [];
   const nomes = (xs: { nome: string }[]) => xs.slice(0, 4).map((x) => x.nome).join(", ") + (xs.length > 4 ? ` e mais ${xs.length - 4}` : "");
 
-  if (equipes.length === 0)
-    p.push({ id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe criada", detalhe: "Monte as equipes com o gerador ou crie à mão.", href: "/admin/equipes/gerador", acao: "Abrir o gerador" });
+  const aguardando = propostas.filter((e) => e.situacao === "aguardando_aprovacao");
+  if (aguardando.length)
+    p.push({
+      id: "propostas",
+      tom: "alerta",
+      titulo: `${aguardando.length} equipe(s) proposta(s) aguardando aprovação`,
+      detalhe: nomes(aguardando),
+      href: "/admin/equipes/propostas",
+      acao: "Analisar",
+    });
+  if (equipes.length === 0 && !propostas.length)
+    p.push(
+      config.modo_formacao === "alunos_propoem"
+        ? { id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe proposta ainda", detalhe: "Nesta edição os alunos propõem as equipes pelo sistema.", href: "/admin/equipes/propostas", acao: "Ver propostas" }
+        : { id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe criada", detalhe: "Monte as equipes com o gerador ou crie à mão.", href: "/admin/equipes/gerador", acao: "Abrir o gerador" },
+    );
   if (semEquipe.length)
     p.push({
       id: "sem-equipe",
@@ -106,6 +123,6 @@ export function listarPendencias({
       });
   }
   if (config.edicao_bloqueada)
-    p.push({ id: "bloqueada", tom: "info", titulo: "Edição pelos alunos bloqueada", detalhe: "Os alunos só visualizam a equipe.", href: "/admin/equipes#configuracao", acao: "Mudar" });
+    p.push({ id: "bloqueada", tom: "info", titulo: "Edição pelos alunos bloqueada", detalhe: "Os alunos só visualizam a equipe.", href: "/admin/equipes#regras", acao: "Mudar" });
   return p;
 }

@@ -1,7 +1,6 @@
-import { definirEncerramento } from "@/modules/avaliacao/application/actions";
+import { definirEncerramento } from "@/modules/edicoes/application/actions";
 import { carregarRanking, paraAvaliacao } from "@/modules/avaliacao/application/consultas";
 import { andamentoPorRubrica, resumirParaQuadro } from "@/modules/avaliacao/domain/consolidacao";
-import { DESCLASSIFICACAO, DESEMPATE, FORMULA } from "@/modules/avaliacao/domain/rubricas";
 import { AjudaCalculo } from "@/modules/avaliacao/ui/AjudaCalculo";
 import { Andamento } from "@/modules/avaliacao/ui/Andamento";
 import { DetalheFichas } from "@/modules/avaliacao/ui/DetalheFichas";
@@ -22,8 +21,8 @@ type Aba = (typeof ABAS)[number];
 export default async function AdminAvaliacao({ searchParams }: PageProps<"/admin/avaliacao">) {
   const { aba: abaUrl } = await searchParams;
   const aba: Aba = ABAS.find((a) => a === abaUrl) ?? "quadro";
-  const { cliente } = await sessaoAtual();
-  const { equipes, fichas, encerrada, linhas } = await carregarRanking(cliente);
+  const { cliente, edicao } = await sessaoAtual();
+  const { reg, equipes, fichas, encerrada, linhas } = await carregarRanking(cliente, edicao);
   const avaliadores = new Set(fichas.map((f) => f.avaliador)).size;
 
   return (
@@ -32,10 +31,10 @@ export default async function AdminAvaliacao({ searchParams }: PageProps<"/admin
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Avaliação" }]}
         titulo="Notas e avaliação"
         destaque="avaliação"
-        descricao={`${plural(fichas.length, "ficha", "fichas")} de ${plural(avaliadores, "avaliador", "avaliadores")}. ${FORMULA}.`}
+        descricao={`${plural(fichas.length, "ficha", "fichas")} de ${plural(avaliadores, "avaliador", "avaliadores")}. ${reg.formula}`}
         acoes={
           <>
-            <AjudaCalculo />
+            <AjudaCalculo reg={reg} />
             <Menu
               rotulo="Exportar"
               icone="baixar"
@@ -92,11 +91,11 @@ export default async function AdminAvaliacao({ searchParams }: PageProps<"/admin
           As notas aparecem aqui depois que as equipes forem montadas e as bancas lançarem as fichas.
         </EstadoVazio>
       ) : aba === "andamento" ? (
-        <Andamento itens={andamentoPorRubrica(equipes.map(paraAvaliacao), fichas)} />
+        <Andamento itens={andamentoPorRubrica(reg, equipes.map(paraAvaliacao), fichas)} />
       ) : aba === "fichas" ? (
-        <DetalheFichas linhas={linhas} />
+        <DetalheFichas reg={reg} linhas={linhas} />
       ) : (
-        <QuadroGeral equipes={resumirParaQuadro(linhas)} />
+        <QuadroGeral equipes={resumirParaQuadro(reg, linhas)} />
       )}
 
       <section className="card space-y-2 text-sm">
@@ -106,10 +105,10 @@ export default async function AdminAvaliacao({ searchParams }: PageProps<"/admin
           usa-se a média por critério. Nota final mínima 0.
         </p>
         <p className="text-suave">
-          <strong className="text-foreground">Desempate:</strong> {DESEMPATE.join(" → ")}
+          <strong className="text-foreground">Desempate:</strong> {reg.desempate.map((d) => d.descricao).join(" → ")}
         </p>
         <p className="text-suave">
-          <strong className="text-foreground">Desclassificação:</strong> {DESCLASSIFICACAO}
+          <strong className="text-foreground">Desclassificação:</strong> {reg.desclassificacao || "—"}
         </p>
       </section>
     </Pagina>

@@ -7,22 +7,23 @@ import type { Cliente } from "@/shared/db/servidor";
 
 const SELECT_TROCA =
   "id, solicitante, equipe_origem, equipe_destino, status, mensagem, criado_em, respondido_em," +
-  " quem:inscritos!trocas_solicitante_fkey(nome)";
+  " quem:pessoas!trocas_solicitante_fkey(nome)";
 
 const SELECT_HISTORICO =
   SELECT_TROCA +
-  ", respondido_por, respondeu:inscritos!trocas_respondido_por_fkey(nome)," +
+  ", respondido_por, respondeu:pessoas!trocas_respondido_por_fkey(nome)," +
   " solicitante_nome, origem_nome, destino_nome, respondido_nome";
 
 /**
  * Pedidos que interessam a um aluno: os que ele fez (aguardando, ou respondidos nas últimas 24 h)
  * e os aguardando que o banco deixa ver (os da equipe dele).
  */
-export async function trocasDoAluno(cliente: Cliente, email: string): Promise<Troca[]> {
+export async function trocasDoAluno(cliente: Cliente, email: string, edicaoId: string): Promise<Troca[]> {
   const desde = new Date(Date.now() - 24 * 3600 * 1000).toISOString();
   const r = await cliente
     .from("trocas")
     .select(SELECT_TROCA)
+    .eq("edicao_id", edicaoId)
     .or(`solicitante.eq."${email}",status.eq.pendente`)
     .or(`status.eq.pendente,respondido_em.gte."${desde}"`)
     .order("criado_em", { ascending: false })
@@ -31,10 +32,11 @@ export async function trocasDoAluno(cliente: Cliente, email: string): Promise<Tr
   return exigir(r, "os pedidos de troca") ?? [];
 }
 
-export async function trocasPendentes(cliente: Cliente): Promise<Troca[]> {
+export async function trocasPendentes(cliente: Cliente, edicaoId: string): Promise<Troca[]> {
   const r = await cliente
     .from("trocas")
     .select(SELECT_TROCA)
+    .eq("edicao_id", edicaoId)
     .eq("status", "pendente")
     .order("criado_em", { ascending: true })
     .overrideTypes<Troca[], { merge: false }>();
@@ -42,10 +44,11 @@ export async function trocasPendentes(cliente: Cliente): Promise<Troca[]> {
 }
 
 /** Histórico completo (auditoria da organização), mais recentes primeiro. */
-export async function historicoTrocas(cliente: Cliente): Promise<Troca[]> {
+export async function historicoTrocas(cliente: Cliente, edicaoId: string): Promise<Troca[]> {
   const r = await cliente
     .from("trocas")
     .select(SELECT_HISTORICO)
+    .eq("edicao_id", edicaoId)
     .order("criado_em", { ascending: false })
     .limit(500)
     .overrideTypes<Troca[], { merge: false }>();

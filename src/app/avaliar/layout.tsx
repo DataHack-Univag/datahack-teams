@@ -8,10 +8,10 @@ import type { Comando } from "@/shared/ui/PaletaComandos";
 // Área das bancas: avaliadores (técnico/negócio) e organizadores.
 // A organização continua com as abas dela; as bancas veem só "Avaliar" e "Ajuda".
 export default async function LayoutAvaliar({ children }: LayoutProps<"/avaliar">) {
-  const { cliente, usuario, avatar, organizador, avaliador } = await sessaoAtual();
+  const { cliente, usuario, avatar, organizador, avaliador, edicao } = await sessaoAtual();
   if (!organizador && !avaliador) redirect("/");
 
-  const equipes = await listarResumo(cliente);
+  const equipes = await listarResumo(cliente, edicao.id);
   const nav = organizador ? navOrganizacao() : { itens: navBancas(), mais: undefined };
   const comandos: Comando[] = [
     ...comandosDasAbas([...nav.itens, ...(nav.mais ?? [])]),

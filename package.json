@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "typecheck": "next typegen && tsc --noEmit",
     "db:tipos": "node scripts/gerar_tipos_banco.mjs",
-    "gerar:rubricas": "node scripts/gerar_rubricas.mjs"
+    "regulamento": "node scripts/regulamento_canonico.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",

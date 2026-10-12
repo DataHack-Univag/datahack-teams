@@ -1,29 +1,24 @@
 "use client";
 
 import { useRef } from "react";
-import {
-  BANCAS,
-  DESCLASSIFICACAO,
-  DESEMPATE,
-  DIVISAO_FASES_1_2,
-  FASES,
-  FORMULA,
-  NIVEIS,
-  PENALIDADES,
-  RUBRICAS,
-} from "@/modules/avaliacao/domain/rubricas";
+import type { Regulamento } from "@/modules/avaliacao/domain/regulamento";
 
 const pct = (f: number) => `${Math.round(f * 100)}%`;
 const fmt = (v: number) => v.toFixed(1).replace(".", ",");
 
 /**
- * Botão "Como a nota é calculada?" com a regra completa (cronograma_rubrica_v2.html),
- * gerada das próprias rubricas do sistema (src/lib/rubricas.ts) para nunca ficar desatualizada.
+ * Botão "Como a nota é calculada?" com a regra completa, montada a partir do regulamento
+ * da edição (o mesmo que o cálculo usa), para nunca ficar desatualizada.
  */
-export function AjudaCalculo({ className = "btn-secundario" }: { className?: string }) {
+export function AjudaCalculo({ reg, className = "btn-secundario" }: { reg: Regulamento; className?: string }) {
   const modal = useRef<HTMLDialogElement>(null);
-  const f1Pitch = RUBRICAS.find((r) => r.id === "F1_PITCH");
-  const f1Mesa = RUBRICAS.find((r) => r.id === "F1_MESA");
+  const { niveis: NIVEIS, fases: FASES, rubricas: RUBRICAS, penalidades: PENALIDADES } = reg;
+  const nomeBanca = (codigo: string) => reg.bancas.find((b) => b.codigo === codigo)?.nome ?? codigo;
+  // Exemplos com o regulamento desta edição: a primeira rubrica e a primeira fase com duas partes.
+  const exemplo = RUBRICAS[0];
+  const fasePartida = FASES.find((f) => f.partes.length >= 2);
+  const [parteA, parteB] = fasePartida ? fasePartida.partes.map((id) => RUBRICAS.find((r) => r.id === id)!) : [];
+  const proficiente = NIVEIS.find((n) => n.nome === "Proficiente") ?? NIVEIS[Math.max(0, NIVEIS.length - 2)];
 
   return (
     <>
@@ -40,7 +35,7 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
           <div className="flex items-start gap-3">
             <div className="mr-auto">
               <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">
-                Regulamento · cronograma_rubrica_v2
+                Regulamento da edição
               </p>
               <h2 className="text-2xl font-extrabold">
                 Como a nota é <span className="grad-text">calculada</span>
@@ -80,11 +75,11 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
               Os pesos dos critérios de cada rubrica somam 100. Critério ainda sem nível conta 0 (a ficha aparece como
               incompleta).
             </p>
-            {f1Pitch && (
+            {exemplo && proficiente && (
               <p className="text-suave">
-                Exemplo ({f1Pitch.curto}): {f1Pitch.criterios.map((c) => `${c.nome} (${c.peso})`).join(", ")}. Se todos
-                forem Proficiente: {f1Pitch.criterios.map((c) => `${c.peso}×0,8`).join(" + ")} ={" "}
-                <strong className="text-foreground">80</strong>.
+                Exemplo ({exemplo.curto}): {exemplo.criterios.map((c) => `${c.nome} (${c.peso})`).join(", ")}. Se todos
+                forem {proficiente.nome}: {exemplo.criterios.map((c) => `${c.peso}×${String(proficiente.fator).replace(".", ",")}`).join(" + ")} ={" "}
+                <strong className="text-foreground">{fmt(exemplo.criterios.reduce((s, c) => s + c.peso * proficiente.fator, 0))}</strong>.
               </p>
             )}
           </section>
@@ -122,9 +117,9 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
                   {FASES.map((f) =>
                     RUBRICAS.filter((r) => f.partes.includes(r.id)).map((r, k) => (
                       <tr key={r.id} className="border-t border-borda">
-                        <td className="py-1 pr-2">{k === 0 ? `${f.id === "NEG" ? "Negócio" : f.id} (${f.peso}%)` : ""}</td>
+                        <td className="py-1 pr-2">{k === 0 ? `${f.nome} (${f.peso}%)` : ""}</td>
                         <td className="py-1 pr-2">{r.nome}</td>
-                        <td className="py-1 pr-2 text-suave">{BANCAS[r.banca]}</td>
+                        <td className="py-1 pr-2 text-suave">{nomeBanca(r.banca)}</td>
                         <td className="py-1 pr-2 text-right font-mono">{r.pesoFinal}%</td>
                       </tr>
                     )),
@@ -132,11 +127,10 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
                 </tbody>
               </table>
             </div>
-            {DIVISAO_FASES_1_2 && (
+            {fasePartida && (
               <p className="text-suave">
-                Fases 1 e 2 têm duas avaliações: <strong className="text-foreground">pitch</strong> (banca de professores,
-                visão macro) e <strong className="text-foreground">mesa</strong> (organizadores, visão técnica). Dentro da
-                fase: pitch {DIVISAO_FASES_1_2.pitch}% · mesa {DIVISAO_FASES_1_2.mesa}%.
+                Algumas fases têm mais de uma avaliação (ex.: {fasePartida.nome}: {parteA?.curto} e {parteB?.curto}, por bancas
+                diferentes). A nota da fase junta as partes pelos pesos.
               </p>
             )}
           </section>
@@ -147,14 +141,14 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
             <p className="rounded-xl border border-borda bg-superficie p-3 font-mono">
               nota da fase = Σ (peso da rubrica × nota da rubrica) ÷ peso da fase
             </p>
-            {f1Pitch && f1Mesa && (
+            {parteA && parteB && (
               <p className="text-suave">
-                Ex.: F1 com pitch 100 e mesa 50 → ({f1Pitch.pesoFinal}×100 + {f1Mesa.pesoFinal}×50) ÷{" "}
-                {f1Pitch.pesoFinal + f1Mesa.pesoFinal} ={" "}
+                Ex.: {parteA.curto} 100 e {parteB.curto} 50 → ({parteA.pesoFinal}×100 + {parteB.pesoFinal}×50) ÷{" "}
+                {parteA.pesoFinal + parteB.pesoFinal} ={" "}
                 <strong className="text-foreground">
-                  {fmt((f1Pitch.pesoFinal * 100 + f1Mesa.pesoFinal * 50) / (f1Pitch.pesoFinal + f1Mesa.pesoFinal))}
+                  {fmt((parteA.pesoFinal * 100 + parteB.pesoFinal * 50) / (parteA.pesoFinal + parteB.pesoFinal))}
                 </strong>
-                , que soma {fmt((f1Pitch.pesoFinal * 100 + f1Mesa.pesoFinal * 50) / 100)} pontos na nota final.
+                , que soma {fmt((parteA.pesoFinal * 100 + parteB.pesoFinal * 50) / 100)} pontos na nota final.
               </p>
             )}
           </section>
@@ -163,7 +157,7 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
           <section className="space-y-2">
             <h3 className="text-base font-bold">6. Nota final</h3>
             <p className="rounded-xl border border-borda bg-superficie p-3 font-mono [overflow-wrap:anywhere]">
-              {FORMULA}
+              {reg.formula || `Nota final = ${RUBRICAS.map((r) => `${r.pesoFinal}% × ${r.curto}`).join(" + ")} + penalidades`}
             </p>
             <p className="text-suave">
               Cada termo é peso × nota da rubrica ÷ 100. Penalidades são somadas no fim. A nota final nunca fica abaixo de 0.
@@ -184,7 +178,7 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
               ))}
             </ul>
             <p className="text-suave">
-              <strong className="text-foreground">Desclassificação:</strong> {DESCLASSIFICACAO}
+              <strong className="text-foreground">Desclassificação:</strong> {reg.desclassificacao || "—"}
             </p>
           </section>
 
@@ -192,8 +186,8 @@ export function AjudaCalculo({ className = "btn-secundario" }: { className?: str
           <section className="space-y-2">
             <h3 className="text-base font-bold">8. Desempate (nesta ordem)</h3>
             <ol className="list-decimal space-y-1 pl-5 text-suave">
-              {DESEMPATE.map((d) => (
-                <li key={d}>{d}</li>
+              {reg.desempate.map((d) => (
+                <li key={d.descricao}>{d.descricao}</li>
               ))}
             </ol>
           </section>

@@ -1,12 +1,12 @@
-// Cálculo das notas (mesma regra de src/build_cronograma_rubrica.py, versão 2):
+// Cálculo das notas a partir do regulamento da edição:
 //   - cada critério: média dos fatores dados pelos avaliadores daquela rubrica;
 //   - nota da rubrica (0–100) = soma(peso_critério × fator médio);
-//   - fases 1 e 2 têm duas rubricas: pitch (professores) e mesa (organizadores);
+//   - uma fase pode ter várias rubricas (ex.: pitch + mesa);
 //     nota da fase (0–100) = soma(peso_final × nota_rubrica) / peso da fase;
 //   - nota final = soma(peso_final × nota_rubrica / 100) + penalidades, mínimo 0;
-//   - desempate: F3 · Repositório → "Respondeu às perguntas" (NEG) → "Idempotência" (F2 · Mesa).
+//   - desempate: as regras da edição, em ordem (nota de uma rubrica ou média de um critério).
 
-import { FASES, PENALIDADES, RUBRICAS, type FaseId, type Rubrica, type RubricaId } from "./rubricas";
+import type { Regulamento, Rubrica } from "./regulamento";
 import type { Ficha, Notas } from "./tipos";
 
 /** Nota (0–100) de uma única ficha. Critérios sem nível contam 0. */
@@ -45,48 +45,38 @@ export type ResultadoFase = {
 };
 
 export type ResultadoEquipe = {
-  rubricas: Record<RubricaId, ResultadoRubrica>;
-  fases: Record<FaseId, ResultadoFase>;
+  rubricas: Record<string, ResultadoRubrica>;
+  fases: Record<string, ResultadoFase>;
   penalidades: number;
   final: number;
   completa: boolean;
+  /** Valores das regras de desempate automáticas, na ordem do regulamento (maior vence). */
   desempate: number[];
 };
 
-export function consolidarEquipe(fichas: Ficha[], penalidadesIds: string[]): ResultadoEquipe {
-  const rubricas = Object.fromEntries(RUBRICAS.map((r) => [r.id, consolidarRubrica(r, fichas)])) as Record<
-    RubricaId,
-    ResultadoRubrica
-  >;
-  const penalidades = penalidadesIds.reduce((s, id) => s + (PENALIDADES.find((p) => p.id === id)?.pontos ?? 0), 0);
+export function consolidarEquipe(reg: Regulamento, fichas: Ficha[], penalidadesIds: string[]): ResultadoEquipe {
+  const rubricas = Object.fromEntries(reg.rubricas.map((r) => [r.id, consolidarRubrica(r, fichas)]));
+  const penalidades = penalidadesIds.reduce((s, id) => s + (reg.penalidades.find((p) => p.id === id)?.pontos ?? 0), 0);
   const fases = Object.fromEntries(
-    FASES.map((f) => {
-      const partes = RUBRICAS.filter((r) => f.partes.includes(r.id));
+    reg.fases.map((f) => {
+      const partes = reg.rubricas.filter((r) => f.partes.includes(r.id));
       const pontos = partes.reduce((s, r) => s + (r.pesoFinal * (rubricas[r.id].nota ?? 0)) / 100, 0);
       const algumaAvaliada = partes.some((r) => rubricas[r.id].nota !== null);
-      return [
-        f.id,
-        {
-          nota: algumaAvaliada ? (pontos * 100) / f.peso : null,
-          pontos,
-          completa: partes.every((r) => rubricas[r.id].completa),
-        },
-      ];
+      return [f.id, { nota: algumaAvaliada && f.peso ? (pontos * 100) / f.peso : null, pontos, completa: partes.every((r) => rubricas[r.id].completa) }];
     }),
-  ) as Record<FaseId, ResultadoFase>;
-  const bruta = RUBRICAS.reduce((s, r) => s + (r.pesoFinal * (rubricas[r.id].nota ?? 0)) / 100, 0);
+  );
+  const bruta = reg.rubricas.reduce((s, r) => s + (r.pesoFinal * (rubricas[r.id].nota ?? 0)) / 100, 0);
   return {
     rubricas,
     fases,
     penalidades,
     final: Math.max(0, bruta + penalidades),
-    completa: RUBRICAS.every((r) => rubricas[r.id].completa),
-    // critérios de desempate, nesta ordem (maior vence)
-    desempate: [
-      rubricas.F3_REPO.nota ?? 0,
-      rubricas.NEG.mediaCriterio.respondeu ?? 0,
-      rubricas.F2_MESA.mediaCriterio.idempotencia ?? 0,
-    ],
+    completa: reg.rubricas.every((r) => rubricas[r.id].completa),
+    desempate: reg.desempate.flatMap((d) => {
+      if (d.tipo === "rubrica") return [rubricas[d.rubrica]?.nota ?? 0];
+      if (d.tipo === "criterio") return [rubricas[d.rubrica]?.mediaCriterio[d.criterio] ?? 0];
+      return [];
+    }),
   };
 }
 
@@ -94,7 +84,7 @@ export function consolidarEquipe(fichas: Ficha[], penalidadesIds: string[]): Res
 export function compararRanking(a: ResultadoEquipe, b: ResultadoEquipe) {
   if (Math.abs(b.final - a.final) > 1e-9) return b.final - a.final;
   for (let i = 0; i < a.desempate.length; i++) {
-    const d = b.desempate[i] - a.desempate[i];
+    const d = (b.desempate[i] ?? 0) - (a.desempate[i] ?? 0);
     if (Math.abs(d) > 1e-9) return d;
   }
   return 0;

@@ -2,7 +2,7 @@
 
 import { nomeNivel } from "./bancas";
 import { compararRanking, consolidarEquipe, notaFicha, type ResultadoEquipe } from "./nota";
-import { FASES, PENALIDADES, RUBRICAS } from "./rubricas";
+import type { Regulamento } from "./regulamento";
 import type { EquipeAvaliada, Ficha } from "./tipos";
 
 export type LinhaRanking = {
@@ -16,6 +16,7 @@ export type LinhaRanking = {
 
 /** Classifica as equipes (nota final + desempate do regulamento). */
 export function montarRanking(
+  reg: Regulamento,
   equipes: EquipeAvaliada[],
   fichas: Ficha[],
   penalidades: Map<string, string[]>,
@@ -24,7 +25,7 @@ export function montarRanking(
     .map((equipe) => {
       const daEquipe = fichas.filter((f) => f.equipe_id === equipe.id);
       const pens = penalidades.get(equipe.id) ?? [];
-      return { equipe, fichas: daEquipe, penalidades: pens, resultado: consolidarEquipe(daEquipe, pens), posicao: 0 };
+      return { equipe, fichas: daEquipe, penalidades: pens, resultado: consolidarEquipe(reg, daEquipe, pens), posicao: 0 };
     })
     .sort((a, b) => compararRanking(a.resultado, b.resultado))
     .map((l, i) => ({ ...l, posicao: i + 1 }));
@@ -69,7 +70,7 @@ export type EquipeResumoNota = {
   fases: FaseResumo[];
 };
 
-export function resumirParaQuadro(linhas: LinhaRanking[]): EquipeResumoNota[] {
+export function resumirParaQuadro(reg: Regulamento, linhas: LinhaRanking[]): EquipeResumoNota[] {
   return linhas.map(({ equipe, fichas, penalidades, resultado: r, posicao }) => ({
     id: equipe.id,
     nome: equipe.nome,
@@ -77,17 +78,17 @@ export function resumirParaQuadro(linhas: LinhaRanking[]): EquipeResumoNota[] {
     final: r.final,
     completa: r.completa,
     penalidades: penalidades.map((id) => {
-      const p = PENALIDADES.find((x) => x.id === id);
+      const p = reg.penalidades.find((x) => x.id === id);
       return { texto: p?.texto ?? id, pontos: p?.pontos ?? 0 };
     }),
-    fases: FASES.map((fa) => ({
+    fases: reg.fases.map((fa) => ({
       id: fa.id,
       nome: fa.nome,
       peso: fa.peso,
       nota: r.fases[fa.id].nota,
       pontos: r.fases[fa.id].pontos,
       completa: r.fases[fa.id].completa,
-      partes: RUBRICAS.filter((rb) => fa.partes.includes(rb.id)).map((rb) => {
+      partes: reg.rubricas.filter((rb) => fa.partes.includes(rb.id)).map((rb) => {
         const x = r.rubricas[rb.id];
         return {
           id: rb.id,
@@ -104,7 +105,7 @@ export function resumirParaQuadro(linhas: LinhaRanking[]): EquipeResumoNota[] {
             .map((f) => ({
               avaliador: f.quem?.nome ?? f.avaliador,
               nota: notaFicha(rb, f.notas ?? {}),
-              niveis: Object.fromEntries(rb.criterios.map((c) => [c.id, nomeNivel(f.notas?.[c.id])])),
+              niveis: Object.fromEntries(rb.criterios.map((c) => [c.id, nomeNivel(reg, f.notas?.[c.id])])),
             })),
         };
       }),
@@ -126,8 +127,8 @@ export type Andamento = {
   avaliadores: number;
 };
 
-export function andamentoPorRubrica(equipes: EquipeAvaliada[], fichas: Ficha[]): Andamento[] {
-  return RUBRICAS.map((rb) => {
+export function andamentoPorRubrica(reg: Regulamento, equipes: EquipeAvaliada[], fichas: Ficha[]): Andamento[] {
+  return reg.rubricas.map((rb) => {
     const daRubrica = fichas.filter((f) => f.rubrica === rb.id);
     let completas = 0;
     let incompletas = 0;

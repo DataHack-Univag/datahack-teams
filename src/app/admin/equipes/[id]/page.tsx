@@ -1,36 +1,45 @@
 import { notFound } from "next/navigation";
-import { buscarEquipe, lerConfiguracao } from "@/modules/equipes/infra/repositorio";
-import { ExcluirEquipe } from "@/modules/equipes/ui/FormulariosOrganizacao";
+import { configuracaoDa, situacaoEquipe } from "@/modules/equipes/domain/tipos";
+import { buscarEquipe } from "@/modules/equipes/infra/repositorio";
+import { ArquivarEquipe } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
+import { AnalisarProposta } from "@/modules/equipes/ui/Propostas";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
+import { Selo } from "@/shared/ui/Selo";
 
 // Uma equipe vista pela organização (pode editar tudo).
 export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/[id]">) {
   const { id } = await params;
-  const { cliente, usuario } = await sessaoAtual();
-  const [equipe, disponiveis, config] = await Promise.all([buscarEquipe(cliente, id), listarSemEquipe(cliente), lerConfiguracao(cliente)]);
-  if (!equipe) notFound();
+  const { cliente, usuario, edicao } = await sessaoAtual();
+  const [equipe, disponiveis] = await Promise.all([buscarEquipe(cliente, id), listarSemEquipe(cliente, edicao.id)]);
+  if (!equipe || equipe.edicao_id !== edicao.id) notFound();
+  const situacao = situacaoEquipe(equipe.situacao);
+  const emAnalise = equipe.situacao === "formando" || equipe.situacao === "aguardando_aprovacao";
 
   return (
     <Pagina estreita>
       <CabecalhoPagina
         trilha={[
           { rotulo: "Organização", href: "/admin" },
-          { rotulo: "Equipes", href: "/admin/equipes" },
+          { rotulo: "Equipes", href: emAnalise ? "/admin/equipes/propostas" : "/admin/equipes" },
           { rotulo: equipe.nome },
         ]}
         titulo="Gerenciar equipe"
+        descricao={equipe.situacao !== "aprovada" ? <Selo tom={situacao.tom}>{situacao.rotulo}</Selo> : undefined}
         acoes={
-          <BotaoLink href={`/avaliar/${equipe.id}`} icone="avaliacao" tamanho="pequeno">
-            Avaliar esta equipe
-          </BotaoLink>
+          equipe.situacao === "aprovada" && (
+            <BotaoLink href={`/avaliar/${equipe.id}`} icone="avaliacao" tamanho="pequeno">
+              Avaliar esta equipe
+            </BotaoLink>
+          )
         }
       />
-      <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={config} meuEmail={usuario.email} organizador rotulo="Equipe" />
-      <ExcluirEquipe equipe={equipe} />
+      {emAnalise && <AnalisarProposta equipe={equipe} />}
+      <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={configuracaoDa(edicao)} meuEmail={usuario.email} organizador rotulo="Equipe" />
+      {equipe.situacao === "aprovada" && <ArquivarEquipe equipe={equipe} />}
     </Pagina>
   );
 }

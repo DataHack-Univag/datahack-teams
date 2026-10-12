@@ -1,7 +1,9 @@
-import { criarEquipe, excluirEquipe, salvarConfiguracao } from "@/modules/equipes/application/actions";
-import type { Configuracao, Equipe } from "@/modules/equipes/domain/tipos";
+import { salvarRegrasEquipes } from "@/modules/edicoes/application/actions";
+import { MODOS_FORMACAO, type Edicao } from "@/modules/edicoes/domain/tipos";
+import { arquivarEquipe, criarEquipe } from "@/modules/equipes/application/actions";
+import type { Equipe } from "@/modules/equipes/domain/tipos";
 import { Aviso } from "@/shared/ui/Aviso";
-import { Campo, CaixaMarcar } from "@/shared/ui/Campo";
+import { Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 
 /** Criar equipe à mão (o gerador cria várias de uma vez). */
@@ -18,47 +20,57 @@ export function CriarEquipe() {
   );
 }
 
-export function FormConfiguracao({ config }: { config: Configuracao }) {
+/** Regras das equipes nesta edição: como são formadas, tamanho, trocas e trava de edição. */
+export function FormRegrasEquipes({ edicao }: { edicao: Edicao }) {
   return (
-    <Formulario action={salvarConfiguracao} className="space-y-4">
-      <Campo
-        rotulo="Máximo de integrantes por equipe"
-        type="number"
-        name="max_membros"
-        min={1}
-        max={20}
-        required
-        defaultValue={config.max_membros}
-        className="max-w-xs"
+    <Formulario action={salvarRegrasEquipes} className="space-y-4">
+      <Ocultos valores={{ id: edicao.id }} />
+      <Selecao
+        rotulo="Como as equipes são formadas"
+        name="modo_formacao"
+        defaultValue={edicao.modo_formacao}
+        opcoes={MODOS_FORMACAO.map((m) => ({ valor: m.valor, rotulo: `${m.rotulo} — ${m.descricao}` }))}
+      />
+      <div className="grid gap-3 sm:grid-cols-2">
+        <Campo rotulo="Mínimo de integrantes" type="number" name="min_membros" min={1} max={20} required defaultValue={edicao.min_membros} />
+        <Campo rotulo="Máximo de integrantes" type="number" name="max_membros" min={1} max={20} required defaultValue={edicao.max_membros} />
+      </div>
+      <CaixaMarcar
+        name="permite_trocas"
+        defaultChecked={edicao.permite_trocas}
+        rotulo="Alunos podem pedir troca de equipe"
+        dica="Um integrante da equipe de destino aceita e os dois trocam de lugar."
       />
       <CaixaMarcar
-        name="edicao_bloqueada"
-        defaultChecked={config.edicao_bloqueada}
+        name="equipes_travadas"
+        defaultChecked={edicao.equipes_travadas}
         rotulo="Bloquear a edição pelos alunos"
         dica="Use no fim do prazo de entrega: os alunos só visualizam; a organização continua editando."
       />
-      <BotaoEnviar icone="ok">Salvar configuração</BotaoEnviar>
+      <BotaoEnviar icone="ok">Salvar regras</BotaoEnviar>
     </Formulario>
   );
 }
 
-export function ExcluirEquipe({ equipe }: { equipe: Equipe }) {
+/** Arquivar (não apagar) a equipe. */
+export function ArquivarEquipe({ equipe }: { equipe: Equipe }) {
   return (
     <section className="card space-y-3 border-red-400/40">
-      <h2 className="font-semibold text-red-600 dark:text-red-400">Zona de perigo</h2>
-      <Aviso tom="erro">
-        Excluir apaga a equipe e os links dela. Os integrantes ficam sem equipe. Não dá para desfazer; se a equipe já tiver
-        fichas de avaliação, apague as fichas antes.
+      <h2 className="font-semibold text-red-600 dark:text-red-400">Arquivar equipe</h2>
+      <Aviso tom="alerta">
+        A equipe sai das listas e os integrantes ficam sem equipe. Nada é apagado: integrantes, links, trocas e fichas continuam
+        guardados no histórico.
       </Aviso>
       <Formulario
-        action={excluirEquipe}
-        tituloConfirmar={`Excluir a ${equipe.nome}?`}
-        confirmar={`Os ${equipe.membros.length} integrante(s) ficam sem equipe e os ${equipe.links.length} link(s) são apagados. Essa ação não pode ser desfeita.`}
-        rotuloConfirmar="Excluir equipe"
+        action={arquivarEquipe}
+        tituloConfirmar={`Arquivar a ${equipe.nome}?`}
+        confirmar={`Os ${equipe.membros.length} integrante(s) ficam sem equipe. Pedidos de troca aguardando são cancelados.`}
+        rotuloConfirmar="Arquivar equipe"
+        perigo
       >
         <Ocultos valores={{ id: equipe.id }} />
         <BotaoEnviar variante="perigo" icone="lixo">
-          Excluir equipe
+          Arquivar equipe
         </BotaoEnviar>
       </Formulario>
     </section>

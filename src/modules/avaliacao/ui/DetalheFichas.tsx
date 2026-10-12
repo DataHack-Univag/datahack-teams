@@ -3,16 +3,16 @@ import { alternarPenalidade, excluirFicha } from "@/modules/avaliacao/applicatio
 import { nomeNivel, nomeRubrica } from "@/modules/avaliacao/domain/bancas";
 import type { LinhaRanking } from "@/modules/avaliacao/domain/consolidacao";
 import { notaFicha } from "@/modules/avaliacao/domain/nota";
-import { PENALIDADES, RUBRICAS } from "@/modules/avaliacao/domain/rubricas";
+import type { Penalidade, Regulamento } from "@/modules/avaliacao/domain/regulamento";
 import { dataHora, nota } from "@/shared/lib/formatar";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
 
 /** Penalidades de uma equipe: cada uma liga/desliga com um clique, com "Desfazer". */
-export function Penalidades({ equipeId, aplicadas }: { equipeId: string; aplicadas: string[] }) {
+export function Penalidades({ equipeId, aplicadas, penalidades }: { equipeId: string; aplicadas: string[]; penalidades: Penalidade[] }) {
   return (
     <div className="flex flex-wrap gap-2">
-      {PENALIDADES.map((p) => {
+      {penalidades.map((p) => {
         const ativa = aplicadas.includes(p.id);
         return (
           <Formulario key={`${equipeId}-${p.id}-${ativa}`} action={alternarPenalidade} acaoDesfazer={alternarPenalidade}>
@@ -34,7 +34,7 @@ export function Penalidades({ equipeId, aplicadas }: { equipeId: string; aplicad
 }
 
 /** Fichas de cada equipe, critério por critério, com comentário e "apagar ficha". */
-export function DetalheFichas({ linhas }: { linhas: LinhaRanking[] }) {
+export function DetalheFichas({ reg, linhas }: { reg: Regulamento; linhas: LinhaRanking[] }) {
   return (
     <ol className="space-y-3">
       {linhas.map(({ equipe, fichas, penalidades, resultado: r, posicao }) => (
@@ -57,17 +57,17 @@ export function DetalheFichas({ linhas }: { linhas: LinhaRanking[] }) {
 
           <div className="space-y-2">
             <h3 className="text-sm font-semibold">Penalidades</h3>
-            <Penalidades equipeId={equipe.id} aplicadas={penalidades} />
+            <Penalidades equipeId={equipe.id} aplicadas={penalidades} penalidades={reg.penalidades} />
           </div>
 
-          {RUBRICAS.map((rb) => {
+          {reg.rubricas.map((rb) => {
             const daRubrica = fichas.filter((f) => f.rubrica === rb.id);
             const x = r.rubricas[rb.id];
             return (
               <details key={rb.id} className="group rounded-xl border border-borda p-3" open={daRubrica.length > 0 && !x.completa}>
                 <summary className="flex cursor-pointer list-none items-center justify-between gap-2 select-none">
                   <span className="text-sm font-semibold">
-                    {nomeRubrica(rb.id)} <span className="font-normal text-suave">· média {nota(x.nota)} · {daRubrica.length} ficha(s)</span>
+                    {nomeRubrica(reg, rb.id)} <span className="font-normal text-suave">· média {nota(x.nota)} · {daRubrica.length} ficha(s)</span>
                   </span>
                   <Icone nome="avancar" className="size-4 text-suave transition group-open:rotate-90" />
                 </summary>
@@ -101,7 +101,7 @@ export function DetalheFichas({ linhas }: { linhas: LinhaRanking[] }) {
                               </td>
                               {daRubrica.map((f) => (
                                 <td key={f.id} className="py-1 pr-2">
-                                  {nomeNivel(f.notas?.[c.id])}
+                                  {nomeNivel(reg, f.notas?.[c.id])}
                                 </td>
                               ))}
                               <td className="py-1 font-mono">{x.mediaCriterio[c.id] === null ? "–" : `${Math.round((x.mediaCriterio[c.id] ?? 0) * 100)}%`}</td>
@@ -130,7 +130,7 @@ export function DetalheFichas({ linhas }: { linhas: LinhaRanking[] }) {
                         action={excluirFicha}
                         tituloConfirmar="Apagar esta ficha?"
                         rotuloConfirmar="Apagar ficha"
-                        confirmar={`A ficha de ${f.quem?.nome ?? f.avaliador} (${nomeRubrica(rb.id)}) para a ${equipe.nome} é apagada e sai da média. Não dá para desfazer.`}
+                        confirmar={`A ficha de ${f.quem?.nome ?? f.avaliador} (${nomeRubrica(reg, rb.id)}) para a ${equipe.nome} é apagada e sai da média. Não dá para desfazer.`}
                       >
                         <Ocultos valores={{ id: f.id }} />
                         <BotaoEnviar variante="perigo" tamanho="pequeno" icone="lixo">

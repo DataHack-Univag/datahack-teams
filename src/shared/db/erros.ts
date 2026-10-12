@@ -11,14 +11,13 @@ export function traduzirErro(e: ErroBanco): string {
   if (e.code === "P0001") return e.message;
   if (e.code === "23505") {
     if (e.message.includes("equipes_nome_unico")) return "Já existe uma equipe com esse nome. Escolha outro.";
-    if (e.message.includes("membros_pkey")) return "Essa pessoa já está em uma equipe. Tire-a da equipe atual antes.";
-    if (e.message.includes("inscritos_pkey")) return "Já existe um participante com esse e-mail.";
+    if (e.message.includes("membros_um_ativo")) return "Essa pessoa já está em uma equipe (ou tem um convite aguardando). Tire-a da equipe atual antes.";
+    if (e.message.includes("pessoas_pkey") || e.message.includes("participacoes_pkey")) return "Já existe uma pessoa com esse e-mail nesta edição.";
+    if (e.message.includes("edicoes_slug")) return "Já existe uma edição com esse endereço curto.";
     return "Esse registro já existe.";
   }
   if (e.code === "23514") return "Algum campo está com um valor inválido. Confira o formato e tente de novo.";
   if (e.code === "23503") {
-    if (e.message.includes("avaliacoes"))
-      return "Não dá para apagar: já existem fichas de avaliação ligadas a essa equipe ou pessoa. Apague as fichas antes (Avaliação → Fichas).";
     return "Esse e-mail não está na lista de participantes. Cadastre a pessoa em Pessoas primeiro.";
   }
   if (e.code === "42501") return "Você não tem permissão para fazer isso. Se acha que deveria ter, fale com a organização.";

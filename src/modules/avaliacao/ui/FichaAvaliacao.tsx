@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { salvarFicha } from "@/modules/avaliacao/application/actions";
 import { CRITERIOS_COM_PERGUNTAS } from "@/modules/avaliacao/domain/perguntas";
-import { NIVEIS, type Rubrica } from "@/modules/avaliacao/domain/rubricas";
+import type { Nivel, Rubrica } from "@/modules/avaliacao/domain/regulamento";
 import type { Notas } from "@/modules/avaliacao/domain/tipos";
 import { PerguntasDesafio } from "@/modules/avaliacao/ui/PerguntasDesafio";
 import { hora, nota as fmtNota } from "@/shared/lib/formatar";
@@ -25,10 +25,11 @@ const digitando = (el: Element | null) => !!el && ["INPUT", "TEXTAREA", "SELECT"
  *  3 · limpar critério, desfazer alterações, aviso ao sair e rascunho automático;
  *  5 · avisa antes de salvar incompleta e leva ao que falta;
  *  6 · descrição de cada nível no próprio botão (não precisa lembrar a rubrica);
- *  7 · atalhos: 1–4 marcam o nível do critério selecionado, ↑↓ mudam de critério, Ctrl+S salva.
+ *  7 · atalhos: 1, 2, 3… marcam o nível do critério selecionado, ↑↓ mudam de critério, Ctrl+S salva.
  */
 export function FichaAvaliacao({
   rubrica,
+  niveis: NIVEIS,
   equipeId,
   equipeNome,
   notasIniciais,
@@ -38,6 +39,8 @@ export function FichaAvaliacao({
   voltarAoSalvar,
 }: {
   rubrica: Rubrica;
+  /** Níveis da edição, na ordem (os atalhos 1, 2, 3… marcam cada um). */
+  niveis: Nivel[];
   equipeId: string;
   equipeNome: string;
   notasIniciais: Notas;
@@ -235,6 +238,7 @@ export function FichaAvaliacao({
           <Criterio
             key={c.id}
             c={c}
+            niveis={NIVEIS}
             valor={notas[c.id]}
             ativo={i === ativo && !bloqueada}
             destacar={destacarFaltando && typeof notas[c.id] !== "number"}
@@ -344,6 +348,7 @@ export function FichaAvaliacao({
 /** Um critério: os 4 níveis como botões com nome, % e a descrição do nível. */
 function Criterio({
   c,
+  niveis: NIVEIS,
   valor,
   ativo,
   destacar,
@@ -352,6 +357,7 @@ function Criterio({
   limpar,
 }: {
   c: Rubrica["criterios"][number];
+  niveis: Nivel[];
   valor: number | undefined;
   ativo: boolean;
   destacar: boolean;

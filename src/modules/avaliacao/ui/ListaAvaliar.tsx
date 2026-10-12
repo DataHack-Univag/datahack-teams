@@ -1,7 +1,7 @@
 import Link from "next/link";
-import { criteriosFeitos, nomeRubrica, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
+import { criteriosFeitos, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
 import { notaFicha } from "@/modules/avaliacao/domain/nota";
-import type { Rubrica } from "@/modules/avaliacao/domain/rubricas";
+import type { Rubrica } from "@/modules/avaliacao/domain/regulamento";
 import type { Ficha } from "@/modules/avaliacao/domain/tipos";
 import type { Equipe } from "@/modules/equipes/domain/tipos";
 import { nota, plural } from "@/shared/lib/formatar";
@@ -50,7 +50,7 @@ export function ListaAvaliar({ equipes, minhas, fichas }: { equipes: Equipe[]; m
                 const feitos = criteriosFeitos(r, f?.notas);
                 return (
                   <li key={r.id}>
-                    <Link href={`/avaliar/${e.id}?r=${r.id}`} className={`selo ${TOM[s]}`} title={nomeRubrica(r.id)}>
+                    <Link href={`/avaliar/${e.id}?r=${r.id}`} className={`selo ${TOM[s]}`} title={r.nome}>
                       {r.curto}:{" "}
                       {s === "completa" ? `✔ ${nota(notaFicha(r, f!.notas))}` : s === "incompleta" ? `${feitos} de ${r.criterios.length}` : "não iniciada"}
                     </Link>

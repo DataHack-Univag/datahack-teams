@@ -1,11 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { rubricasDaBanca, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
-import { avaliacaoEncerrada, listarFichas } from "@/modules/avaliacao/infra/repositorio";
+import { nomeBanca, rubricasDaBanca, situacaoFicha } from "@/modules/avaliacao/domain/bancas";
+import { carregarRegulamento, listarFichas } from "@/modules/avaliacao/infra/repositorio";
 import { FichaAvaliacao } from "@/modules/avaliacao/ui/FichaAvaliacao";
 import { liderDa, nomeMembro, rotuloCategoria } from "@/modules/equipes/domain/tipos";
 import { buscarEquipe, listarResumo } from "@/modules/equipes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { Aviso } from "@/shared/ui/Aviso";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { Icone } from "@/shared/ui/Icone";
 import { Pagina } from "@/shared/ui/Pagina";
@@ -15,17 +16,18 @@ import { Selo } from "@/shared/ui/Selo";
 export default async function AvaliarEquipe({ params, searchParams }: PageProps<"/avaliar/[id]">) {
   const { id } = await params;
   const { r } = await searchParams;
-  const { cliente, usuario, organizador, banca } = await sessaoAtual();
-  // Avaliador: só as rubricas da banca dele. Organização: todas (as dela primeiro).
-  const minhas = rubricasDaBanca(banca, organizador);
-
-  const [equipe, todas, fichas, encerrada] = await Promise.all([
+  const { cliente, usuario, organizador, banca, simulacao, edicao } = await sessaoAtual();
+  const [reg, equipe, todas, fichas] = await Promise.all([
+    carregarRegulamento(cliente, edicao.id),
     buscarEquipe(cliente, id),
-    listarResumo(cliente),
-    listarFichas(cliente, { equipeId: id, avaliador: usuario.email }),
-    avaliacaoEncerrada(cliente),
+    listarResumo(cliente, edicao.id),
+    listarFichas(cliente, edicao.id, { equipeId: id, avaliador: usuario.email }),
   ]);
-  if (!equipe) notFound();
+  if (!equipe || equipe.edicao_id !== edicao.id) notFound();
+  const encerrada = edicao.avaliacao_encerrada || edicao.situacao === "encerrada";
+  // Avaliador: só as rubricas da banca dele. Organização: todas (as dela primeiro).
+  const minhas = rubricasDaBanca(reg, banca, organizador);
+  if (!minhas.length) notFound();
   const pos = todas.findIndex((e) => e.id === id);
   const anterior = pos > 0 ? todas[pos - 1] : null;
   const proxima = pos >= 0 && pos < todas.length - 1 ? todas[pos + 1] : null;
@@ -104,9 +106,7 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
                 }`}
               >
                 {x.curto}
-                {organizador && x.banca !== "organizacao" && (
-                  <span className="ml-1 text-[10px] font-normal opacity-75">({x.banca === "professores" ? "professores" : "negócio"})</span>
-                )}
+                {organizador && x.banca !== banca && <span className="ml-1 text-[10px] font-normal opacity-75">({nomeBanca(reg, x.banca)})</span>}
                 {ok && <span className="ml-1" aria-label="completa">✔</span>}
               </Link>
             );
@@ -121,16 +121,23 @@ export default async function AvaliarEquipe({ params, searchParams }: PageProps<
         </p>
       </div>
 
+      {simulacao && (
+        <Aviso tom="alerta" titulo="Simulação: ficha só para consulta">
+          Você está vendo as notas que {usuario.nome} lançou. Para lançar notas, saia da simulação.
+        </Aviso>
+      )}
+
       <FichaAvaliacao
         key={`${id}-${rubrica.id}-${ficha?.atualizado_em ?? "nova"}`}
         rubrica={rubrica}
+        niveis={reg.niveis}
         equipeId={id}
         equipeNome={equipe.nome}
         notasIniciais={ficha?.notas ?? {}}
         comentarioInicial={ficha?.comentario ?? ""}
         salvoEm={ficha?.atualizado_em ?? null}
         voltarAoSalvar={!organizador}
-        bloqueada={encerrada && !organizador}
+        bloqueada={simulacao || (encerrada && !organizador)}
       />
     </Pagina>
   );
