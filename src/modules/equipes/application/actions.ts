@@ -3,7 +3,7 @@
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { normalizarRepo } from "@/modules/equipes/domain/github";
-import { CATEGORIAS_LINK, rotuloCategoria } from "@/modules/equipes/domain/tipos";
+import { CATEGORIAS_LINK, ICONES_EQUIPE, rotuloCategoria } from "@/modules/equipes/domain/tipos";
 import { repoEhPublico } from "@/modules/equipes/infra/github";
 import * as repo from "@/modules/equipes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -81,6 +81,18 @@ export const criarEquipe = criarAcao(
     atualizarTelas();
     if (d.redirecionar === "admin") redirect(`/admin/equipes/${novoId}`);
     return sucesso(`Equipe “${d.nome}” criada. Agora adicione os integrantes.`);
+  },
+);
+
+/** Ícone da equipe (líder ou organização); vazio volta para as iniciais. */
+export const definirIcone = criarAcao(
+  z.object({ id, icone: z.string().refine((v) => v === "" || (ICONES_EQUIPE as readonly string[]).includes(v), "Escolha um dos ícones da lista.") }),
+  async (d) => {
+    const { alterou, error } = await repo.atualizarEquipe(await clienteServidor(), d.id, { icone: d.icone || null });
+    if (error) return falha(traduzirErro(error));
+    if (!alterou) return SEM_PERMISSAO;
+    atualizarTelas();
+    return sucesso(d.icone ? `Ícone da equipe: ${d.icone}` : "A equipe voltou a usar as iniciais.");
   },
 );
 

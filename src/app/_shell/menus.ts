@@ -66,4 +66,5 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },
   { grupo: "Telas", rotulo: "Cadastrar pessoa", href: "/admin/pessoas#cadastrar", icone: "mais_novo" },
   { grupo: "Telas", rotulo: "Croqui do evento", href: "/admin/mapa/croqui", icone: "mapa" },
+  { grupo: "Telas", rotulo: "Distribuir equipes no mapa", href: "/admin/mapa/equipes", icone: "equipe" },
 ];

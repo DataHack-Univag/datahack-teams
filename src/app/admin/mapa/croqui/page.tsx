@@ -1,16 +1,26 @@
 import { medida, TIPOS, TIPOS_ELEMENTO } from "@/modules/mapa/domain/catalogo";
-import { carregarMapa } from "@/modules/mapa/infra/repositorio";
+import { listarEquipes } from "@/modules/equipes/infra/repositorio";
+import { ocupacao } from "@/modules/mapa/domain/alocacao";
+import { carregarAlocacoes, carregarMapa } from "@/modules/mapa/infra/repositorio";
 import { BaixarSvg, BotaoImprimir } from "@/modules/mapa/ui/BaixarSvg";
 import { AmostraTipo, DesenhoSala } from "@/modules/mapa/ui/DesenhoSala";
 import { periodo } from "@/modules/edicoes/domain/tipos";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { BotaoLink } from "@/shared/ui/Botao";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Croqui do evento para a universidade: todas as salas por piso, em escala, com legenda.
-export default async function Croqui() {
+// Com ?equipes=1, mostra também onde cada equipe está (para o dia do evento).
+export default async function Croqui({ searchParams }: PageProps<"/admin/mapa/croqui">) {
+  const comEquipes = (await searchParams).equipes === "1";
   const { cliente, edicao } = await sessaoAtual();
-  const mapa = await carregarMapa(cliente, edicao.id);
+  const [mapa, equipes, alocacoes] = await Promise.all([
+    carregarMapa(cliente, edicao.id),
+    comEquipes ? listarEquipes(cliente, edicao.id) : Promise.resolve([]),
+    comEquipes ? carregarAlocacoes(cliente, edicao.id) : Promise.resolve([]),
+  ]);
+  const ocup = comEquipes ? ocupacao(mapa.elementos, alocacoes, equipes.map((e) => ({ id: e.id, nome: e.nome, icone: e.icone }))) : undefined;
   const comSalas = mapa.pisos.filter((p) => p.salas.length);
   const usados = new Set(mapa.elementos.map((e) => e.tipo));
 
@@ -21,7 +31,16 @@ export default async function Croqui() {
         titulo="Croqui do evento"
         destaque="Croqui"
         descricao="Todas as salas em escala, prontas para mandar para a universidade."
-        acoes={comSalas.length > 0 && <BotaoImprimir />}
+        acoes={
+          comSalas.length > 0 && (
+            <>
+              <BotaoLink href={comEquipes ? "/admin/mapa/croqui" : "/admin/mapa/croqui?equipes=1"} variante="secundario" icone="equipe">
+                {comEquipes ? "Sem as equipes" : "Com as equipes"}
+              </BotaoLink>
+              <BotaoImprimir />
+            </>
+          )
+        }
       />
       {!comSalas.length ? (
         <EstadoVazio icone="mapa" titulo="Nenhuma sala no mapa">
@@ -33,7 +52,7 @@ export default async function Croqui() {
             <h2 className="text-2xl font-bold">{edicao.nome} · croqui</h2>
             <p className="text-sm text-suave">
               {periodo(edicao)}
-              {edicao.local ? ` · ${edicao.local}` : ""} · medidas aproximadas, em metros
+              {edicao.local ? ` · ${edicao.local}` : ""} · medidas aproximadas, em metros{comEquipes ? " · com as equipes" : ""}
             </p>
           </header>
           {comSalas.map((p) => (
@@ -50,7 +69,7 @@ export default async function Croqui() {
                         {medida(s.largura_cm)} × {medida(s.profundidade_cm)} · {lugares} lugar(es) para equipes
                       </p>
                     </div>
-                    <DesenhoSala sala={s} elementos={elementos} idSvg={`croqui-${s.id}`} className="mx-auto max-h-[70vh]" />
+                    <DesenhoSala sala={s} elementos={elementos} ocupacao={ocup} idSvg={`croqui-${s.id}`} className="mx-auto max-h-[70vh]" />
                     <BaixarSvg idSvg={`croqui-${s.id}`} nome={s.nome} />
                   </article>
                 );

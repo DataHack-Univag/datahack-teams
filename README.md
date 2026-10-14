@@ -123,13 +123,16 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
     presença pela função `registrar_presenca` (a única coisa que a mentoria altera).
 13. `…13_mapa` — mapa do evento por edição: pisos > salas > elementos (bancadas, mesas, portas…),
     em centímetros, com importação/exportação em JSON (metros) e croqui em escala.
+14. `…14_mapa_equipes` — ícone da equipe (líder ou organização) e alocação das equipes nos
+    lugares das bancadas, com histórico (`alocar_equipe` troca as duas quando o lugar está ocupado).
+    **Rode antes de publicar o app**: a lista de equipes passa a ler a coluna `icone`.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se a 012 e a 013 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se a 012, a 013 e a 014 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -212,6 +215,7 @@ psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/202610
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261012000011_presenca.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000012_mentoria.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000013_mapa.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000014_mapa_equipes.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

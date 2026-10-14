@@ -7,7 +7,7 @@ import type { Cliente } from "@/shared/db/servidor";
 import type { Json } from "@/shared/db/tipos-banco";
 
 const SELECT_EQUIPE =
-  "id, edicao_id, nome, repo_github, repo_publico, repo_verificado_em, lider_email, situacao, origem, proposta_por, motivo_analise, criado_em, atualizado_em," +
+  "id, edicao_id, nome, icone, repo_github, repo_publico, repo_verificado_em, lider_email, situacao, origem, proposta_por, motivo_analise, criado_em, atualizado_em," +
   " membros(email, situacao, saiu_em, inscritos:pessoas!membros_email_fkey(nome))," +
   " links(id, categoria, titulo, url, removido_em, criado_em)";
 
@@ -116,7 +116,7 @@ export const criarEquipe = (cliente: Cliente, edicaoId: string, nome: string, re
 export async function atualizarEquipe(
   cliente: Cliente,
   id: string,
-  dados: { nome?: string; repo_github?: string; repo_publico?: boolean | null; repo_verificado_em?: string | null; lider_email?: string | null },
+  dados: { nome?: string; icone?: string | null; repo_github?: string; repo_publico?: boolean | null; repo_verificado_em?: string | null; lider_email?: string | null },
 ) {
   const { data, error } = await cliente.from("equipes").update(dados).eq("id", id).select("id");
   return { alterou: !!data?.length, error };

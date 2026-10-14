@@ -261,6 +261,28 @@ export const criarFileira = criarAcao(
   },
 );
 
+// ---------------------------------------------------------------- equipes no mapa
+
+/** Põe a equipe num lugar; se estava ocupado, as duas trocam (o banco faz a troca). */
+export const alocarEquipe = criarAcao(z.object({ equipe_id: id, elemento_id: id, lugar: z.coerce.number().int().min(1), nome: z.string().optional(), onde: z.string().optional() }), async (d) => {
+  const { cliente } = await sessaoAtual();
+  const { data, error } = await repo.alocarEquipe(cliente, d.equipe_id, d.elemento_id, d.lugar);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  const r = (data ?? {}) as { mudou?: boolean; trocou_com?: string; sem_lugar?: string };
+  if (!r.mudou) return LIMPO;
+  const base = `${d.nome || "Equipe"} → ${d.onde || "novo lugar"}.`;
+  return sucesso(r.trocou_com ? `${base} Trocou de lugar com a ${r.trocou_com}.` : r.sem_lugar ? `${base} A ${r.sem_lugar} ficou sem lugar.` : base);
+});
+
+export const desalocarEquipe = criarAcao(z.object({ equipe_id: id, nome: z.string().optional() }), async (d) => {
+  const { cliente } = await sessaoAtual();
+  const { error } = await repo.desalocarEquipe(cliente, d.equipe_id);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso(`${d.nome || "Equipe"} ficou sem lugar no mapa.`);
+});
+
 // ---------------------------------------------------------------- importar
 
 export const importarMapa = criarAcao(z.object({ json: z.string().min(2, "Cole o JSON do mapa."), substituir: caixa }), async (d) => {

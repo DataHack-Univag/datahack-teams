@@ -130,6 +130,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como coloco as equipes nas bancadas do mapa?",
+    resposta:
+      "Em Mapa → “Distribuir equipes”. No computador, arraste a equipe da lista até um lugar da bancada; no celular, toque na equipe e depois no lugar. Soltar num lugar ocupado troca as duas equipes. Toda mudança tem “Desfazer”, e o histórico de onde cada equipe esteve fica guardado. Para imprimir com as equipes: Croqui → “Com as equipes”.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Tenho um desenho no papel. Dá para importar?",
     resposta:
       "Sim, de dois jeitos. Em Mapa → “Importar um desenho”, copie as instruções, mande para uma IA junto com a foto do desenho e cole o JSON que ela devolver: o sistema confere antes de importar. Ou abra a sala e, em “Medidas e fundo da sala”, ponha a foto como fundo e desenhe as bancadas por cima. PDF não é lido direto: tire um print da planta.",
@@ -158,6 +164,16 @@ export const TOPICOS: Topico[] = [
     resposta:
       "Em Pessoas, cadastre a pessoa com a função “Mentoria” e o e-mail dela (com a edição certa escolhida no topo). No primeiro acesso ela cria a senha com esse e-mail. Para conferir o que ela vê, use “Ver como”.",
     publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Onde fica a minha equipe no evento?",
+    resposta: "Em “Minha equipe”, abaixo do nome, aparece o lugar no mapa (sala e bancada), assim que a organização distribuir as equipes.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Como escolho o ícone da equipe?",
+    resposta: "O líder (ou a organização) abre “Minha equipe” e toca em “Escolher um ícone para a equipe”. O ícone aparece no mapa do evento e nos cards da equipe.",
+    publicos: ["aluno", "organizacao"],
   },
   // ------------------------------------------------ todos
   {

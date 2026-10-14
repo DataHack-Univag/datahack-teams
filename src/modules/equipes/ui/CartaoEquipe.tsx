@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { pendenciasEquipe } from "@/modules/equipes/domain/permissoes";
 import { liderDa, nomeMembro, presencaDosMembros, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
+import { IconeEquipe } from "@/modules/equipes/ui/IconeEquipe";
 import { StatusRepo } from "@/modules/equipes/ui/StatusRepo";
 import type { Presenca } from "@/modules/pessoas/domain/tipos";
 import { PresencaEquipe } from "@/modules/pessoas/ui/MarcarPresenca";
@@ -17,11 +18,13 @@ export function CartaoEquipe({
   maxMembros,
   indice = 0,
   presenca,
+  local,
 }: {
   equipe: Equipe;
   maxMembros: number;
   indice?: number;
   presenca?: Record<string, Presenca | null>;
+  local?: string | null;
 }) {
   const lider = liderDa(equipe);
   const pend = pendenciasEquipe(equipe);
@@ -34,8 +37,9 @@ export function CartaoEquipe({
     >
       <div className="flex items-start justify-between gap-2">
         <div className="min-w-0">
-          <h2 className="text-lg font-bold break-words">
-            <Link href={`/admin/equipes/${equipe.id}`} className="hover:text-marca hover:underline">
+          <h2 className="flex items-center gap-2 text-lg font-bold break-words">
+            <IconeEquipe equipe={equipe} tamanho="size-8 text-base" />
+            <Link href={`/admin/equipes/${equipe.id}`} className="min-w-0 hover:text-marca hover:underline">
               {equipe.nome}
             </Link>
           </h2>
@@ -54,6 +58,12 @@ export function CartaoEquipe({
           <Icone nome="avancar" className="size-3.5" />
         </Link>
       </div>
+
+      {local !== undefined && (
+        <p className={`flex items-center gap-1.5 text-xs ${local ? "" : "text-amber-700 dark:text-amber-300"}`}>
+          <Icone nome="mapa" className="size-3.5" /> {local ?? "sem lugar no mapa"}
+        </p>
+      )}
 
       <div className="flex flex-wrap items-center gap-1.5">
         <StatusRepo equipe={equipe} />

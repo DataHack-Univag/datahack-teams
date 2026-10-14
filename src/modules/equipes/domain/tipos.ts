@@ -53,6 +53,8 @@ export type Equipe = {
   repo_verificado_em: string | null;
   /** E-mail do líder (escolhido pelos integrantes; quem propõe a equipe já começa como líder). */
   lider_email: string | null;
+  /** Ícone da equipe no mapa e nos cards (emoji); null = iniciais do nome. */
+  icone: string | null;
   situacao: SituacaoEquipe;
   origem: OrigemEquipe;
   proposta_por: string | null;
@@ -100,6 +102,13 @@ export const configuracaoDa = (e: Edicao, { paraParticipante = false } = {}): Co
 });
 
 export const nomeMembro = (m: Membro) => m.inscritos?.nome ?? m.email;
+
+/** Ícones que a equipe pode escolher (aparecem no mapa do evento). */
+export const ICONES_EQUIPE = [
+  "🐼", "🦊", "🦉", "🐙", "🦄", "🐝", "🦖", "🐺", "🦅", "🐬", "🐢", "🦁",
+  "🚀", "🛰️", "🧠", "📊", "📈", "🔍", "💡", "⚡", "🔥", "🎯", "🧩", "🛠️",
+  "💾", "🤖", "🌵", "🌊", "🌎", "⭐", "🎓", "🏆",
+] as const;
 
 /** Integrantes com a presença de cada um (bloco de presença das telas de equipe). */
 export const presencaDosMembros = (e: Equipe, presenca: Record<string, Presenca | null>) =>

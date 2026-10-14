@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { locaisDasEquipes, lugaresDoElemento, ocupacao } from "./alocacao";
 import { encaixar, medida, modeloPorId } from "./catalogo";
 import { caixa, conferirMapa, dentroDaSala, fileira, proximoRotulo } from "./tipos";
 
@@ -47,5 +48,34 @@ describe("mapa", () => {
     const erros = conferirMapa(ruim);
     expect(erros[0]).toContain("“sofa” não existe");
     expect(erros[1]).toContain("fora da sala");
+  });
+});
+
+describe("equipes no mapa", () => {
+  const b1 = { id: "b1", sala_id: "s1", tipo: "bancada" as const, rotulo: "B1", x_cm: 100, y_cm: 100, largura_cm: 320, profundidade_cm: 80, rotacao: 0, lugares: 2 };
+  const m1 = { ...b1, id: "m1", rotulo: "M1", lugares: 1 };
+
+  it("divide a bancada em lugares iguais no lado mais comprido (também girada)", () => {
+    expect(lugaresDoElemento(b1).map((l) => [l.x, l.y, l.largura, l.profundidade])).toEqual([
+      [100, 100, 160, 80],
+      [260, 100, 160, 80],
+    ]);
+    expect(lugaresDoElemento({ ...b1, rotacao: 90 }).map((l) => [l.x, l.y, l.largura, l.profundidade])).toEqual([
+      [100, 100, 80, 160],
+      [100, 260, 80, 160],
+    ]);
+  });
+
+  it("monta quem está em cada lugar e o local de cada equipe", () => {
+    const equipes = [
+      { id: "e1", nome: "DataMind", icone: "🧠" },
+      { id: "e2", nome: "Pandas", icone: null },
+    ];
+    const alocacoes = [
+      { equipe_id: "e1", elemento_id: "b1", lugar: 2 },
+      { equipe_id: "e2", elemento_id: "m1", lugar: 1 },
+    ];
+    expect(ocupacao([b1, m1], alocacoes, equipes).b1.map((e) => e?.nome ?? null)).toEqual([null, "DataMind"]);
+    expect(locaisDasEquipes([{ id: "s1", nome: "Lab 1" }], [b1, m1], alocacoes)).toEqual({ e1: "Lab 1 · B1 (lugar 2)", e2: "Lab 1 · M1" });
   });
 });

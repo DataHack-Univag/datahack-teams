@@ -7,6 +7,7 @@ import { CartaoEquipe } from "@/modules/equipes/ui/CartaoEquipe";
 import { CriarEquipe, FormRegrasEquipes } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { cursoSemestre } from "@/modules/pessoas/domain/tipos";
+import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { listarSemEquipe, presencaDaEdicao } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
@@ -21,13 +22,16 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
   const { filtro, arquivada } = await searchParams;
   const soPendentes = filtro === "pendentes";
   const { cliente, edicao } = await sessaoAtual();
-  const [equipes, propostas, semEquipe, trocas, presenca] = await Promise.all([
+  const [equipes, propostas, semEquipe, trocas, presenca, locais] = await Promise.all([
     listarEquipes(cliente, edicao.id),
     listarPropostas(cliente, edicao.id),
     listarSemEquipe(cliente, edicao.id),
     trocasPendentes(cliente, edicao.id),
     presencaDaEdicao(cliente, edicao.id),
+    locaisDaEdicao(cliente, edicao.id),
   ]);
+  // Só mostra o lugar nos cards quando a edição tem mapa com equipes distribuídas.
+  const temMapa = Object.keys(locais).length > 0;
   const comPendencia = equipes.filter((e) => pendenciasEquipe(e).length > 0);
   const lista = soPendentes ? comPendencia : equipes;
   const porProposta = edicao.modo_formacao === "alunos_propoem";
@@ -108,7 +112,7 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {lista.map((e, i) => (
-            <CartaoEquipe key={e.id} equipe={e} maxMembros={edicao.max_membros} indice={i} presenca={presenca} />
+            <CartaoEquipe key={e.id} equipe={e} maxMembros={edicao.max_membros} indice={i} presenca={presenca} local={temMapa ? (locais[e.id] ?? null) : undefined} />
           ))}
         </div>
       )}

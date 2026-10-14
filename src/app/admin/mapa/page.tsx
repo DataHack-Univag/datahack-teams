@@ -34,8 +34,11 @@ export default async function AdminMapa() {
                 <BotaoLink href="/admin/mapa/exportar" variante="secundario" icone="baixar">
                   Baixar JSON
                 </BotaoLink>
-                <BotaoLink href="/admin/mapa/croqui" icone="mapa">
+                <BotaoLink href="/admin/mapa/croqui" variante="secundario" icone="mapa">
                   Croqui
+                </BotaoLink>
+                <BotaoLink href="/admin/mapa/equipes" icone="equipe">
+                  Distribuir equipes
                 </BotaoLink>
               </>
             )}

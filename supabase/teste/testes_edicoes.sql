@@ -231,6 +231,36 @@ end $$;
 select pg_temp.falha($q$select importar_mapa((select id from edicoes where numero = 1), '{"pisos":[{"nome":"X","salas":[]}]}'::jsonb)$q$, 'Só a organização');
 select pg_temp.falha($q$delete from mapa_elementos$q$, 'permission denied');
 
+-- ---------------------------------------------------------------- 014 · equipes no mapa
+-- (usa a sala Lab 1 importada no bloco 013: uma bancada B1 com 2 lugares)
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed uuid := (select id from edicoes where numero = 1);
+  v_b1 uuid := (select id from mapa_elementos where rotulo = 'B1' and removido_em is null);
+  v_e1 uuid; v_e2 uuid; r jsonb;
+begin
+  select id into v_e1 from equipes where edicao_id = v_ed and situacao = 'aprovada' and removido_em is null order by nome limit 1;
+  select id into v_e2 from equipes where edicao_id = v_ed and situacao = 'aprovada' and removido_em is null and id <> v_e1 order by nome limit 1;
+  perform set_config('dh.e1', v_e1::text, false);
+  perform alocar_equipe(v_e1, v_b1, 1);
+  perform alocar_equipe(v_e2, v_b1, 2);
+  r := alocar_equipe(v_e1, v_b1, 2);
+  assert r ->> 'trocou_com' is not null, 'lugar ocupado: as duas trocam';
+  assert (select lugar from alocacoes where equipe_id = v_e2 and ate is null) = 1, 'a outra foi para o lugar antigo';
+  assert (select count(*) from alocacoes where equipe_id = v_e1) = 2, 'o lugar anterior fica no histórico';
+  perform desalocar_equipe(v_e2);
+  assert not exists (select 1 from alocacoes where equipe_id = v_e2 and ate is null), 'tirar do lugar';
+  update equipes set icone = '🐼' where id = v_e1;
+end $$;
+select pg_temp.falha($q$select alocar_equipe(current_setting('dh.e1')::uuid, (select id from mapa_elementos where rotulo = 'B1'), 3)$q$, '2 lugar');
+
+select pg_temp.como('p1@teste.local');
+select pg_temp.falha($q$select alocar_equipe(current_setting('dh.e1')::uuid, (select id from mapa_elementos where rotulo = 'B1'), 1)$q$, 'Só a organização');
+do $$ begin
+  assert (select count(*) from alocacoes where ate is null) = 1, 'aluno vê onde as equipes estão';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 013 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 014 conferem.'

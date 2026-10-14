@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { liderDa, nomeMembro, presencaDosMembros, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
+import { IconeEquipe } from "@/modules/equipes/ui/IconeEquipe";
 import { StatusRepo } from "@/modules/equipes/ui/StatusRepo";
 import type { Presenca } from "@/modules/pessoas/domain/tipos";
 import { PresencaEquipe } from "@/modules/pessoas/ui/MarcarPresenca";
@@ -10,7 +11,15 @@ import { Icone } from "@/shared/ui/Icone";
  * Equipes vistas pela mentoria: líder, repositório e links de entrega só para leitura,
  * e a presença de cada integrante para marcar ali mesmo ao passar pela equipe (heurística 7).
  */
-export function EquipesMentoria({ equipes, presenca }: { equipes: Equipe[]; presenca: Record<string, Presenca | null> }) {
+export function EquipesMentoria({
+  equipes,
+  presenca,
+  locais = {},
+}: {
+  equipes: Equipe[];
+  presenca: Record<string, Presenca | null>;
+  locais?: Record<string, string>;
+}) {
   if (!equipes.length)
     return (
       <EstadoVazio icone="equipe" titulo="Nenhuma equipe aprovada ainda">
@@ -26,8 +35,12 @@ export function EquipesMentoria({ equipes, presenca }: { equipes: Equipe[]; pres
           <li key={e.id} id={`equipe-${e.id}`} className="card faixa-topo min-w-0 scroll-mt-24 space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
-                <h2 className="text-lg font-bold break-words">{e.nome}</h2>
+                <h2 className="flex items-center gap-2 text-lg font-bold break-words">
+                  <IconeEquipe equipe={e} tamanho="size-8 text-base" />
+                  <span className="min-w-0">{e.nome}</span>
+                </h2>
                 <p className="text-xs text-suave">
+                  {locais[e.id] ? `${locais[e.id]} · ` : ""}
                   {e.membros.length} integrante(s)
                   {lider && (
                     <>

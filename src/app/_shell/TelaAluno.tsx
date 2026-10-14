@@ -4,6 +4,7 @@ import { comandosDasAbas, navAluno } from "@/app/_shell/menus";
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { configuracaoDa } from "@/modules/equipes/domain/tipos";
 import { equipeDoAluno, listarResumo, ultimaRecusa } from "@/modules/equipes/infra/repositorio";
+import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
 import { ConviteRecebido, MinhaProposta, ProporEquipe, PropostaRecusada } from "@/modules/equipes/ui/Propostas";
 import { listarMateriais } from "@/modules/materiais/infra/repositorio";
@@ -47,13 +48,14 @@ export async function TelaAluno({
   const config = configuracaoDa(edicao, { paraParticipante: true });
   const porProposta = edicao.modo_formacao === "alunos_propoem";
   // Tudo em paralelo: uma única "rodada" até o banco.
-  const [materiais, equipe, equipes, trocas, colegasLivres, recusa] = await Promise.all([
+  const [materiais, equipe, equipes, trocas, colegasLivres, recusa, locais] = await Promise.all([
     listarMateriais(cliente, edicao.id),
     equipeDoAluno(cliente, aluno.email, edicao.id),
     listarResumo(cliente, edicao.id),
     edicao.permite_trocas ? trocasDoAluno(cliente, aluno.email, edicao.id) : Promise.resolve([]),
     porProposta ? listarSemEquipe(cliente, edicao.id) : Promise.resolve([]),
     porProposta ? ultimaRecusa(cliente, aluno.email, edicao.id) : Promise.resolve(null),
+    locaisDaEdicao(cliente, edicao.id),
   ]);
 
   const meuVinculo = equipe?.membros.find((m) => m.email === aluno.email);
@@ -101,7 +103,7 @@ export async function TelaAluno({
             ) : equipe && !aprovada ? (
               <MinhaProposta equipe={equipe} meuEmail={aluno.email} colegas={colegasLivres} config={config} />
             ) : equipe ? (
-              <PainelEquipe equipe={equipe} config={config} meuEmail={aluno.email} organizador={false} />
+              <PainelEquipe equipe={equipe} config={config} meuEmail={aluno.email} organizador={false} local={locais[equipe.id]} />
             ) : podeFormar ? (
               <>
                 {recusa && <PropostaRecusada nome={recusa.nome} motivo={recusa.motivo} />}

@@ -6,6 +6,68 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      alocacoes: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          equipe_id: string;
+          elemento_id: string;
+          lugar: number;
+          desde: string;
+          ate: string | null;
+          por: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          equipe_id: string;
+          elemento_id: string;
+          lugar: number;
+          desde?: string;
+          ate?: string | null;
+          por?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          equipe_id?: string;
+          elemento_id?: string;
+          lugar?: number;
+          desde?: string;
+          ate?: string | null;
+          por?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "alocacoes_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_elemento_id_fkey";
+            columns: ["elemento_id"];
+            isOneToOne: false;
+            referencedRelation: "mapa_elementos";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_equipe_id_fkey";
+            columns: ["equipe_id"];
+            isOneToOne: false;
+            referencedRelation: "equipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_por_fkey";
+            columns: ["por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+        ];
+      };
       avaliacoes_legado: {
         Row: {
           id: string;
@@ -292,6 +354,7 @@ export type Database = {
           motivo_analise: string | null;
           removido_em: string | null;
           removido_por: string | null;
+          icone: string | null;
         };
         Insert: {
           id?: string;
@@ -312,6 +375,7 @@ export type Database = {
           motivo_analise?: string | null;
           removido_em?: string | null;
           removido_por?: string | null;
+          icone?: string | null;
         };
         Update: {
           id?: string;
@@ -332,6 +396,7 @@ export type Database = {
           motivo_analise?: string | null;
           removido_em?: string | null;
           removido_por?: string | null;
+          icone?: string | null;
         };
         Relationships: [
           {
@@ -1427,6 +1492,7 @@ export type Database = {
     Views: { [_ in never]: never };
     Functions: {
       aceitar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: string };
+      alocar_equipe: { Args: { p_equipe: string; p_elemento: string; p_lugar: number }; Returns: Json };
       analisar_equipe: { Args: { p_equipe: string; p_aprovar: boolean; p_motivo?: string }; Returns: undefined };
       aplicar_equipes: { Args: { p_equipes: Json; p_substituir?: boolean; p_edicao?: string }; Returns: number };
       arquivar_equipe: { Args: { p_equipe: string }; Returns: undefined };
@@ -1439,6 +1505,7 @@ export type Database = {
       criar_equipe: { Args: { p_nome: string; p_repo: string; p_edicao?: string }; Returns: string };
       definir_edicao_atual: { Args: { p_edicao: string }; Returns: undefined };
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
+      desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
       edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
@@ -1452,7 +1519,7 @@ export type Database = {
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
-      minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
+      minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
       papel_atual: { Args: Record<PropertyKey, never>; Returns: string };
