@@ -1,379 +1,424 @@
 "use client";
 
-import { useEffect, useRef, useState, useTransition, type KeyboardEvent, type PointerEvent as EventoPonteiro } from "react";
-import {
-  adicionarModelo,
-  criarFileira,
-  duplicarElemento,
-  girarElemento,
-  moverElemento,
-  removerElemento,
-  salvarElemento,
-  salvarFundo,
-  salvarSala,
-} from "@/modules/mapa/application/actions";
-import { medida, MODELOS, TIPOS, type Modelo } from "@/modules/mapa/domain/catalogo";
+import { useEffect, useRef, useState, type KeyboardEvent, type PointerEvent as EventoPonteiro } from "react";
+import { adicionarModelo, ajustarElementos, duplicarElementos, duplicarSala, removerElementos } from "@/modules/mapa/application/actions";
+import { medida, type Modelo } from "@/modules/mapa/domain/catalogo";
+import { ALCAS, caixaDoGrupo, caixaEntre, deslocamentoDoGrupo, medidasDaCaixa, redimensionar, tocados, type Alca, type Caixa } from "@/modules/mapa/domain/edicao";
 import { caixa, dentroDaSala, type Elemento, type Sala } from "@/modules/mapa/domain/tipos";
 import { DesenhoSala } from "@/modules/mapa/ui/DesenhoSala";
+import { Catalogo, encostados, FormFileira, FormSala, PainelElemento, PainelLateral, PainelVarios } from "@/modules/mapa/ui/PainelEditor";
 import type { Acao } from "@/shared/acao/acao";
-import { Botao } from "@/shared/ui/Botao";
-import { Campo, Selecao } from "@/shared/ui/Campo";
-import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
-import { Icone } from "@/shared/ui/Icone";
+import { BotaoLink } from "@/shared/ui/Botao";
+import { Icone, type NomeIcone } from "@/shared/ui/Icone";
 import { useToast } from "@/shared/ui/Toast";
 
-const m = (cm: number) => String(cm / 100).replace(".", ",");
+type Ponto = { x: number; y: number };
+type Interacao =
+  | { tipo: "mover"; inicio: Ponto; originais: Map<string, Ponto>; grupo: Caixa; moveu: boolean }
+  | { tipo: "alca"; id: string; alca: Alca; inicio: Ponto; original: Caixa; antes: Elemento; moveu: boolean }
+  | { tipo: "selecao"; inicio: Ponto; somar: boolean };
+/** Painéis que se abrem pela barra (as propriedades abrem sozinhas quando há algo escolhido). */
+type PainelExtra = "fileira" | "sala" | null;
+
 const formData = (dados: Record<string, string | number>) => {
   const fd = new FormData();
   Object.entries(dados).forEach(([k, v]) => fd.set(k, String(v)));
   return fd;
 };
+const posicao = (e: Elemento) => ({ id: e.id, x_cm: e.x_cm, y_cm: e.y_cm, largura_cm: e.largura_cm, profundidade_cm: e.profundidade_cm, rotacao: e.rotacao });
+const CURSOR: Record<Alca, string> = { n: "ns-resize", s: "ns-resize", l: "ew-resize", o: "ew-resize", nl: "nesw-resize", so: "nesw-resize", no: "nwse-resize", sl: "nwse-resize" };
 
 /**
- * Editor da sala: catálogo de modelos prontos, o desenho (arrastar com mouse ou dedo,
- * setas no teclado) e o painel do elemento escolhido. Tudo grava na hora; tirar e criar
- * têm "desfazer" (heurísticas 3 e 7). As medidas aparecem em metros (heurística 2).
+ * Editor da sala em tela cheia: o desenho ocupa tudo e os painéis abrem nas laterais.
+ *  - arrastar move (encaixa de 10 em 10 cm); as alças redimensionam para qualquer tamanho;
+ *  - Shift/Ctrl + toque, "Selecionar vários" ou um retângulo no vazio escolhem vários: movem,
+ *    giram, duplicam e saem juntos (heurística 7);
+ *  - teclado: setas, R gira, Delete tira, Ctrl+D duplica, Ctrl+A escolhe tudo, Esc desmarca;
+ *  - criar, duplicar e tirar têm "desfazer"; medidas em metros (heurísticas 2 e 3).
  */
-export function EditorSala({ sala, elementos: doServidor }: { sala: Sala; elementos: Elemento[] }) {
+export function EditorSala({ sala, elementos: doServidor, piso }: { sala: Sala; elementos: Elemento[]; piso?: string | null }) {
   const [elementos, setElementos] = useState(doServidor);
-  const [selecionado, setSelecionado] = useState<string | null>(null);
-  const [, iniciar] = useTransition();
-  const svg = useRef<HTMLDivElement>(null);
-  const arraste = useRef<{ id: string; dx: number; dy: number; moveu: boolean } | null>(null);
+  const [selecao, setSelecao] = useState<Set<string>>(new Set());
+  const [varios, setVarios] = useState(false);
+  const [catalogo, setCatalogo] = useState(true);
+  const [extra, setExtra] = useState<PainelExtra>(null);
+  const [retangulo, setRetangulo] = useState<Caixa | null>(null);
+  const [cheia, setCheia] = useState(false);
+  const area = useRef<HTMLDivElement>(null);
+  const raiz = useRef<HTMLDivElement>(null);
+  const interacao = useRef<Interacao | null>(null);
   const teclas = useRef<ReturnType<typeof setTimeout> | null>(null);
   const toast = useToast();
 
-  // Os dados do servidor mandam, exceto no meio de um arraste.
+  // Os dados do servidor mandam, exceto no meio de um gesto; quem saiu do mapa sai da seleção.
   useEffect(() => {
-    if (!arraste.current) setElementos(doServidor);
+    if (interacao.current) return;
+    setElementos(doServidor);
+    setSelecao((s) => new Set([...s].filter((id) => doServidor.some((e) => e.id === id))));
   }, [doServidor]);
 
-  const atual = elementos.find((e) => e.id === selecionado) ?? null;
+  // No celular o catálogo começa fechado (o desenho fica com a tela toda).
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- só no navegador se sabe o tamanho da tela
+    if (window.matchMedia("(max-width: 1023px)").matches) setCatalogo(false);
+    const aoMudar = () => setCheia(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", aoMudar);
+    return () => document.removeEventListener("fullscreenchange", aoMudar);
+  }, []);
+
+  const escolhidos = elementos.filter((e) => selecao.has(e.id));
+  const unico = escolhidos.length === 1 ? escolhidos[0] : null;
+  const lugares = elementos.reduce((t, e) => t + (e.lugares ?? 0), 0);
+  // Fileira/sala quando pedidos pela barra; senão, as propriedades do que estiver escolhido.
+  const painel = extra ?? (escolhidos.length ? "item" : null);
 
   async function executar(acao: Acao, dados: Record<string, string | number>, desfazer?: Acao) {
     const r = await acao(null, formData(dados));
     if (r?.erro) toast(r.erro, { tom: "erro" });
     else if (r?.ok)
-      toast(r.ok, {
-        acao: desfazer && r.desfazer ? { rotulo: "Desfazer", executar: () => void desfazer(null, formData(r.desfazer!)) } : undefined,
-      });
+      toast(r.ok, { acao: desfazer && r.desfazer ? { rotulo: "Desfazer", executar: () => void desfazer(null, formData(r.desfazer!)) } : undefined });
     return r;
   }
+  const salvarAjustes = (itens: ReturnType<typeof posicao>[], mensagem?: string, anteriores?: ReturnType<typeof posicao>[]) =>
+    executar(ajustarElementos, { itens: JSON.stringify(itens), ...(mensagem ? { mensagem } : {}), ...(anteriores ? { anteriores: JSON.stringify(anteriores) } : {}) }, ajustarElementos);
 
   /** Ponto do ponteiro em centímetros da sala. */
-  function pontoNaSala(ev: { clientX: number; clientY: number }) {
-    const el = svg.current?.querySelector("svg");
+  function pontoNaSala(ev: { clientX: number; clientY: number }): Ponto {
+    const el = area.current?.querySelector("svg");
     const matriz = el?.getScreenCTM();
     if (!el || !matriz) return { x: 0, y: 0 };
     const p = new DOMPoint(ev.clientX, ev.clientY).matrixTransform(matriz.inverse());
     return { x: p.x, y: p.y };
   }
+  const capturar = (id: number) => (area.current?.querySelector("svg") as SVGSVGElement | null)?.setPointerCapture(id);
 
-  function pressionar(e: Elemento, ev: EventoPonteiro<SVGGElement>) {
+  function iniciarMovimento(ids: Set<string>, ev: { clientX: number; clientY: number }) {
+    const lista = elementos.filter((e) => ids.has(e.id));
+    if (!lista.length) return;
+    interacao.current = {
+      tipo: "mover",
+      inicio: pontoNaSala(ev),
+      originais: new Map(lista.map((e) => [e.id, { x: e.x_cm, y: e.y_cm }])),
+      grupo: caixaDoGrupo(lista),
+      moveu: false,
+    };
+  }
+
+  function pressionarItem(e: Elemento, ev: EventoPonteiro<SVGGElement>) {
     ev.preventDefault();
     ev.stopPropagation();
-    setSelecionado(e.id);
-    const p = pontoNaSala(ev);
-    arraste.current = { id: e.id, dx: p.x - e.x_cm, dy: p.y - e.y_cm, moveu: false };
-    (svg.current?.querySelector("svg") as SVGSVGElement | null)?.setPointerCapture(ev.pointerId);
+    area.current?.focus();
+    setExtra(null);
+    const somar = ev.shiftKey || ev.ctrlKey || ev.metaKey || varios;
+    let nova = selecao;
+    if (somar) {
+      nova = new Set(selecao);
+      if (nova.has(e.id)) nova.delete(e.id);
+      else nova.add(e.id);
+    } else if (!selecao.has(e.id)) nova = new Set([e.id]);
+    setSelecao(nova);
+    if (nova.has(e.id)) {
+      iniciarMovimento(nova, ev);
+      capturar(ev.pointerId);
+    }
+  }
+
+  function pressionarAlca(alca: Alca, ev: EventoPonteiro<SVGRectElement>) {
+    if (!unico) return;
+    ev.preventDefault();
+    ev.stopPropagation();
+    interacao.current = { tipo: "alca", id: unico.id, alca, inicio: pontoNaSala(ev), original: caixa(unico), antes: unico, moveu: false };
+    capturar(ev.pointerId);
+  }
+
+  function pressionarVazio(ev: EventoPonteiro<HTMLDivElement>) {
+    if ((ev.target as Element).closest("[data-elemento],[data-alca]")) return;
+    area.current?.focus();
+    const somar = ev.shiftKey || ev.ctrlKey || ev.metaKey || varios;
+    if (!somar) setSelecao(new Set());
+    interacao.current = { tipo: "selecao", inicio: pontoNaSala(ev), somar };
+    capturar(ev.pointerId);
   }
 
   function mover(ev: EventoPonteiro<HTMLDivElement>) {
-    const a = arraste.current;
-    if (!a) return;
+    const i = interacao.current;
+    if (!i) return;
     const p = pontoNaSala(ev);
-    setElementos((lista) =>
-      lista.map((e) => {
-        if (e.id !== a.id) return e;
-        const pos = dentroDaSala(sala, e, p.x - a.dx, p.y - a.dy);
-        if (pos.x !== e.x_cm || pos.y !== e.y_cm) a.moveu = true;
-        return { ...e, x_cm: pos.x, y_cm: pos.y };
-      }),
-    );
+    if (i.tipo === "mover") {
+      const d = deslocamentoDoGrupo(i.grupo, p.x - i.inicio.x, p.y - i.inicio.y, sala);
+      if (d.dx || d.dy) i.moveu = true;
+      setElementos((lista) => lista.map((e) => (i.originais.has(e.id) ? { ...e, x_cm: i.originais.get(e.id)!.x + d.dx, y_cm: i.originais.get(e.id)!.y + d.dy } : e)));
+    } else if (i.tipo === "alca") {
+      const nova = redimensionar(i.original, i.alca, p.x - i.inicio.x, p.y - i.inicio.y, sala);
+      i.moveu = true;
+      setElementos((lista) => lista.map((e) => (e.id === i.id ? { ...e, ...medidasDaCaixa(e, nova) } : e)));
+    } else setRetangulo(caixaEntre(i.inicio, p));
   }
 
   function soltar() {
-    const a = arraste.current;
-    arraste.current = null;
-    if (!a?.moveu) return;
-    const e = elementos.find((x) => x.id === a.id);
-    if (e) iniciar(() => void executar(moverElemento, { id: e.id, x: e.x_cm, y: e.y_cm }));
+    const i = interacao.current;
+    interacao.current = null;
+    if (!i) return;
+    if (i.tipo === "selecao") {
+      if (retangulo && retangulo.largura + retangulo.profundidade > 10) {
+        const ids = tocados(elementos, retangulo);
+        setSelecao((s) => new Set(i.somar ? [...s, ...ids] : ids));
+      }
+      setRetangulo(null);
+      return;
+    }
+    if (!i.moveu) return;
+    if (i.tipo === "mover") void salvarAjustes(elementos.filter((e) => i.originais.has(e.id)).map(posicao));
+    else {
+      const e = elementos.find((x) => x.id === i.id);
+      if (e) void salvarAjustes([posicao(e)], `${e.rotulo || "Item"}: ${medida(e.largura_cm)} × ${medida(e.profundidade_cm)}.`, [posicao(i.antes)]);
+    }
   }
 
-  /** Setas movem 10 cm (Shift: 50 cm), R gira, Delete tira do mapa. */
+  // ---------------------------------------------------------------- comandos da seleção
+  function girar() {
+    if (!escolhidos.length) return;
+    const antes = escolhidos.map(posicao);
+    const depois = escolhidos.map((e) => {
+      const g = { ...e, rotacao: (e.rotacao + 90) % 360 };
+      const p = dentroDaSala(sala, g, g.x_cm, g.y_cm);
+      return posicao({ ...g, x_cm: p.x, y_cm: p.y });
+    });
+    setElementos((lista) => lista.map((e) => ({ ...e, ...(depois.find((d) => d.id === e.id) ?? {}) })));
+    void salvarAjustes(depois, escolhidos.length > 1 ? `${escolhidos.length} itens girados.` : "Girado 90°.", antes);
+  }
+  async function duplicar() {
+    if (!escolhidos.length) return;
+    const r = await executar(duplicarElementos, { sala_id: sala.id, ids: JSON.stringify(escolhidos.map((e) => e.id)) }, removerElementos);
+    if (r?.desfazer?.ids) setSelecao(new Set(JSON.parse(r.desfazer.ids) as string[]));
+  }
+  function tirar() {
+    if (!escolhidos.length) return;
+    const ids = escolhidos.map((e) => e.id);
+    setSelecao(new Set());
+    void executar(removerElementos, { ids: JSON.stringify(ids) }, removerElementos);
+  }
+  async function colocar(modelo: Modelo) {
+    const r = await executar(adicionarModelo, { sala_id: sala.id, modelo: modelo.id }, removerElementos);
+    if (r?.desfazer?.id) setSelecao(new Set([r.desfazer.id]));
+  }
+
   function teclado(ev: KeyboardEvent<HTMLDivElement>) {
-    if (!atual) return;
+    const ctrl = ev.ctrlKey || ev.metaKey;
+    if (ctrl && (ev.key === "a" || ev.key === "A")) {
+      ev.preventDefault();
+      return setSelecao(new Set(elementos.map((e) => e.id)));
+    }
+    if (ev.key === "Escape") return setSelecao(new Set());
+    if (!escolhidos.length) return;
     const passo = ev.shiftKey ? 50 : 10;
     const delta = { ArrowLeft: [-passo, 0], ArrowRight: [passo, 0], ArrowUp: [0, -passo], ArrowDown: [0, passo] }[ev.key];
     if (delta) {
       ev.preventDefault();
-      const pos = dentroDaSala(sala, atual, atual.x_cm + delta[0], atual.y_cm + delta[1]);
-      setElementos((lista) => lista.map((e) => (e.id === atual.id ? { ...e, x_cm: pos.x, y_cm: pos.y } : e)));
+      const d = deslocamentoDoGrupo(caixaDoGrupo(escolhidos), delta[0], delta[1], sala);
+      const novos = escolhidos.map((e) => posicao({ ...e, x_cm: e.x_cm + d.dx, y_cm: e.y_cm + d.dy }));
+      setElementos((lista) => lista.map((e) => ({ ...e, ...(novos.find((n) => n.id === e.id) ?? {}) })));
       if (teclas.current) clearTimeout(teclas.current);
-      teclas.current = setTimeout(() => void executar(moverElemento, { id: atual.id, x: pos.x, y: pos.y }), 500);
-    } else if (ev.key === "r" || ev.key === "R") {
+      teclas.current = setTimeout(() => void salvarAjustes(novos), 500);
+    } else if (!ctrl && (ev.key === "r" || ev.key === "R")) {
       ev.preventDefault();
-      void executar(girarElemento, { id: atual.id, rotacao: (atual.rotacao + 90) % 360 });
+      girar();
+    } else if (ctrl && (ev.key === "d" || ev.key === "D")) {
+      ev.preventDefault();
+      void duplicar();
     } else if (ev.key === "Delete" || ev.key === "Backspace") {
       ev.preventDefault();
-      setSelecionado(null);
-      void executar(removerElemento, { id: atual.id }, removerElemento);
-    } else if (ev.key === "Escape") setSelecionado(null);
-  }
-
-  async function colocar(modelo: Modelo) {
-    const r = await executar(adicionarModelo, { sala_id: sala.id, modelo: modelo.id }, removerElemento);
-    if (r?.desfazer?.id) setSelecionado(r.desfazer.id);
-  }
-
-  return (
-    <div className="grid gap-4 lg:grid-cols-[15rem_minmax(0,1fr)_19rem]">
-      {/* ------------------------------------------------ desenho */}
-      {/* No celular o desenho vem primeiro; no computador fica no meio e acompanha a rolagem. */}
-      <section className="card min-w-0 space-y-2 p-3 sm:p-4 lg:sticky lg:top-20 lg:col-start-2 lg:row-start-1 lg:self-start" aria-label={`Desenho da sala ${sala.nome}`}>
-        <div
-          ref={svg}
-          tabIndex={0}
-          onKeyDown={teclado}
-          onPointerMove={mover}
-          onPointerUp={soltar}
-          onPointerCancel={soltar}
-          onPointerDown={(ev) => {
-            if (!(ev.target as Element).closest("[data-elemento]")) setSelecionado(null);
-          }}
-          className="touch-none rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-marca"
-        >
-          <DesenhoSala sala={sala} elementos={elementos} selecionado={selecionado} grade fundo aoPressionar={pressionar} idSvg={`sala-${sala.id}`} />
-        </div>
-        <p className="text-xs text-suave">
-          Arraste para mover (encaixa de 10 em 10 cm). Com um item escolhido: setas movem, <kbd>Shift</kbd> + setas andam 50 cm, <kbd>R</kbd> gira e{" "}
-          <kbd>Delete</kbd> tira do mapa.
-        </p>
-      </section>
-
-      {/* ------------------------------------------------ catálogo */}
-      <aside className="card space-y-3 lg:col-start-1 lg:row-start-1 lg:max-h-[calc(100vh-8rem)] lg:self-start lg:overflow-y-auto" aria-label="Modelos prontos">
-        <h2 className="text-sm font-semibold">Colocar na sala</h2>
-        <p className="text-xs text-suave">Toque num modelo: ele aparece no meio da sala, pronto para arrastar.</p>
-        {(["Equipes", "Móveis", "Sala"] as const).map((grupo) => (
-          <div key={grupo} className="space-y-1.5">
-            <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">{grupo}</p>
-            <div className="grid grid-cols-2 gap-1.5 lg:grid-cols-1">
-              {MODELOS.filter((x) => x.grupo === grupo).map((x) => (
-                <button
-                  key={x.id}
-                  type="button"
-                  onClick={() => void colocar(x)}
-                  className="rounded-lg border border-borda-forte bg-superficie-solida px-2.5 py-1.5 text-left transition hover:border-marca"
-                >
-                  <span className="block text-sm font-medium">{x.nome}</span>
-                  <span className="block text-[11px] text-suave">{x.descricao}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        ))}
-      </aside>
-
-      {/* ------------------------------------------------ painel */}
-      <aside className="space-y-4 lg:col-start-3 lg:row-start-1 lg:self-start">
-        {atual ? (
-          <PainelElemento encostando={encostados(atual, elementos)} key={`${atual.id}-${atual.x_cm}-${atual.y_cm}-${atual.rotacao}-${atual.largura_cm}-${atual.profundidade_cm}`} e={atual} salaId={sala.id} aoTirar={() => setSelecionado(null)} executar={executar} />
-        ) : (
-          <div className="card space-y-1 text-sm text-suave">
-            <p className="font-semibold text-foreground">Nada escolhido</p>
-            <p>Toque num item do desenho para mudar medidas, girar, duplicar ou tirar.</p>
-          </div>
-        )}
-        <FormFileira salaId={sala.id} />
-        <FormSala sala={sala} />
-      </aside>
-    </div>
-  );
-}
-
-/** Rótulos dos elementos que estão por cima do escolhido (zonas e textos não contam). */
-function encostados(e: Elemento, todos: Elemento[]): string[] {
-  const ignora = (x: Elemento) => TIPOS[x.tipo].estilo === "zona" || TIPOS[x.tipo].estilo === "texto";
-  if (ignora(e)) return [];
-  const a = caixa(e);
-  return todos
-    .filter((o) => o.id !== e.id && !ignora(o))
-    .filter((o) => {
-      const b = caixa(o);
-      return a.x < b.x + b.largura && b.x < a.x + a.largura && a.y < b.y + b.profundidade && b.y < a.y + a.profundidade;
-    })
-    .map((o) => o.rotulo || TIPOS[o.tipo].rotulo);
-}
-
-function PainelElemento({
-  e,
-  salaId,
-  aoTirar,
-  executar,
-  encostando,
-}: {
-  encostando: string[];
-  e: Elemento;
-  salaId: string;
-  aoTirar: () => void;
-  executar: (acao: Acao, dados: Record<string, string | number>, desfazer?: Acao) => Promise<unknown>;
-}) {
-  const tipo = TIPOS[e.tipo];
-  return (
-    <section className="card space-y-3">
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">{tipo.rotulo}</p>
-          <h2 className="text-lg font-semibold">{e.rotulo || tipo.rotulo}</h2>
-        </div>
-        <span className="text-xs text-suave">
-          {medida(e.largura_cm)} × {medida(e.profundidade_cm)}
-        </span>
-      </div>
-      {encostando.length > 0 && (
-        <p role="status" className="rounded-lg bg-amber-500/15 px-3 py-2 text-xs text-amber-800 dark:text-amber-300">
-          Está por cima de {encostando.join(", ")}. Arraste um pouco para separar.
-        </p>
-      )}
-      <div className="flex flex-wrap gap-1.5">
-        <Botao variante="secundario" tamanho="pequeno" icone="girar" onClick={() => void executar(girarElemento, { id: e.id, rotacao: (e.rotacao + 90) % 360 })}>
-          Girar 90°
-        </Botao>
-        <Botao variante="secundario" tamanho="pequeno" icone="copiar" onClick={() => void executar(duplicarElemento, { id: e.id, sala_id: salaId }, removerElemento)}>
-          Duplicar
-        </Botao>
-        <Botao
-          variante="perigo"
-          tamanho="pequeno"
-          icone="lixo"
-          onClick={() => {
-            aoTirar();
-            void executar(removerElemento, { id: e.id }, removerElemento);
-          }}
-        >
-          Tirar
-        </Botao>
-      </div>
-      <Formulario action={salvarElemento} className="grid grid-cols-2 gap-2">
-        <Ocultos valores={{ id: e.id, tipo: e.tipo, rotacao: String(e.rotacao) }} />
-        <Campo rotulo="Rótulo" name="rotulo" maxLength={60} defaultValue={e.rotulo ?? ""} placeholder="B1, Café…" className="col-span-2" />
-        <Campo rotulo="Largura (m)" name="largura" inputMode="decimal" required defaultValue={m(e.largura_cm)} />
-        <Campo rotulo="Profundidade (m)" name="profundidade" inputMode="decimal" required defaultValue={m(e.profundidade_cm)} />
-        <Campo rotulo="Da parede esquerda (m)" name="x" inputMode="decimal" required defaultValue={m(e.x_cm)} />
-        <Campo rotulo="Da parede do fundo (m)" name="y" inputMode="decimal" required defaultValue={m(e.y_cm)} />
-        {tipo.temLugares && (
-          <Campo rotulo="Equipes que cabem" name="lugares" type="number" min={1} max={20} required defaultValue={e.lugares ?? 1} className="col-span-2" />
-        )}
-        <div className="col-span-2">
-          <BotaoEnviar tamanho="pequeno" icone="ok">
-            Salvar
-          </BotaoEnviar>
-        </div>
-      </Formulario>
-    </section>
-  );
-}
-
-function FormFileira({ salaId }: { salaId: string }) {
-  return (
-    <details className="card group">
-      <summary className="cursor-pointer text-sm font-semibold select-none">Colocar uma fileira</summary>
-      <Formulario action={criarFileira} className="mt-3 grid grid-cols-2 gap-2">
-        <Ocultos valores={{ sala_id: salaId }} />
-        <Selecao
-          rotulo="Modelo"
-          name="modelo"
-          defaultValue="bancada-lab-2"
-          className="col-span-2"
-          opcoes={MODELOS.filter((x) => x.grupo !== "Sala").map((x) => ({ valor: x.id, rotulo: `${x.nome} (${x.descricao})` }))}
-        />
-        <Campo rotulo="Quantas" name="quantidade" type="number" min={1} max={30} defaultValue={3} required />
-        <Selecao
-          rotulo="Direção"
-          name="direcao"
-          defaultValue="vertical"
-          opcoes={[
-            { valor: "vertical", rotulo: "Uma embaixo da outra" },
-            { valor: "horizontal", rotulo: "Lado a lado" },
-          ]}
-        />
-        <Campo rotulo="Espaço entre elas (m)" name="espaco" inputMode="decimal" defaultValue="1" required className="col-span-2" />
-        <Campo rotulo="Começa a (m) da esquerda" name="x" inputMode="decimal" defaultValue="0,5" required />
-        <Campo rotulo="e a (m) do fundo" name="y" inputMode="decimal" defaultValue="0,5" required />
-        <div className="col-span-2">
-          <BotaoEnviar tamanho="pequeno" icone="mais_novo">
-            Colocar fileira
-          </BotaoEnviar>
-        </div>
-      </Formulario>
-    </details>
-  );
-}
-
-function FormSala({ sala }: { sala: Sala }) {
-  return (
-    <details className="card group">
-      <summary className="cursor-pointer text-sm font-semibold select-none">Medidas e fundo da sala</summary>
-      <div className="mt-3 space-y-4">
-        <Formulario action={salvarSala} className="grid grid-cols-2 gap-2">
-          <Ocultos valores={{ id: sala.id }} />
-          <Campo rotulo="Nome" name="nome" required maxLength={60} defaultValue={sala.nome} className="col-span-2" />
-          <Campo rotulo="Largura (m)" name="largura" inputMode="decimal" required defaultValue={m(sala.largura_cm)} />
-          <Campo rotulo="Profundidade (m)" name="profundidade" inputMode="decimal" required defaultValue={m(sala.profundidade_cm)} />
-          <div className="col-span-2">
-            <BotaoEnviar variante="secundario" tamanho="pequeno" icone="ok">
-              Salvar sala
-            </BotaoEnviar>
-          </div>
-        </Formulario>
-        <FundoSala sala={sala} />
-      </div>
-    </details>
-  );
-}
-
-/** Foto ou rascunho de fundo: reduzido no navegador (até 1600 px, WEBP) antes de enviar. */
-function FundoSala({ sala }: { sala: Sala }) {
-  const [enviando, setEnviando] = useState(false);
-  const toast = useToast();
-
-  async function escolher(arquivo: File | undefined) {
-    if (!arquivo) return;
-    if (!arquivo.type.startsWith("image/")) return toast("Escolha uma imagem (PNG, JPG ou WEBP). PDF: tire um print da planta.", { tom: "erro" });
-    setEnviando(true);
-    try {
-      const img = await createImageBitmap(arquivo);
-      const escala = Math.min(1, 1600 / Math.max(img.width, img.height));
-      const canvas = document.createElement("canvas");
-      canvas.width = Math.round(img.width * escala);
-      canvas.height = Math.round(img.height * escala);
-      canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const r = await salvarFundo(null, formData({ id: sala.id, fundo: canvas.toDataURL("image/webp", 0.7) }));
-      toast(r?.erro ?? r?.ok ?? "Pronto.", { tom: r?.erro ? "erro" : "sucesso" });
-    } catch {
-      toast("Não foi possível ler essa imagem. Tente outra (PNG ou JPG).", { tom: "erro" });
-    } finally {
-      setEnviando(false);
+      tirar();
     }
   }
 
-  return (
-    <div className="space-y-2 border-t border-borda pt-3">
-      <p className="text-sm font-semibold">Imagem de fundo</p>
-      <p className="text-xs text-suave">Uma foto da planta ou um rascunho: aparece clarinha atrás do desenho, para você posicionar as bancadas por cima.</p>
-      <label className="btn-secundario min-h-9 cursor-pointer px-3 text-xs">
-        <Icone nome="imagem" className="size-4" /> {enviando ? "Enviando…" : sala.fundo ? "Trocar imagem" : "Escolher imagem"}
-        <input type="file" accept="image/*" className="sr-only" disabled={enviando} onChange={(ev) => void escolher(ev.target.files?.[0])} />
-      </label>
-      {sala.fundo && (
-        <Formulario action={salvarFundo}>
-          <Ocultos valores={{ id: sala.id, fundo: "" }} />
-          <BotaoEnviar variante="fantasma" tamanho="pequeno">
-            Tirar a imagem
-          </BotaoEnviar>
-        </Formulario>
+  async function telaCheia() {
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await raiz.current?.requestFullscreen();
+    } catch {
+      toast("O navegador não deixou abrir em tela cheia.", { tom: "info" });
+    }
+  }
+
+  // Alças (um item) ou contorno do grupo (vários), por cima do desenho e na mesma escala.
+  const tamAlca = Math.max(12, Math.round(Math.max(sala.largura_cm, sala.profundidade_cm) / 55));
+  const camada = (
+    <>
+      {unico && <Alcas caixa={caixa(unico)} tamanho={tamAlca} aoPressionar={pressionarAlca} />}
+      {escolhidos.length > 1 &&
+        (() => {
+          const g = caixaDoGrupo(escolhidos);
+          return <rect x={g.x - 14} y={g.y - 14} width={g.largura + 28} height={g.profundidade + 28} fill="none" stroke="var(--magenta)" strokeWidth={2} strokeDasharray="10 8" pointerEvents="none" />;
+        })()}
+      {retangulo && (
+        <rect
+          x={retangulo.x}
+          y={retangulo.y}
+          width={retangulo.largura}
+          height={retangulo.profundidade}
+          fill="color-mix(in srgb, var(--magenta) 10%, transparent)"
+          stroke="var(--magenta)"
+          strokeWidth={2}
+          strokeDasharray="8 6"
+          pointerEvents="none"
+        />
       )}
+    </>
+  );
+
+  return (
+    <div
+      ref={raiz}
+      className={`flex flex-col bg-background ${cheia ? "h-dvh" : "h-[calc(100dvh-8.75rem)] sm:h-[calc(100dvh-7.5rem)]"}`}
+    >
+      {/* ------------------------------------------------ barra de ferramentas */}
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-borda px-2 py-2 sm:px-3">
+        <BotaoLink href="/admin/mapa" variante="fantasma" tamanho="pequeno" icone="voltar" aria-label="Voltar para o mapa">
+          Mapa
+        </BotaoLink>
+        <div className="mr-auto min-w-0 px-1">
+          <p className="truncate text-sm font-semibold">
+            {piso ? `${piso} › ` : ""}
+            {sala.nome}
+          </p>
+          <p className="truncate text-[11px] text-suave">
+            {medida(sala.largura_cm)} × {medida(sala.profundidade_cm)} · {elementos.length} item(ns) · {lugares} lugar(es) para equipes
+          </p>
+        </div>
+        <Ferramenta icone="mais_novo" ativo={catalogo} aoTocar={() => setCatalogo((v) => !v)} rotulo="Modelos" />
+        <Ferramenta icone="ok" ativo={varios} aoTocar={() => setVarios((v) => !v)} rotulo="Selecionar vários" curto="Vários" />
+        <Ferramenta icone="copiar" ativo={painel === "fileira"} aoTocar={() => setExtra((p) => (p === "fileira" ? null : "fileira"))} rotulo="Fileira" />
+        <Ferramenta icone="editar" ativo={painel === "sala"} aoTocar={() => setExtra((p) => (p === "sala" ? null : "sala"))} rotulo="Sala" />
+        <Ferramenta icone="mapa" aoTocar={() => void executar(duplicarSala, { id: sala.id })} rotulo="Duplicar sala" curto="Copiar sala" />
+        <Ferramenta icone="telao" ativo={cheia} aoTocar={() => void telaCheia()} rotulo={cheia ? "Sair da tela cheia" : "Tela cheia"} curto="Tela cheia" />
+      </div>
+
+      <div className="relative flex min-h-0 flex-1">
+        {/* ------------------------------------------------ catálogo (lateral esquerda) */}
+        {catalogo && (
+          <aside className="absolute inset-y-0 left-0 z-20 w-64 overflow-y-auto border-r border-borda bg-superficie-solida p-3 shadow-xl lg:static lg:shadow-none" aria-label="Modelos prontos">
+            <PainelLateral titulo="Colocar na sala" aoFechar={() => setCatalogo(false)}>
+              <Catalogo aoColocar={(x) => void colocar(x)} />
+            </PainelLateral>
+          </aside>
+        )}
+
+        {/* ------------------------------------------------ desenho */}
+        <div
+          ref={area}
+          tabIndex={0}
+          role="application"
+          aria-label={`Desenho da sala ${sala.nome}. Setas movem, R gira, Delete tira, Ctrl+D duplica, Ctrl+A escolhe tudo.`}
+          onKeyDown={teclado}
+          onPointerDown={pressionarVazio}
+          onPointerMove={mover}
+          onPointerUp={soltar}
+          onPointerCancel={soltar}
+          className="min-w-0 flex-1 touch-none p-2 outline-none focus-visible:ring-1 focus-visible:ring-borda-forte focus-visible:ring-inset sm:p-4"
+        >
+          <DesenhoSala
+            sala={sala}
+            elementos={elementos}
+            selecionados={selecao}
+            grade
+            fundo
+            aoPressionar={pressionarItem}
+            idSvg={`sala-${sala.id}`}
+            className="h-full"
+          >
+            {camada}
+          </DesenhoSala>
+        </div>
+
+        {/* ------------------------------------------------ propriedades (lateral direita) */}
+        {painel && (
+          <aside className="absolute inset-y-0 right-0 z-20 w-80 max-w-[90vw] overflow-y-auto border-l border-borda bg-superficie-solida p-3 shadow-xl lg:static lg:shadow-none" aria-label="Propriedades">
+            {painel === "fileira" ? (
+              <PainelLateral titulo="Colocar uma fileira" aoFechar={() => setExtra(null)}>
+                <FormFileira salaId={sala.id} />
+              </PainelLateral>
+            ) : painel === "sala" ? (
+              <PainelLateral titulo="Medidas e fundo da sala" aoFechar={() => setExtra(null)}>
+                <FormSala sala={sala} />
+              </PainelLateral>
+            ) : unico ? (
+              <PainelLateral titulo="Item escolhido" aoFechar={() => setSelecao(new Set())}>
+                <PainelElemento
+                  key={`${unico.id}-${unico.x_cm}-${unico.y_cm}-${unico.rotacao}-${unico.largura_cm}-${unico.profundidade_cm}`}
+                  e={unico}
+                  encostando={encostados(unico, elementos)}
+                  girar={girar}
+                  duplicar={() => void duplicar()}
+                  tirar={tirar}
+                />
+              </PainelLateral>
+            ) : escolhidos.length > 1 ? (
+              <PainelLateral titulo="Vários itens" aoFechar={() => setSelecao(new Set())}>
+                <PainelVarios itens={escolhidos} girar={girar} duplicar={() => void duplicar()} tirar={tirar} aoLimpar={() => setSelecao(new Set())} />
+              </PainelLateral>
+            ) : null}
+          </aside>
+        )}
+      </div>
+
+      <p className="border-t border-borda px-3 py-1.5 text-[11px] text-suave">
+        {varios ? "Modo vários: toque nos itens para juntar ou tirar da seleção. " : null}
+        <span className="sm:hidden">Toque para escolher · arraste para mover · puxe as alças para mudar o tamanho.</span>
+        <span className="hidden sm:inline">
+          {varios ? "" : "Shift ou Ctrl + clique escolhe vários; arraste no vazio para escolher com um retângulo. "}
+          Alças redimensionam · setas movem (Shift: 50 cm) · <kbd>R</kbd> gira · <kbd>Delete</kbd> tira · <kbd>Ctrl</kbd>+<kbd>D</kbd> duplica · <kbd>Ctrl</kbd>+<kbd>A</kbd> escolhe tudo
+        </span>
+      </p>
     </div>
+  );
+}
+
+/** As 8 alças de redimensionar em volta do item escolhido. */
+function Alcas({ caixa: c, tamanho, aoPressionar }: { caixa: Caixa; tamanho: number; aoPressionar: (a: Alca, ev: EventoPonteiro<SVGRectElement>) => void }) {
+  const pos: Record<Alca, Ponto> = {
+    no: { x: c.x, y: c.y },
+    n: { x: c.x + c.largura / 2, y: c.y },
+    nl: { x: c.x + c.largura, y: c.y },
+    l: { x: c.x + c.largura, y: c.y + c.profundidade / 2 },
+    sl: { x: c.x + c.largura, y: c.y + c.profundidade },
+    s: { x: c.x + c.largura / 2, y: c.y + c.profundidade },
+    so: { x: c.x, y: c.y + c.profundidade },
+    o: { x: c.x, y: c.y + c.profundidade / 2 },
+  };
+  return ALCAS.map((a) => (
+    <rect
+      key={a}
+      data-alca={a}
+      x={pos[a].x - tamanho / 2}
+      y={pos[a].y - tamanho / 2}
+      width={tamanho}
+      height={tamanho}
+      rx={3}
+      fill="var(--superficie-solida)"
+      stroke="var(--magenta)"
+      strokeWidth={3}
+      style={{ cursor: CURSOR[a] }}
+      onPointerDown={(ev) => aoPressionar(a, ev)}
+    />
+  ));
+}
+
+/** Botão da barra de ferramentas (com estado ligado/desligado quando é um painel ou modo). */
+function Ferramenta({ icone, rotulo, curto, ativo, aoTocar }: { icone: NomeIcone; rotulo: string; curto?: string; ativo?: boolean; aoTocar: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={aoTocar}
+      aria-pressed={ativo}
+      title={rotulo}
+      className={`inline-flex min-h-9 items-center gap-1.5 rounded-lg border px-2.5 text-xs font-semibold transition ${
+        ativo ? "border-transparent text-white [background:var(--grad)]" : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground"
+      }`}
+    >
+      <Icone nome={icone} className="size-4" />
+      <span className="hidden md:inline">{rotulo}</span>
+      <span className="md:hidden">{curto ?? rotulo}</span>
+    </button>
   );
 }

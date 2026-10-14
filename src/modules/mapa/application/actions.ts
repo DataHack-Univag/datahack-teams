@@ -144,19 +144,9 @@ export const adicionarModelo = criarAcao(
     ]);
     if (error) return falha(traduzirErro(error));
     atualizarTelas();
-    return sucesso(`${modelo.nome} colocada na sala. Arraste para o lugar certo.`, { id: data[0].id });
+    return sucesso(`${modelo.nome} colocada na sala. Arraste para o lugar certo.`, { id: data[0].id, ids: JSON.stringify([data[0].id]) });
   },
 );
-
-/** Arrastar no mapa: só a posição. */
-export const moverElemento = criarAcao(z.object({ id, x: inteiro, y: inteiro }), async (d) => {
-  const { cliente } = await sessaoAtual();
-  const { data, error } = await repo.atualizarElemento(cliente, d.id, { x_cm: Math.max(0, d.x), y_cm: Math.max(0, d.y) });
-  if (error) return falha(traduzirErro(error));
-  if (!data?.length) return SEM_PERMISSAO;
-  atualizarTelas();
-  return LIMPO;
-});
 
 /** Painel do elemento: rótulo, medidas, giro, posição e lugares. */
 export const salvarElemento = criarAcao(
@@ -189,41 +179,6 @@ export const salvarElemento = criarAcao(
     return sucesso("Salvo no mapa.");
   },
 );
-
-export const girarElemento = criarAcao(z.object({ id, rotacao }), async (d) => {
-  const { cliente } = await sessaoAtual();
-  const { data, error } = await repo.atualizarElemento(cliente, d.id, { rotacao: d.rotacao });
-  if (error) return falha(traduzirErro(error));
-  if (!data?.length) return SEM_PERMISSAO;
-  atualizarTelas();
-  return LIMPO;
-});
-
-export const duplicarElemento = criarAcao(z.object({ id, sala_id: id }), async (d) => {
-  const { cliente, edicao } = await sessaoAtual();
-  const mapa = await repo.carregarMapa(cliente, edicao.id);
-  const daSala = mapa.elementos.filter((e) => e.sala_id === d.sala_id);
-  const original = daSala.find((e) => e.id === d.id);
-  if (!original) return falha("Elemento não encontrado. Recarregue a página.");
-  const prefixo = original.rotulo?.match(/^([A-Za-z]+)\d+$/)?.[1];
-  const { tipo, largura_cm, profundidade_cm, rotacao: giro, lugares } = original;
-  const { data, error } = await repo.criarElementos(cliente, edicao.id, d.sala_id, [
-    { tipo, largura_cm, profundidade_cm, rotacao: giro, lugares, rotulo: prefixo ? proximoRotulo(prefixo, daSala.map((e) => e.rotulo)) : original.rotulo, x_cm: original.x_cm + 20, y_cm: original.y_cm + 20 },
-  ]);
-  if (error) return falha(traduzirErro(error));
-  atualizarTelas();
-  return sucesso("Cópia colocada ao lado. Arraste para o lugar.", { id: data[0].id });
-});
-
-/** Tirar do mapa (arquiva; o "desfazer" traz de volta). Também desfaz a criação. */
-export const removerElemento = criarAcao(z.object({ id, voltar: caixa }), async (d) => {
-  const { cliente } = await sessaoAtual();
-  const { data, error } = await repo.arquivarElemento(cliente, d.id, !d.voltar);
-  if (error) return falha(traduzirErro(error));
-  if (!data?.length) return SEM_PERMISSAO;
-  atualizarTelas();
-  return d.voltar ? sucesso("De volta ao mapa.") : sucesso("Tirado do mapa.", { id: d.id, voltar: "1" });
-});
 
 /** Várias peças iguais de uma vez, numeradas (B1, B2...). */
 export const criarFileira = criarAcao(
@@ -260,6 +215,93 @@ export const criarFileira = criarAcao(
     return sucesso(`${novos.length} × ${modelo.nome.toLowerCase()} colocadas (${novos[0].rotulo ?? ""}${novos.length > 1 ? ` a ${novos[novos.length - 1].rotulo ?? ""}` : ""}).`);
   },
 );
+
+// ---------------------------------------------------------------- vários de uma vez (seleção do editor)
+
+/** Lista de ids enviada como JSON (seleção do editor). */
+const listaIds = z.string().transform((v, ctx) => {
+  try {
+    const ids = JSON.parse(v);
+    if (Array.isArray(ids) && ids.length && ids.length <= 200 && ids.every((x) => typeof x === "string")) return ids as string[];
+  } catch {}
+  ctx.addIssue({ code: "custom", message: "Seleção inválida. Recarregue a página." });
+  return z.NEVER;
+});
+
+/** Posição/tamanho/giro de vários itens (arrastar, redimensionar, girar a seleção). */
+const ajustes = z.string().transform((v, ctx) => {
+  try {
+    const lista = JSON.parse(v) as { id: string; x_cm: number; y_cm: number; largura_cm?: number; profundidade_cm?: number; rotacao?: number }[];
+    const inteiro = (n: unknown) => n === undefined || (Number.isInteger(n) && (n as number) >= 0 && (n as number) <= 10000);
+    if (Array.isArray(lista) && lista.length && lista.length <= 200 && lista.every((a) => typeof a.id === "string" && inteiro(a.x_cm) && inteiro(a.y_cm) && inteiro(a.largura_cm) && inteiro(a.profundidade_cm) && (a.rotacao === undefined || [0, 90, 180, 270].includes(a.rotacao))))
+      return lista;
+  } catch {}
+  ctx.addIssue({ code: "custom", message: "Ajuste inválido. Recarregue a página." });
+  return z.NEVER;
+});
+
+/** Grava o novo lugar/tamanho/giro de cada item. O "desfazer" manda as medidas de antes. */
+export const ajustarElementos = criarAcao(z.object({ itens: ajustes, anteriores: z.string().optional(), mensagem: z.string().optional() }), async (d) => {
+  const { cliente } = await sessaoAtual();
+  for (const { id: idEl, ...dados } of d.itens) {
+    const { error } = await repo.atualizarElemento(cliente, idEl, dados);
+    if (error) return falha(traduzirErro(error));
+  }
+  atualizarTelas();
+  return d.mensagem ? sucesso(d.mensagem, d.anteriores ? { itens: d.anteriores } : undefined) : LIMPO;
+});
+
+/** Duplica a seleção ao lado (20 cm para a direita e para baixo), renumerando B1, B2... */
+export const duplicarElementos = criarAcao(z.object({ sala_id: id, ids: listaIds }), async (d) => {
+  const { cliente, edicao } = await sessaoAtual();
+  const mapa = await repo.carregarMapa(cliente, edicao.id);
+  const daSala = mapa.elementos.filter((e) => e.sala_id === d.sala_id);
+  const originais = daSala.filter((e) => d.ids.includes(e.id));
+  if (!originais.length) return falha("Nada para duplicar. Recarregue a página.");
+  const rotulos = daSala.map((e) => e.rotulo);
+  const copias = originais.map(({ tipo, largura_cm, profundidade_cm, rotacao: giro, lugares, rotulo, x_cm, y_cm }) => {
+    const prefixo = rotulo?.match(/^([A-Za-z]+)d+$/)?.[1];
+    const novo = prefixo ? proximoRotulo(prefixo, rotulos) : rotulo;
+    rotulos.push(novo);
+    return { tipo, largura_cm, profundidade_cm, rotacao: giro, lugares, rotulo: novo, x_cm: x_cm + 20, y_cm: y_cm + 20 };
+  });
+  const { data, error } = await repo.criarElementos(cliente, edicao.id, d.sala_id, copias);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso(`${copias.length} cópia(s) colocada(s) ao lado. Arraste para o lugar.`, { ids: JSON.stringify(data.map((x) => x.id)) });
+});
+
+/** Tira a seleção do mapa (arquiva); o desfazer traz todos de volta. */
+export const removerElementos = criarAcao(z.object({ ids: listaIds, voltar: caixa }), async (d) => {
+  const { cliente } = await sessaoAtual();
+  for (const idEl of d.ids) {
+    const { error } = await repo.arquivarElemento(cliente, idEl, !d.voltar);
+    if (error) return falha(traduzirErro(error));
+  }
+  atualizarTelas();
+  return d.voltar ? sucesso("De volta ao mapa.") : sucesso(`${d.ids.length} item(ns) tirado(s) do mapa.`, { ids: JSON.stringify(d.ids), voltar: "1" });
+});
+
+/** Copia a sala inteira (medidas, fundo e tudo que está desenhado): para labs iguais. */
+export const duplicarSala = criarAcao(z.object({ id }), async (d) => {
+  const { cliente, edicao } = await sessaoAtual();
+  const [sala, mapa] = await Promise.all([repo.buscarSala(cliente, d.id), repo.carregarMapa(cliente, edicao.id)]);
+  if (!sala) return falha("Sala não encontrada.");
+  const nomes = new Set(mapa.pisos.flatMap((p) => p.salas).filter((s) => s.piso_id === sala.piso_id).map((s) => s.nome.toLowerCase()));
+  let nome = `${sala.nome} (cópia)`;
+  for (let n = 2; nomes.has(nome.toLowerCase()); n++) nome = `${sala.nome} (cópia ${n})`;
+  const ordem = (mapa.pisos.find((p) => p.id === sala.piso_id)?.salas.length ?? 0) + 1;
+  const nova = await repo.criarSala(cliente, edicao.id, { piso_id: sala.piso_id, nome: nome.slice(0, 60), largura_cm: sala.largura_cm, profundidade_cm: sala.profundidade_cm, ordem });
+  if (nova.error) return falha(traduzirErro(nova.error));
+  if (sala.fundo) await repo.atualizarSala(cliente, nova.data.id, { fundo: sala.fundo });
+  const itens = mapa.elementos.filter((e) => e.sala_id === sala.id).map(({ tipo, rotulo, x_cm, y_cm, largura_cm, profundidade_cm, rotacao: giro, lugares }) => ({ tipo, rotulo, x_cm, y_cm, largura_cm, profundidade_cm, rotacao: giro, lugares }));
+  if (itens.length) {
+    const { error } = await repo.criarElementos(cliente, edicao.id, nova.data.id, itens);
+    if (error) return falha(traduzirErro(error));
+  }
+  atualizarTelas();
+  return sucesso(`Sala copiada: “${nome}”, com ${itens.length} item(ns). Renomeie em “Medidas e fundo da sala”.`, { id: nova.data.id });
+});
 
 // ---------------------------------------------------------------- equipes no mapa
 

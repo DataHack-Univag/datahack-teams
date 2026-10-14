@@ -1,4 +1,4 @@
-import type { PointerEvent as EventoPonteiro } from "react";
+import type { PointerEvent as EventoPonteiro, ReactNode } from "react";
 import { medida, TIPOS } from "@/modules/mapa/domain/catalogo";
 import { lugaresDoElemento, type Ocupacao } from "@/modules/mapa/domain/alocacao";
 import { caixa, type Elemento, type Sala } from "@/modules/mapa/domain/tipos";
@@ -155,6 +155,8 @@ export function DesenhoSala({
   aoTocarLugar,
   lugarDestacado,
   alertas,
+  selecionados,
+  children,
 }: {
   sala: Pick<Sala, "nome" | "largura_cm" | "profundidade_cm" | "fundo">;
   elementos: Elemento[];
@@ -174,6 +176,10 @@ export function DesenhoSala({
   lugarDestacado?: string | null;
   /** Equipes com pedido de ajuda: o lugar delas fica em destaque (por id da equipe). */
   alertas?: Record<string, Alerta>;
+  /** Vários itens escolhidos (editor). */
+  selecionados?: ReadonlySet<string>;
+  /** Camada por cima do desenho, nas mesmas medidas (alças e seleção do editor). */
+  children?: ReactNode;
 }) {
   const L = sala.largura_cm;
   const P = sala.profundidade_cm;
@@ -207,7 +213,7 @@ export function DesenhoSala({
         const c = caixa(e);
         const tipo = TIPOS[e.tipo];
         const est = ESTILO[tipo.estilo];
-        const ativo = e.id === selecionado;
+        const ativo = e.id === selecionado || !!selecionados?.has(e.id);
         const comLugares = !!ocupacao && !!e.lugares && !!ocupacao[e.id];
         const texto = comLugares ? "" : (e.rotulo ?? (tipo.estilo === "equipe" ? tipo.rotulo : ""));
         const tamanho = Math.min(fonte, Math.max(9, Math.min(c.largura, c.profundidade) * 0.45));
@@ -284,6 +290,7 @@ export function DesenhoSala({
           </g>
         </g>
       )}
+      {children}
     </svg>
   );
 }

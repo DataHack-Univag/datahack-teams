@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { locaisDasEquipes, lugaresDoElemento, ocupacao } from "./alocacao";
 import { encaixar, medida, modeloPorId } from "./catalogo";
+import { caixaDoGrupo, caixaEntre, deslocamentoDoGrupo, medidasDaCaixa, redimensionar, tocados } from "./edicao";
 import { caixa, conferirMapa, dentroDaSala, fileira, proximoRotulo } from "./tipos";
 
 const sala = { largura_cm: 800, profundidade_cm: 600 };
@@ -77,5 +78,34 @@ describe("equipes no mapa", () => {
     ];
     expect(ocupacao([b1, m1], alocacoes, equipes).b1.map((e) => e?.nome ?? null)).toEqual([null, "DataMind"]);
     expect(locaisDasEquipes([{ id: "s1", nome: "Lab 1" }], [b1, m1], alocacoes)).toEqual({ e1: "Lab 1 · B1 (lugar 2)", e2: "Lab 1 · M1" });
+  });
+});
+
+describe("editor do mapa", () => {
+  const sala800 = { largura_cm: 800, profundidade_cm: 600 };
+  const c = { x: 100, y: 100, largura: 320, profundidade: 80 };
+
+  it("redimensiona pela alça, encaixando na grade, sem sumir nem sair da sala", () => {
+    expect(redimensionar(c, "l", 47, 0, sala800)).toEqual({ x: 100, y: 100, largura: 370, profundidade: 80 });
+    expect(redimensionar(c, "so", -33, 21, sala800)).toEqual({ x: 70, y: 100, largura: 350, profundidade: 100 });
+    expect(redimensionar(c, "n", 0, 500, sala800)).toMatchObject({ profundidade: 10 });
+    expect(redimensionar(c, "l", 9999, 0, sala800)).toMatchObject({ largura: 700 });
+  });
+
+  it("guarda as medidas de antes do giro", () => {
+    expect(medidasDaCaixa({ rotacao: 90 }, { x: 0, y: 0, largura: 80, profundidade: 320 })).toEqual({ x_cm: 0, y_cm: 0, largura_cm: 320, profundidade_cm: 80 });
+  });
+
+  it("move o grupo junto sem deixar ninguém sair da sala", () => {
+    const grupo = { x: 50, y: 50, largura: 700, profundidade: 100 };
+    expect(deslocamentoDoGrupo(grupo, 200, -100, sala800)).toEqual({ dx: 50, dy: -50 });
+  });
+
+  it("seleciona com o retângulo os itens que ele toca", () => {
+    const a = { id: "a", sala_id: "s", tipo: "mesa" as const, rotulo: null, x_cm: 0, y_cm: 0, largura_cm: 100, profundidade_cm: 100, rotacao: 0, lugares: 1 };
+    const b = { ...a, id: "b", x_cm: 400 };
+    expect(tocados([a, b], caixaEntre({ x: 450, y: 50 }, { x: 90, y: 10 }))).toEqual(["a", "b"]);
+    expect(tocados([a, b], caixaEntre({ x: 150, y: 0 }, { x: 300, y: 300 }))).toEqual([]);
+    expect(caixaDoGrupo([a, b])).toEqual({ x: 0, y: 0, largura: 500, profundidade: 100 });
   });
 });
