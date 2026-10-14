@@ -155,6 +155,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["mentoria", "organizacao"],
   },
   {
+    pergunta: "Como atendo os pedidos de ajuda?",
+    resposta:
+      "Em “Chamados” aparecem as equipes que pediram ajuda, na ordem: problemas primeiro, depois quem espera há mais tempo, com o lugar no mapa. Toque em “Vou atender” (a equipe vê que você está indo) e, no fim, em “Resolvido”. Errou? Use “Desfazer”. O número ao lado de “Chamados” no menu mostra quantos estão esperando.",
+    publicos: ["mentoria", "organizacao"],
+  },
+  {
     pergunta: "Marcar ausente tira o aluno da equipe?",
     resposta: "Não. Ausência só registra que ele não estava no evento: o aluno continua inscrito e na equipe. Mudanças de equipe são com a organização.",
     publicos: ["mentoria", "organizacao"],
@@ -168,6 +174,12 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Onde fica a minha equipe no evento?",
     resposta: "Em “Minha equipe”, abaixo do nome, aparece o lugar no mapa (sala e bancada), assim que a organização distribuir as equipes.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Como peço ajuda durante o evento?",
+    resposta:
+      "Em “Minha equipe”, no quadro “Precisa de ajuda?”, toque em “Estamos com uma dúvida” ou “Estamos com um problema” (dá para deixar um recado). A mentoria vê na hora, com a bancada de vocês piscando no mapa. Quando alguém estiver a caminho, aparece o nome de quem vem. Resolveram sozinhos? Toque em “Já resolvemos”.",
     publicos: ["aluno"],
   },
   {

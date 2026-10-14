@@ -154,6 +154,87 @@ export type Database = {
           },
         ];
       };
+      chamados: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          equipe_id: string;
+          tipo: string;
+          mensagem: string | null;
+          situacao: string;
+          aberto_por: string | null;
+          aberto_em: string;
+          atendido_por: string | null;
+          atendido_em: string | null;
+          fechado_por: string | null;
+          fechado_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          equipe_id: string;
+          tipo: string;
+          mensagem?: string | null;
+          situacao?: string;
+          aberto_por?: string | null;
+          aberto_em?: string;
+          atendido_por?: string | null;
+          atendido_em?: string | null;
+          fechado_por?: string | null;
+          fechado_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          equipe_id?: string;
+          tipo?: string;
+          mensagem?: string | null;
+          situacao?: string;
+          aberto_por?: string | null;
+          aberto_em?: string;
+          atendido_por?: string | null;
+          atendido_em?: string | null;
+          fechado_por?: string | null;
+          fechado_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chamados_aberto_por_fkey";
+            columns: ["aberto_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "chamados_atendido_por_fkey";
+            columns: ["atendido_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "chamados_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chamados_equipe_id_fkey";
+            columns: ["equipe_id"];
+            isOneToOne: false;
+            referencedRelation: "equipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chamados_fechado_por_fkey";
+            columns: ["fechado_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+        ];
+      };
       configuracao_legado: {
         Row: {
           id: number;
@@ -1491,12 +1572,15 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      abrir_chamado: { Args: { p_tipo: string; p_mensagem?: string; p_como?: string }; Returns: string };
       aceitar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: string };
       alocar_equipe: { Args: { p_equipe: string; p_elemento: string; p_lugar: number }; Returns: Json };
       analisar_equipe: { Args: { p_equipe: string; p_aprovar: boolean; p_motivo?: string }; Returns: undefined };
       aplicar_equipes: { Args: { p_equipes: Json; p_substituir?: boolean; p_edicao?: string }; Returns: number };
       arquivar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       arquivar_ficha: { Args: { p_ficha: string }; Returns: undefined };
+      atende_chamados: { Args: { p_edicao: string }; Returns: boolean };
+      atender_chamado: { Args: { p_chamado: string; p_resolver?: boolean }; Returns: undefined };
       atualizar_situacao_proposta: { Args: { p_equipe: string }; Returns: undefined };
       cancelar_proposta: { Args: { p_equipe: string; p_como?: string }; Returns: undefined };
       cancelar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
@@ -1508,7 +1592,7 @@ export type Database = {
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
+      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador: { Args: Record<PropertyKey, never>; Returns: boolean };
@@ -1517,6 +1601,7 @@ export type Database = {
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
       exportar_mapa: { Args: { p_edicao: string }; Returns: Json };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
+      fechar_chamado_da_equipe: { Args: { p_chamado: string; p_resolvido: boolean; p_como?: string }; Returns: undefined };
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
@@ -1529,6 +1614,7 @@ export type Database = {
       pode_avaliar: { Args: { p_rubrica: string }; Returns: boolean };
       propor_equipe: { Args: { p_nome: string; p_emails: string[]; p_repo?: string; p_como?: string }; Returns: string };
       quem_age: { Args: { p_como: string }; Returns: string };
+      reabrir_chamado: { Args: { p_chamado: string }; Returns: undefined };
       recusar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
       registrar_presenca: { Args: { p_edicao: string; p_email: string; p_presenca: string }; Returns: undefined };
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };

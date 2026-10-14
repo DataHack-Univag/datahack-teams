@@ -261,6 +261,50 @@ do $$ begin
   assert (select count(*) from alocacoes where ate is null) = 1, 'aluno vê onde as equipes estão';
 end $$;
 
+-- ---------------------------------------------------------------- 015 · chamados
+-- (a edição 1 volta a ser a atual; quem pede ajuda é um integrante de uma equipe aprovada dela)
+reset role;
+update edicoes set atual = false;
+update edicoes set atual = true where numero = 1;
+select set_config('dh.aluno', (select m.email from membros m join equipes e on e.id = m.equipe_id
+                               join edicoes ed on ed.id = e.edicao_id and ed.numero = 1
+                              where m.saiu_em is null and m.situacao = 'confirmado' and e.situacao = 'aprovada' and e.removido_em is null
+                              order by m.email limit 1), false);
+set role authenticated;
+select pg_temp.como(current_setting('dh.aluno'));
+do $$
+declare v_id uuid;
+begin
+  v_id := abrir_chamado('duvida', 'Como junto as bases?');
+  perform set_config('dh.chamado', v_id::text, false);
+  assert (select situacao from chamados where id = v_id) = 'aberto', 'equipe abre o chamado';
+end $$;
+select pg_temp.falha($q$select abrir_chamado('problema')$q$, 'já tem um pedido');
+select pg_temp.falha($q$select atender_chamado(current_setting('dh.chamado')::uuid)$q$, 'Só a mentoria e a organização');
+
+-- outra equipe não vê o chamado
+select pg_temp.como((select m.email from membros m join equipes e on e.id = m.equipe_id
+                      where m.saiu_em is null and m.situacao = 'confirmado' and e.situacao = 'aprovada' and e.removido_em is null
+                        and m.equipe_id <> (select equipe_id from chamados where id = current_setting('dh.chamado')::uuid) limit 1));
+do $$ begin assert (select count(*) from chamados) = 0, 'outra equipe não vê o chamado'; end $$;
+
+select pg_temp.como('mentor@teste.local');
+do $$
+declare v_id uuid := current_setting('dh.chamado')::uuid;
+begin
+  assert (select count(*) from chamados) = 1, 'mentoria vê o chamado';
+  perform atender_chamado(v_id);
+  assert (select atendido_por from chamados where id = v_id) = 'mentor@teste.local', 'vou atender';
+  perform atender_chamado(v_id, true);
+  assert (select situacao from chamados where id = v_id) = 'resolvido', 'resolvido';
+  perform reabrir_chamado(v_id);
+  assert (select situacao from chamados where id = v_id) = 'aberto', 'desfazer reabre';
+end $$;
+
+select pg_temp.como(current_setting('dh.aluno'));
+select fechar_chamado_da_equipe(current_setting('dh.chamado')::uuid, true);
+do $$ begin assert (select situacao from chamados where id = current_setting('dh.chamado')::uuid) = 'resolvido', 'a equipe avisa que resolveu'; end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 014 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 015 conferem.'

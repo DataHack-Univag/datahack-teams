@@ -32,18 +32,24 @@ export function AmostraTipo({ tipo }: { tipo: keyof typeof TIPOS }) {
 }
 
 /** Os lugares de uma bancada: divisões, quem está em cada um (ícone + nome) ou "livre". */
+/** Cor do alerta de um lugar (pedido de ajuda da equipe). */
+export type Alerta = "duvida" | "problema" | "atendimento";
+const COR_ALERTA: Record<Alerta, string> = { duvida: "#f59e0b", problema: "#ef4444", atendimento: "#10b981" };
+
 function Lugares({
   e,
   quem,
   fonte,
   aoTocar,
   destacado,
+  alertas,
 }: {
   e: Elemento;
   quem: Ocupacao[string];
   fonte: number;
   aoTocar?: (elementoId: string, lugar: number) => void;
   destacado?: string | null;
+  alertas?: Record<string, Alerta>;
 }) {
   const lugares = lugaresDoElemento(e);
   const c = caixa(e);
@@ -71,6 +77,22 @@ function Lugares({
             style={aoTocar ? { cursor: "pointer" } : undefined}
           >
             <title>{equipe ? `${equipe.nome} · ${e.rotulo ?? "bancada"}, lugar ${l.lugar}` : `${e.rotulo ?? "Bancada"}, lugar ${l.lugar}: livre`}</title>
+            {equipe && alertas?.[equipe.id] && (
+              // pedido de ajuda: o lugar pisca (para quem não prefere menos movimento)
+              <rect
+                x={l.x - 6}
+                y={l.y - 6}
+                width={l.largura + 12}
+                height={l.profundidade + 12}
+                rx={8}
+                fill={COR_ALERTA[alertas[equipe.id]]}
+                fillOpacity={0.25}
+                stroke={COR_ALERTA[alertas[equipe.id]]}
+                strokeWidth={6}
+                className={alertas[equipe.id] === "atendimento" ? undefined : "motion-safe:animate-pulse"}
+                pointerEvents="none"
+              />
+            )}
             <rect
               x={l.x + 3}
               y={l.y + 3}
@@ -132,6 +154,7 @@ export function DesenhoSala({
   ocupacao,
   aoTocarLugar,
   lugarDestacado,
+  alertas,
 }: {
   sala: Pick<Sala, "nome" | "largura_cm" | "profundidade_cm" | "fundo">;
   elementos: Elemento[];
@@ -149,6 +172,8 @@ export function DesenhoSala({
   aoTocarLugar?: (elementoId: string, lugar: number) => void;
   /** "elementoId:lugar" em destaque (onde a equipe escolhida está ou vai). */
   lugarDestacado?: string | null;
+  /** Equipes com pedido de ajuda: o lugar delas fica em destaque (por id da equipe). */
+  alertas?: Record<string, Alerta>;
 }) {
   const L = sala.largura_cm;
   const P = sala.profundidade_cm;
@@ -222,7 +247,7 @@ export function DesenhoSala({
               </text>
             )}
             {comLugares && (
-              <Lugares e={e} quem={ocupacao![e.id]} fonte={fonte} aoTocar={aoTocarLugar} destacado={lugarDestacado} />
+              <Lugares e={e} quem={ocupacao![e.id]} fonte={fonte} aoTocar={aoTocarLugar} destacado={lugarDestacado} alertas={alertas} />
             )}
             {!comLugares && legendas && e.lugares && e.lugares > 1 && c.profundidade > tamanho * 2.6 && (
               <text
