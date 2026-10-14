@@ -70,3 +70,26 @@ export function tocados(elementos: Elemento[], r: Caixa): string[] {
     })
     .map((e) => e.id);
 }
+
+// ---------------------------------------------------------------- zoom e vista do editor
+
+/** Retângulo visível do desenho (viewBox), em cm. */
+export type Vista = { x: number; y: number; largura: number; profundidade: number };
+
+/**
+ * Aproxima (fator < 1) ou afasta (fator > 1) mantendo o ponto `centro` parado na tela.
+ * Limites: não aproxima além de 1 m de largura visível nem afasta além de 3× a sala inteira.
+ */
+export function zoomEm(v: Vista, fator: number, centro: { x: number; y: number }, inteira: Vista): Vista {
+  const largura = Math.min(Math.max(v.largura * fator, 100), inteira.largura * 3);
+  const f = largura / v.largura;
+  return {
+    x: centro.x - (centro.x - v.x) * f,
+    y: centro.y - (centro.y - v.y) * f,
+    largura,
+    profundidade: v.profundidade * f,
+  };
+}
+
+/** Arrasta a vista (dx, dy em cm, no sentido do gesto: o desenho acompanha o dedo). */
+export const arrastarVista = (v: Vista, dx: number, dy: number): Vista => ({ ...v, x: v.x - dx, y: v.y - dy });

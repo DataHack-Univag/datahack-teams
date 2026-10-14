@@ -126,7 +126,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como monto o mapa do evento (croqui)?",
     resposta:
-      "Em Mais → Mapa, crie cada sala com as medidas aproximadas e toque em “Desenhar” (o editor ocupa a tela toda). Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…), arraste para o lugar e puxe as alças para o tamanho que quiser. Para mexer em vários de uma vez: Shift ou Ctrl + clique, um retângulo no vazio ou “Selecionar vários”. Salas iguais (3 labs iguais)? Desenhe uma e use “Duplicar sala”. O croqui sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
+      "Em Mais → Mapa, crie cada sala com as medidas aproximadas e toque em “Desenhar” (o editor ocupa a tela toda). Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…), arraste para o lugar e puxe as alças para o tamanho que quiser. Para mexer em vários de uma vez: Shift ou Ctrl + clique, um retângulo no vazio ou “Selecionar vários”. Zoom: roda do mouse, pinça com dois dedos ou os botões no canto (0 ajusta à tela); para mover a vista, segure Espaço e arraste, use a “Mão” ou dois dedos. Salas iguais (3 labs iguais)? Desenhe uma e use “Duplicar sala”. O croqui sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
     publicos: ["organizacao"],
   },
   {

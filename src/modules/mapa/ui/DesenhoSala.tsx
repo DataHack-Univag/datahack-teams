@@ -1,6 +1,7 @@
 import type { PointerEvent as EventoPonteiro, ReactNode } from "react";
 import { medida, TIPOS } from "@/modules/mapa/domain/catalogo";
 import { lugaresDoElemento, type Ocupacao } from "@/modules/mapa/domain/alocacao";
+import type { Vista } from "@/modules/mapa/domain/edicao";
 import { caixa, type Elemento, type Sala } from "@/modules/mapa/domain/tipos";
 import { iniciais } from "@/shared/lib/texto";
 
@@ -151,6 +152,12 @@ function Lugares({
   );
 }
 
+/** A sala inteira com a margem das medidas: a vista padrão (e o "Ajustar" do zoom). */
+export function vistaInteira(sala: Pick<Sala, "largura_cm" | "profundidade_cm">, legendas = true): Vista {
+  const margem = legendas ? Math.max(40, Math.round(Math.max(sala.largura_cm, sala.profundidade_cm) * 0.06)) : 10;
+  return { x: -margem, y: -margem, largura: sala.largura_cm + margem * 2, profundidade: sala.profundidade_cm + margem * 2 };
+}
+
 export function DesenhoSala({
   sala,
   elementos,
@@ -168,6 +175,7 @@ export function DesenhoSala({
   alertas,
   selecionados,
   children,
+  vista,
 }: {
   sala: Pick<Sala, "nome" | "largura_cm" | "profundidade_cm" | "fundo">;
   elementos: Elemento[];
@@ -191,17 +199,21 @@ export function DesenhoSala({
   selecionados?: ReadonlySet<string>;
   /** Camada por cima do desenho, nas mesmas medidas (alças e seleção do editor). */
   children?: ReactNode;
+  /** Pedaço da sala que aparece (zoom do editor), em cm; sem ela, a sala inteira. */
+  vista?: Vista | null;
 }) {
   const L = sala.largura_cm;
   const P = sala.profundidade_cm;
-  const margem = legendas ? Math.max(40, Math.round(Math.max(L, P) * 0.06)) : 10;
+  const v = vista ?? vistaInteira(sala, legendas);
+  const margem = -vistaInteira(sala, legendas).x;
   const fonte = Math.max(12, Math.min(30, Math.round(Math.max(L, P) / 40)));
 
   return (
     <svg
       id={idSvg}
-      viewBox={`${-margem} ${-margem} ${L + margem * 2} ${P + margem * 2}`}
-      className={`block w-full select-none ${className}`}
+      viewBox={`${v.x} ${v.y} ${v.largura} ${v.profundidade}`}
+      // Traços com a mesma espessura na tela em qualquer zoom (precisão ao aproximar).
+      className={`block w-full select-none [&_line]:[vector-effect:non-scaling-stroke] [&_rect]:[vector-effect:non-scaling-stroke] ${className}`}
       role="img"
       aria-label={rotuloAcessivel ?? `Mapa da sala ${sala.nome}: ${medida(L)} por ${medida(P)}, ${elementos.length} elemento(s)`}
       fontFamily="DM Sans, system-ui, sans-serif"
@@ -218,7 +230,7 @@ export function DesenhoSala({
       <rect x={0} y={0} width={L} height={P} fill="var(--superficie-solida)" />
       {fundo && sala.fundo && <image href={sala.fundo} x={0} y={0} width={L} height={P} preserveAspectRatio="none" opacity={0.35} />}
       {grade && <rect x={0} y={0} width={L} height={P} fill={`url(#grade-${idSvg ?? "sala"})`} />}
-      <rect x={0} y={0} width={L} height={P} fill="none" stroke="var(--foreground)" strokeWidth={Math.max(4, fonte / 3)} />
+      <rect x={0} y={0} width={L} height={P} fill="none" stroke="var(--foreground)" strokeWidth={3} />
 
       {elementos.map((e) => {
         const c = caixa(e);
@@ -245,7 +257,7 @@ export function DesenhoSala({
                 rx={tipo.estilo === "equipe" || tipo.estilo === "movel" ? 6 : 0}
                 fill={est.fill}
                 stroke={ativo ? "var(--magenta)" : est.stroke}
-                strokeWidth={ativo ? 5 : 2}
+                strokeWidth={ativo ? 3 : 1.5}
                 strokeDasharray={est.tracejado ? "12 8" : undefined}
               />
             )}

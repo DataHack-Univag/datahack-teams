@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { locaisDasEquipes, lugaresDoElemento, ocupacao } from "./alocacao";
 import { encaixar, medida, modeloPorId } from "./catalogo";
-import { caixaDoGrupo, caixaEntre, deslocamentoDoGrupo, medidasDaCaixa, redimensionar, tocados } from "./edicao";
+import { arrastarVista, caixaDoGrupo, caixaEntre, deslocamentoDoGrupo, medidasDaCaixa, redimensionar, tocados, zoomEm } from "./edicao";
 import { caixa, conferirMapa, dentroDaSala, fileira, proximoRotulo } from "./tipos";
 
 const sala = { largura_cm: 800, profundidade_cm: 600 };
@@ -107,5 +107,20 @@ describe("editor do mapa", () => {
     expect(tocados([a, b], caixaEntre({ x: 450, y: 50 }, { x: 90, y: 10 }))).toEqual(["a", "b"]);
     expect(tocados([a, b], caixaEntre({ x: 150, y: 0 }, { x: 300, y: 300 }))).toEqual([]);
     expect(caixaDoGrupo([a, b])).toEqual({ x: 0, y: 0, largura: 500, profundidade: 100 });
+  });
+});
+
+describe("zoom do editor", () => {
+  const inteira = { x: -50, y: -50, largura: 900, profundidade: 700 };
+
+  it("aproxima mantendo o ponto do mouse no lugar, com limites", () => {
+    const v = zoomEm(inteira, 0.5, { x: 400, y: 300 }, inteira);
+    expect(v).toEqual({ x: 175, y: 125, largura: 450, profundidade: 350 });
+    expect(zoomEm(inteira, 0.01, { x: 0, y: 0 }, inteira).largura).toBe(100);
+    expect(zoomEm(inteira, 10, { x: 0, y: 0 }, inteira).largura).toBe(2700);
+  });
+
+  it("arrastar a vista acompanha o gesto", () => {
+    expect(arrastarVista(inteira, 100, -20)).toMatchObject({ x: -150, y: -30 });
   });
 });
