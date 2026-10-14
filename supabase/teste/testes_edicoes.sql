@@ -156,6 +156,62 @@ end $$;
 select pg_temp.como('p1@teste.local');
 select pg_temp.falha($q$select pedir_troca(current_setting('dh.equipe')::uuid)$q$, 'não há troca');
 
+-- ---------------------------------------------------------------- 011 · presença
+-- Só a organização registra presença; aluno não se marca presente.
+select pg_temp.como('p1@teste.local');
+do $$ begin
+  update participacoes set presenca = 'presente' where email = 'p1@teste.local';
+  assert not exists (select 1 from participacoes where email = 'p1@teste.local' and presenca is not null),
+    'aluno não pode registrar a própria presença';
+end $$;
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1);
+begin
+  update participacoes set presenca = 'ausente', presenca_em = now(), presenca_por = 'p56@teste.local'
+   where edicao_id = v_ed and email = 'p4@teste.local';
+  assert (select presenca from participacoes where edicao_id = v_ed and email = 'p4@teste.local') = 'ausente', 'organização marca ausência';
+  update membros set saiu_em = now(), motivo_saida = 'ausente' where edicao_id = v_ed and email = 'p4@teste.local' and saiu_em is null;
+  assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'p4@teste.local' and removido_em is null),
+    'ausente continua inscrito na edição';
+end $$;
+select pg_temp.falha($q$update participacoes set presenca = 'talvez' where email = 'p4@teste.local'$q$, 'presenca_check');
+
+-- ---------------------------------------------------------------- 012 · mentoria
+-- A organização cadastra um mentor; ele vê equipes e alunos, registra presença e nada mais.
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1);
+begin
+  insert into pessoas (email, nome) values ('mentor@teste.local', 'Mentora Teste');
+  insert into participacoes (edicao_id, email, papel) values (v_ed, 'mentor@teste.local', 'mentor');
+end $$;
+
+select pg_temp.como('mentor@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1);
+begin
+  assert (select count(*) from equipes where edicao_id = v_ed) > 0, 'mentor vê as equipes';
+  assert (select count(*) from participacoes where edicao_id = v_ed and papel = 'aluno') > 0, 'mentor vê os alunos';
+  assert (select count(*) from notas) = 0, 'mentor não vê notas';
+  assert (select count(*) from fichas) = 0, 'mentor não vê fichas';
+  perform registrar_presenca(v_ed, 'p2@teste.local', 'presente');
+  assert (select presenca from participacoes where edicao_id = v_ed and email = 'p2@teste.local') = 'presente', 'mentor registra presença';
+  assert (select presenca_por from participacoes where edicao_id = v_ed and email = 'p2@teste.local') = 'mentor@teste.local', 'fica registrado quem marcou';
+  perform registrar_presenca(v_ed, 'p2@teste.local', null);
+  assert (select presenca from participacoes where edicao_id = v_ed and email = 'p2@teste.local') is null, 'desfazer limpa o registro';
+  update participacoes set curso = 'X' where edicao_id = v_ed and email = 'p2@teste.local';
+  assert (select curso from participacoes where edicao_id = v_ed and email = 'p2@teste.local') is distinct from 'X',
+    'mentor não altera a participação por fora da função';
+end $$;
+select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p56@teste.local', 'presente')$q$, 'não é aluna');
+select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'talvez')$q$, 'Presença inválida');
+
+select pg_temp.como('p1@teste.local');
+select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'presente')$q$, 'Só a organização e a mentoria');
+select pg_temp.como('p62@teste.local');
+select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'presente')$q$, 'Só a organização e a mentoria');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras da migração 010 conferem.'
+\echo 'OK: todas as regras das migrações 010, 011 e 012 conferem.'

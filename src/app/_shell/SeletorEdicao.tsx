@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { escolherEdicao } from "@/modules/edicoes/application/actions";
 import { periodo, rotuloSituacaoEdicao, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { Girando } from "@/shared/ui/Botao";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
+import { useFecharDetalhes } from "@/shared/ui/useFecharDetalhes";
 
 type EdicaoResumo = Pick<Edicao, "id" | "numero" | "nome" | "atual" | "situacao" | "data_inicio" | "data_fim">;
 
@@ -19,26 +19,12 @@ type EdicaoResumo = Pick<Edicao, "id" | "numero" | "nome" | "atual" | "situacao"
  * a edição dos alunos e das bancas, e o painel diz isso (heurísticas 2 e 10).
  */
 export function SeletorEdicao({ edicoes, escolhida }: { edicoes: EdicaoResumo[]; escolhida: string }) {
-  const menu = useRef<HTMLDetailsElement>(null);
+  const { ref: menu, fechar } = useFecharDetalhes();
   const caminho = usePathname();
   const vendo = edicoes.find((e) => e.id === escolhida) ?? edicoes[0];
   // Página de uma equipe não existe na outra edição: volta para a lista.
   const voltar = caminho.startsWith("/admin/equipes/") ? "/admin/equipes" : caminho;
 
-  // Fecha ao clicar fora ou com Esc (como o menu "Mais").
-  useEffect(() => {
-    const fechar = (e: Event) => {
-      const el = menu.current;
-      if (!el?.open) return;
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !el.contains(e.target as Node)) el.open = false;
-    };
-    document.addEventListener("click", fechar);
-    document.addEventListener("keydown", fechar);
-    return () => {
-      document.removeEventListener("click", fechar);
-      document.removeEventListener("keydown", fechar);
-    };
-  }, []);
 
   if (!vendo) return null;
   const ordenadas = [...edicoes].sort((a, b) => b.numero - a.numero);
@@ -82,7 +68,7 @@ export function SeletorEdicao({ edicoes, escolhida }: { edicoes: EdicaoResumo[];
         <p className="px-2 text-xs text-suave">Trocar aqui muda só o que você vê. Alunos e bancas continuam na edição atual.</p>
         <Link
           href="/admin/edicoes"
-          onClick={() => menu.current && (menu.current.open = false)}
+          onClick={fechar}
           className="mt-1 flex items-center gap-2 rounded-xl border-t border-borda p-2 pt-3 text-sm font-semibold hover:bg-superficie"
         >
           <Icone nome="relogio" className="size-4 text-suave" />

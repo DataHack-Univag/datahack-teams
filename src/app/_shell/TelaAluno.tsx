@@ -44,7 +44,7 @@ export async function TelaAluno({
   edicao: Edicao;
   simulacao?: boolean;
 }) {
-  const config = configuracaoDa(edicao);
+  const config = configuracaoDa(edicao, { paraParticipante: true });
   const porProposta = edicao.modo_formacao === "alunos_propoem";
   // Tudo em paralelo: uma única "rodada" até o banco.
   const [materiais, equipe, equipes, trocas, colegasLivres, recusa] = await Promise.all([

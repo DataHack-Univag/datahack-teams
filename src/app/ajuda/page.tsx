@@ -1,15 +1,15 @@
 import { Area } from "@/app/_shell/Area";
-import { comandosDasAbas, comandosExtrasOrganizacao, navAluno, navBancas, navOrganizacao } from "@/app/_shell/menus";
+import { comandosDasAbas, comandosExtrasOrganizacao, navAluno, navBancas, navMentoria, navOrganizacao } from "@/app/_shell/menus";
 import { BuscaAjuda } from "@/app/ajuda/BuscaAjuda";
 import { TOPICOS, type Publico } from "@/app/ajuda/conteudo";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
-// Ajuda: perguntas frequentes de quem está logado (aluno, banca ou organização), com busca.
+// Ajuda: perguntas frequentes de quem está logado (aluno, banca, mentoria ou organização), com busca.
 export default async function Ajuda() {
-  const { usuario, avatar, organizador, avaliador } = await sessaoAtual();
-  const publico: Publico = organizador ? "organizacao" : avaliador ? "banca" : "aluno";
-  const nav = organizador ? navOrganizacao() : { itens: avaliador ? navBancas() : navAluno("/"), mais: undefined };
+  const { usuario, avatar, organizador, avaliador, mentor } = await sessaoAtual();
+  const publico: Publico = organizador ? "organizacao" : avaliador ? "banca" : mentor ? "mentoria" : "aluno";
+  const nav = organizador ? navOrganizacao() : { itens: avaliador ? navBancas() : mentor ? navMentoria() : navAluno("/"), mais: undefined };
   const todas = [...nav.itens, ...(nav.mais ?? [])];
 
   return (

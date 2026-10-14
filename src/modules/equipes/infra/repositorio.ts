@@ -97,13 +97,14 @@ export async function listarResumo(cliente: Cliente, edicaoId: string): Promise<
 }
 
 export async function contarEquipes(cliente: Cliente, edicaoId: string): Promise<number> {
-  const { count } = await cliente
+  const r = await cliente
     .from("equipes")
     .select("*", { count: "exact", head: true })
     .eq("edicao_id", edicaoId)
     .eq("situacao", "aprovada")
     .is("removido_em", null);
-  return count ?? 0;
+  exigir(r, "a contagem de equipes");
+  return r.count ?? 0;
 }
 
 // ---------------------------------------------------------------- gravação

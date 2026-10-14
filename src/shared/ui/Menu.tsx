@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useRef, type ReactNode } from "react";
+import type { ReactNode } from "react";
 import { Icone, type NomeIcone } from "@/shared/ui/Icone";
+import { useFecharDetalhes } from "@/shared/ui/useFecharDetalhes";
 
 export type ItemMenu = { rotulo: string; href: string; descricao?: string; icone?: NomeIcone; baixar?: boolean };
 
@@ -10,21 +11,7 @@ export type ItemMenu = { rotulo: string; href: string; descricao?: string; icone
  * Fecha ao escolher, ao clicar fora ou com Esc. No celular abre logo abaixo, na largura da tela.
  */
 export function Menu({ rotulo, icone = "mais", titulo, itens, children }: { rotulo: string; icone?: NomeIcone; titulo?: string; itens: ItemMenu[]; children?: ReactNode }) {
-  const menu = useRef<HTMLDetailsElement>(null);
-
-  useEffect(() => {
-    const fechar = (e: Event) => {
-      const el = menu.current;
-      if (!el?.open) return;
-      if (e instanceof KeyboardEvent ? e.key === "Escape" : !el.contains(e.target as Node)) el.open = false;
-    };
-    document.addEventListener("click", fechar);
-    document.addEventListener("keydown", fechar);
-    return () => {
-      document.removeEventListener("click", fechar);
-      document.removeEventListener("keydown", fechar);
-    };
-  }, []);
+  const { ref: menu, fechar } = useFecharDetalhes();
 
   return (
     <details ref={menu} className="group relative open:max-sm:w-full open:max-sm:basis-full">
@@ -42,7 +29,7 @@ export function Menu({ rotulo, icone = "mais", titulo, itens, children }: { rotu
             key={o.href}
             href={o.href}
             download={o.baixar || undefined}
-            onClick={() => menu.current && (menu.current.open = false)}
+            onClick={fechar}
             className="flex items-start gap-3 rounded-xl p-2 hover:bg-superficie"
           >
             {o.icone && <Icone nome={o.icone} className="mt-0.5 size-4 text-suave" />}

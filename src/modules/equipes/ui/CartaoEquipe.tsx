@@ -1,15 +1,32 @@
 import Link from "next/link";
 import { pendenciasEquipe } from "@/modules/equipes/domain/permissoes";
-import { liderDa, nomeMembro, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
+import { liderDa, nomeMembro, presencaDosMembros, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
 import { StatusRepo } from "@/modules/equipes/ui/StatusRepo";
+import type { Presenca } from "@/modules/pessoas/domain/tipos";
+import { PresencaEquipe } from "@/modules/pessoas/ui/MarcarPresenca";
 import { plural } from "@/shared/lib/formatar";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
 
-/** Cartão de uma equipe na visão da organização (clique leva ao detalhe). */
-export function CartaoEquipe({ equipe, maxMembros, indice = 0 }: { equipe: Equipe; maxMembros: number; indice?: number }) {
+/**
+ * Cartão de uma equipe na visão da organização (clique leva ao detalhe). Com `presenca`,
+ * mostra a presença recolhida: ao passar pela equipe no evento, abre e marca (heurísticas 7 e 8).
+ */
+export function CartaoEquipe({
+  equipe,
+  maxMembros,
+  indice = 0,
+  presenca,
+}: {
+  equipe: Equipe;
+  maxMembros: number;
+  indice?: number;
+  presenca?: Record<string, Presenca | null>;
+}) {
   const lider = liderDa(equipe);
   const pend = pendenciasEquipe(equipe);
+  const pessoas = presenca ? presencaDosMembros(equipe, presenca) : [];
+  const presentes = pessoas.filter((p) => p.presenca === "presente").length;
   return (
     <article
       className="card faixa-topo flex min-w-0 flex-col gap-3 transition duration-300 hover:-translate-y-0.5 hover:shadow-[var(--glow)]"
@@ -67,6 +84,26 @@ export function CartaoEquipe({ equipe, maxMembros, indice = 0 }: { equipe: Equip
             </li>
           ))}
         </ul>
+      )}
+
+      {pessoas.length > 0 && (
+        <details className="group rounded-xl border border-borda px-3 py-2">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-2 text-xs font-semibold [&::-webkit-details-marker]:hidden">
+            <span>
+              Presença ·{" "}
+              <span className="font-mono tabular-nums">
+                {presentes}/{pessoas.length}
+              </span>{" "}
+              presente(s)
+            </span>
+            <span aria-hidden className="text-suave transition-transform group-open:rotate-180">
+              ▾
+            </span>
+          </summary>
+          <div className="mt-2">
+            <PresencaEquipe equipe={equipe.nome} pessoas={pessoas} semContagem />
+          </div>
+        </details>
       )}
 
       <p className="mt-auto border-t border-borda pt-2 text-xs text-suave">

@@ -7,14 +7,14 @@ import {
   responderConvite,
 } from "@/modules/equipes/application/actions";
 import { nomeMembro, situacaoEquipe, type Configuracao, type Equipe } from "@/modules/equipes/domain/tipos";
-import type { Inscrito } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Inscrito } from "@/modules/pessoas/domain/tipos";
 import { dataHora } from "@/shared/lib/formatar";
 import { Aviso } from "@/shared/ui/Aviso";
 import { Avatar } from "@/shared/ui/Avatar";
 import { AreaTexto, Campo } from "@/shared/ui/Campo";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
-import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { EscolherPessoas, type OpcaoPessoa } from "@/shared/ui/EscolherPessoas";
+import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Selo } from "@/shared/ui/Selo";
 
 // Fluxo "alunos propõem a equipe": quem propõe convida os colegas, cada um confirma e,
@@ -22,7 +22,7 @@ import { Selo } from "@/shared/ui/Selo";
 
 /** Colegas livres (sem equipe e sem convite aguardando) no formato do seletor. */
 const paraOpcoes = (colegas: Inscrito[]): OpcaoPessoa[] =>
-  colegas.map((i) => ({ email: i.email, nome: i.nome, detalhe: [i.curso, i.semestre && `${i.semestre}º sem.`].filter(Boolean).join(" · ") }));
+  colegas.map((i) => ({ email: i.email, nome: i.nome, detalhe: cursoSemestre(i) }));
 
 const SEM_COLEGAS = "Todos os alunos desta edição já estão numa equipe ou têm convite aguardando.";
 
@@ -39,7 +39,7 @@ function MembrosDaProposta({ equipe, meuEmail }: { equipe: Equipe; meuEmail?: st
               {m.email === meuEmail && <span className="text-xs text-suave">(você)</span>}
               {m.email === equipe.proposta_por && <Selo tom="marca">propôs</Selo>}
             </p>
-            <p className="truncate text-xs text-suave">{[m.inscritos?.curso, m.inscritos?.semestre && `${m.inscritos.semestre}º sem.`].filter(Boolean).join(" · ")}</p>
+            <p className="truncate text-xs text-suave">{cursoSemestre(m.inscritos)}</p>
           </div>
           {m.situacao === "confirmado" ? <Selo tom="sucesso">✔ confirmou</Selo> : <Selo tom="alerta">aguardando resposta</Selo>}
         </li>

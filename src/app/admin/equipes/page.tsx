@@ -6,7 +6,8 @@ import { listarEquipes, listarPropostas } from "@/modules/equipes/infra/reposito
 import { CartaoEquipe } from "@/modules/equipes/ui/CartaoEquipe";
 import { CriarEquipe, FormRegrasEquipes } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
-import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
+import { cursoSemestre } from "@/modules/pessoas/domain/tipos";
+import { listarSemEquipe, presencaDaEdicao } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -20,11 +21,12 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
   const { filtro, arquivada } = await searchParams;
   const soPendentes = filtro === "pendentes";
   const { cliente, edicao } = await sessaoAtual();
-  const [equipes, propostas, semEquipe, trocas] = await Promise.all([
+  const [equipes, propostas, semEquipe, trocas, presenca] = await Promise.all([
     listarEquipes(cliente, edicao.id),
     listarPropostas(cliente, edicao.id),
     listarSemEquipe(cliente, edicao.id),
     trocasPendentes(cliente, edicao.id),
+    presencaDaEdicao(cliente, edicao.id),
   ]);
   const comPendencia = equipes.filter((e) => pendenciasEquipe(e).length > 0);
   const lista = soPendentes ? comPendencia : equipes;
@@ -106,7 +108,7 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
       ) : (
         <div className="grid gap-3 lg:grid-cols-2">
           {lista.map((e, i) => (
-            <CartaoEquipe key={e.id} equipe={e} maxMembros={edicao.max_membros} indice={i} />
+            <CartaoEquipe key={e.id} equipe={e} maxMembros={edicao.max_membros} indice={i} presenca={presenca} />
           ))}
         </div>
       )}
@@ -122,7 +124,7 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
                 {semEquipe.map((i) => (
                   <li key={i.email} className="py-2">
                     <p className="text-sm font-medium">{i.nome}</p>
-                    <p className="truncate text-xs text-suave">{[i.curso, i.semestre && `${i.semestre}º sem.`, i.email].filter(Boolean).join(" · ")}</p>
+                    <p className="truncate text-xs text-suave">{[cursoSemestre(i), i.email].filter(Boolean).join(" · ")}</p>
                   </li>
                 ))}
               </ul>

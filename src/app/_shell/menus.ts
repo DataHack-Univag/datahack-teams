@@ -29,6 +29,15 @@ export function navBancas(): ItemNav[] {
   ];
 }
 
+/** Mentoria: acompanhar as equipes e registrar a presença dos alunos. */
+export function navMentoria(): ItemNav[] {
+  return [
+    { href: "/mentoria/equipes", rotulo: "Equipes", icone: "equipe", prefixos: ["/mentoria/equipes"] },
+    { href: "/mentoria/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/mentoria/pessoas"] },
+    { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
+  ];
+}
+
 /** Aluno: abas por parâmetro (?aba=). `base` muda no modo "ver como". */
 export function navAluno(base: string, contagens: { trocas?: number } = {}, comAjuda = true): ItemNav[] {
   const sep = base.includes("?") ? "&" : "?";

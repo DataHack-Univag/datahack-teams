@@ -1,3 +1,4 @@
+import { SubAbasPessoas } from "@/app/admin/pessoas/SubAbasPessoas";
 import { carregarRegulamento } from "@/modules/avaliacao/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
@@ -19,7 +20,7 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
       <CabecalhoPagina
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Pessoas" }]}
         titulo="Pessoas"
-        descricao={`Quem participa da ${edicao.nome}: só quem está nesta lista entra no sistema. ${alunos.length} alunos · ${alunos.filter((p) => !p.equipe_id).length} sem equipe · ${pessoas.length - alunos.length} da organização e bancas.`}
+        descricao={`Quem participa da ${edicao.nome}: só quem está nesta lista entra no sistema. ${alunos.length} alunos · ${alunos.filter((p) => !p.equipe_id).length} sem equipe · ${pessoas.length - alunos.length} da organização, bancas e mentoria.`}
         acoes={
           <BotaoAjuda titulo="Pessoas">
             <ul>
@@ -30,10 +31,13 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
                 Para mudar a função de alguém (ex.: aluno → banca), abra a pessoa e troque a <strong>Função nesta edição</strong>.
               </li>
               <li>A nota média só aparece para a organização e serve para o gerador equilibrar as equipes.</li>
+              <li>Mentores entram com o e-mail deles e fazem a chamada na aba Presença (a organização também pode).</li>
             </ul>
           </BotaoAjuda>
         }
       />
+
+      <SubAbasPessoas ativa="cadastro" pessoas={pessoas.length} alunos={alunos.length} />
 
       <details id="cadastrar" className="card group scroll-mt-24">
         <summary className="cursor-pointer font-semibold text-marca select-none">+ Cadastrar pessoa</summary>

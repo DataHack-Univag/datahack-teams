@@ -126,13 +126,14 @@ export async function listarPessoasResumo(cliente: Cliente, edicaoId: string): P
 }
 
 export async function contarAlunos(cliente: Cliente, edicaoId: string): Promise<number> {
-  const { count } = await cliente
+  const r = await cliente
     .from("participacoes")
     .select("*", { count: "exact", head: true })
     .eq("edicao_id", edicaoId)
     .eq("papel", "aluno")
     .is("removido_em", null);
-  return count ?? 0;
+  exigir(r, "a contagem de alunos");
+  return r.count ?? 0;
 }
 
 // ---------------------------------------------------------------- gravação
@@ -205,15 +206,31 @@ export async function mudarFuncao(cliente: Cliente, edicaoId: string, email: str
   return { mudou: !!data?.length, error };
 }
 
+/** Presença de cada aluno da edição (e-mail → presente, ausente ou null). */
+export async function presencaDaEdicao(cliente: Cliente, edicaoId: string): Promise<Record<string, Presenca | null>> {
+  const r = await cliente
+    .from("participacoes")
+    .select("email, presenca")
+    .eq("edicao_id", edicaoId)
+    .eq("papel", "aluno")
+    .is("removido_em", null)
+    .overrideTypes<{ email: string; presenca: Presenca | null }[], { merge: false }>();
+  return Object.fromEntries((exigir(r, "a presença dos alunos") ?? []).map((p) => [p.email, p.presenca]));
+}
+
+/** Presença de um aluno no evento (organização ou mentoria; null limpa o registro). */
+export const registrarPresenca = (cliente: Cliente, edicaoId: string, email: string, presenca: Presenca | null) =>
+  cliente.rpc("registrar_presenca", { p_edicao: edicaoId, p_email: email, p_presenca: presenca as string });
+
 /** id da banca pelo código (na edição). */
 export async function idDaBanca(cliente: Cliente, edicaoId: string, codigo: string | null): Promise<string | null> {
   if (!codigo) return null;
-  const { data } = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("codigo", codigo).maybeSingle();
-  return data?.id ?? null;
+  const r = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("codigo", codigo).maybeSingle();
+  return exigir(r, "as bancas")?.id ?? null;
 }
 
 /** id da banca da organização na edição. */
 export async function idDaBancaOrganizacao(cliente: Cliente, edicaoId: string): Promise<string | null> {
-  const { data } = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("da_organizacao", true).limit(1).maybeSingle();
-  return data?.id ?? null;
+  const r = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("da_organizacao", true).limit(1).maybeSingle();
+  return exigir(r, "as bancas")?.id ?? null;
 }

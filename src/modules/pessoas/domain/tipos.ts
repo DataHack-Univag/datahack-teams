@@ -18,6 +18,10 @@ export type Inscrito = {
 
 export type Presenca = "presente" | "ausente";
 
+/** "Sistemas de Informação · 3º sem." (o que houver dos dois). */
+export const cursoSemestre = (p: { curso?: string | null; semestre?: number | null } | null | undefined): string =>
+  [p?.curso, p?.semestre && `${p.semestre}º sem.`].filter(Boolean).join(" · ");
+
 /** Visão da organização: inscrito + nota (dado sensível) + equipe atual na edição. */
 export type Participante = Inscrito & {
   nota: number | null;

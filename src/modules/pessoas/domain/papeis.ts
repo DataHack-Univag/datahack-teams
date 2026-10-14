@@ -8,20 +8,18 @@ export const PAPEIS: { valor: Papel; rotulo: string; descricao: string }[] = [
   { valor: "aluno", rotulo: "Aluno", descricao: "Participa de uma equipe e faz as entregas." },
   { valor: "organizador", rotulo: "Organização", descricao: "Vê e edita tudo da edição e avalia pela banca da organização." },
   { valor: "avaliador", rotulo: "Avaliador", descricao: "Avalia as rubricas da banca dele." },
-  { valor: "mentor", rotulo: "Mentoria", descricao: "Ajuda as equipes no evento. Fica no registro da edição; não avalia nem tem área no sistema." },
+  { valor: "mentor", rotulo: "Mentoria", descricao: "Acompanha as equipes no evento e registra a presença dos alunos. Não avalia." },
 ];
 
 export const VALORES_PAPEL = PAPEIS.map((p) => p.valor);
 
 export const ehAvaliador = (p: Papel) => p === "avaliador";
 
-/** Papéis que entram no sistema (mentoria só fica registrada na edição). */
-export const temArea = (p: Papel) => p !== "mentor";
-
 /** Para onde cada papel vai ao entrar. */
 export function inicioDoPapel(p: Papel): string {
   if (p === "organizador") return "/admin";
   if (ehAvaliador(p)) return "/avaliar";
+  if (p === "mentor") return "/mentoria";
   return "/";
 }
 

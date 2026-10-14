@@ -4,11 +4,12 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { alterarFuncao, removerParticipante, restaurarParticipante } from "@/modules/pessoas/application/actions";
 import { funcaoDe, opcoesFuncao, rotuloFuncao, type BancaResumo } from "@/modules/pessoas/domain/papeis";
-import type { Participante } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Participante } from "@/modules/pessoas/domain/tipos";
 import { FormPessoa } from "@/modules/pessoas/ui/FormPessoa";
 import { casaBusca } from "@/shared/lib/texto";
 import { Avatar } from "@/shared/ui/Avatar";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
+import { FiltrosChips } from "@/shared/ui/FiltrosChips";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
@@ -84,28 +85,12 @@ export function ListaPessoas({
         />
       </label>
 
-      <div role="group" aria-label="Filtrar" className="flex flex-wrap gap-1.5">
-        {FILTROS.map((f) => {
-          const n = pessoas.filter(f.teste).length;
-          const atual = f.id === filtro;
-          // "Ausentes" só aparece quando a presença da edição foi registrada (heurística 8).
-          if (f.id === "ausentes" && n === 0 && !atual) return null;
-          return (
-            <button
-              key={f.id}
-              type="button"
-              aria-pressed={atual}
-              onClick={() => escolher(f.id)}
-              className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                atual ? "border-transparent text-white [background:var(--grad)]" : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground"
-              }`}
-            >
-              {f.rotulo}
-              <span className={`rounded-full px-1.5 tabular-nums ${atual ? "bg-white/20" : "bg-marca-fundo"}`}>{n}</span>
-            </button>
-          );
-        })}
-      </div>
+      <FiltrosChips
+        // "Ausentes" só aparece quando a presença da edição foi registrada (heurística 8).
+        opcoes={FILTROS.map((f) => ({ id: f.id, rotulo: f.rotulo, n: pessoas.filter(f.teste).length })).filter((f) => f.id !== "ausentes" || f.n > 0 || f.id === filtro)}
+        ativo={filtro}
+        aoEscolher={escolher}
+      />
       <p className="text-xs text-suave" aria-live="polite">
         Mostrando {lista.length} de {pessoas.length}
       </p>
@@ -141,7 +126,7 @@ export function ListaPessoas({
                       )}
                     </p>
                     <p className="truncate text-xs text-suave">
-                      {[p.curso, p.semestre && `${p.semestre}º sem.`, p.email].filter(Boolean).join(" · ")}
+                      {[cursoSemestre(p), p.email].filter(Boolean).join(" · ")}
                     </p>
                   </div>
                   {p.papel === "aluno" && (
@@ -156,7 +141,7 @@ export function ListaPessoas({
                 {abertoAqui && (
                   <div className="mt-2 space-y-3 rounded-xl border border-borda p-3" style={{ animation: "dh-sobe .2s both" }}>
                     <div className="flex flex-wrap gap-2">
-                      {p.papel !== "organizador" && p.papel !== "mentor" && (
+                      {p.papel !== "organizador" && (
                         <Link href={`/ver-como?email=${encodeURIComponent(p.email)}`} className="btn-secundario min-h-9 px-3 text-xs">
                           <Icone nome="olho" className="size-4" /> Ver como esta pessoa
                         </Link>

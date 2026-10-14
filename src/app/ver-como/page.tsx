@@ -16,8 +16,6 @@ export default async function VerComo({ searchParams }: PageProps<"/ver-como">) 
   const alvo = await buscarInscrito(cliente, email.toLowerCase(), edicao.id);
   if (!alvo) notFound();
   if (alvo.papel === "organizador") redirect("/admin/pessoas?filtro=organizador");
-  // Mentoria não tem área no sistema: não há o que simular.
-  if (alvo.papel === "mentor") redirect("/admin/pessoas?filtro=mentor");
   const papel = PAPEIS.find((p) => p.valor === alvo.papel);
 
   return (
@@ -34,10 +32,10 @@ export default async function VerComo({ searchParams }: PageProps<"/ver-como">) 
         </div>
         <ul className="list-disc space-y-1 pl-5 text-sm text-suave">
           <li>Você vê exatamente as telas e os botões que essa pessoa vê.</li>
-          {alvo.papel === "aluno" ? (
-            <li>O que você alterar fica registrado como organização.</li>
-          ) : (
+          {alvo.papel === "avaliador" ? (
             <li>As fichas aparecem só para consulta: nada é salvo em nome da banca.</li>
+          ) : (
+            <li>O que você alterar (equipe, presença) fica registrado em seu nome, como organização.</li>
           )}
           <li>Para voltar, use “Sair da simulação” na faixa amarela.</li>
         </ul>
