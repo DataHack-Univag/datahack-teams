@@ -206,6 +206,18 @@ export async function mudarFuncao(cliente: Cliente, edicaoId: string, email: str
   return { mudou: !!data?.length, error };
 }
 
+/** Presença de cada aluno da edição (e-mail → presente, ausente ou null). */
+export async function presencaDaEdicao(cliente: Cliente, edicaoId: string): Promise<Record<string, Presenca | null>> {
+  const r = await cliente
+    .from("participacoes")
+    .select("email, presenca")
+    .eq("edicao_id", edicaoId)
+    .eq("papel", "aluno")
+    .is("removido_em", null)
+    .overrideTypes<{ email: string; presenca: Presenca | null }[], { merge: false }>();
+  return Object.fromEntries((exigir(r, "a presença dos alunos") ?? []).map((p) => [p.email, p.presenca]));
+}
+
 /** Presença de um aluno no evento (organização ou mentoria; null limpa o registro). */
 export const registrarPresenca = (cliente: Cliente, edicaoId: string, email: string, presenca: Presenca | null) =>
   cliente.rpc("registrar_presenca", { p_edicao: edicaoId, p_email: email, p_presenca: presenca as string });

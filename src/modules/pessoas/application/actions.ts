@@ -112,6 +112,36 @@ export const registrarPresenca = criarAcao(
   },
 );
 
+/** Lista de marcações enviada como JSON: [{ email, presenca }] (presenca null = sem registro). */
+const marcacoes = z.string().transform((v, ctx) => {
+  try {
+    const lista = JSON.parse(v) as { email: string; presenca: "presente" | "ausente" | null }[];
+    if (Array.isArray(lista) && lista.every((m) => typeof m.email === "string" && [null, "presente", "ausente"].includes(m.presenca))) return lista;
+  } catch {}
+  ctx.addIssue({ code: "custom", message: "Lista de presença inválida. Recarregue a página." });
+  return z.NEVER;
+});
+
+/**
+ * Marca vários alunos de uma vez (atalho "Todos presentes" na equipe). O desfazer volta
+ * cada um ao registro que tinha antes.
+ */
+export const registrarPresencas = criarAcao(
+  z.object({ itens: marcacoes, anteriores: z.string().optional(), rotulo: z.string().optional() }),
+  async (d) => {
+    const { cliente, edicao } = await sessaoAtual();
+    for (const m of d.itens) {
+      const { error } = await repo.registrarPresenca(cliente, edicao.id, m.email, m.presenca);
+      if (error) return falha(traduzirErro(error));
+    }
+    atualizarTelas();
+    const rotulo = d.rotulo || "Equipe";
+    const presentes = d.itens.filter((m) => m.presenca === "presente").length;
+    const texto = presentes === d.itens.length ? `${rotulo}: ${presentes} presente(s).` : `${rotulo}: presença desfeita.`;
+    return sucesso(texto, { itens: d.anteriores ?? "[]", anteriores: JSON.stringify(d.itens), rotulo });
+  },
+);
+
 export async function sair() {
   await encerrarSessao(await clienteServidor());
   redirect("/login");

@@ -1,15 +1,14 @@
 import Link from "next/link";
-import { liderDa, nomeMembro, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
+import { liderDa, nomeMembro, presencaDosMembros, rotuloCategoria, type Equipe } from "@/modules/equipes/domain/tipos";
 import { StatusRepo } from "@/modules/equipes/ui/StatusRepo";
-import { cursoSemestre, type Presenca } from "@/modules/pessoas/domain/tipos";
-import { Avatar } from "@/shared/ui/Avatar";
+import type { Presenca } from "@/modules/pessoas/domain/tipos";
+import { PresencaEquipe } from "@/modules/pessoas/ui/MarcarPresenca";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { Icone } from "@/shared/ui/Icone";
-import { Selo } from "@/shared/ui/Selo";
 
 /**
- * Equipes vistas pela mentoria: só leitura. Quem é o líder, quem está presente,
- * o repositório e os links de entrega, para saber onde ajudar (heurísticas 1 e 8).
+ * Equipes vistas pela mentoria: líder, repositório e links de entrega só para leitura,
+ * e a presença de cada integrante para marcar ali mesmo ao passar pela equipe (heurística 7).
  */
 export function EquipesMentoria({ equipes, presenca }: { equipes: Equipe[]; presenca: Record<string, Presenca | null> }) {
   if (!equipes.length)
@@ -23,14 +22,13 @@ export function EquipesMentoria({ equipes, presenca }: { equipes: Equipe[]; pres
     <ul className="grid gap-4 lg:grid-cols-2">
       {equipes.map((e) => {
         const lider = liderDa(e);
-        const presentes = e.membros.filter((m) => presenca[m.email] === "presente").length;
         return (
           <li key={e.id} id={`equipe-${e.id}`} className="card faixa-topo min-w-0 scroll-mt-24 space-y-4">
             <div className="flex flex-wrap items-start justify-between gap-2">
               <div className="min-w-0">
                 <h2 className="text-lg font-bold break-words">{e.nome}</h2>
                 <p className="text-xs text-suave">
-                  {e.membros.length} integrante(s) · {presentes} presente(s)
+                  {e.membros.length} integrante(s)
                   {lider && (
                     <>
                       {" · "}
@@ -42,22 +40,8 @@ export function EquipesMentoria({ equipes, presenca }: { equipes: Equipe[]; pres
               <StatusRepo equipe={e} />
             </div>
 
-            <ul className="divide-y divide-borda">
-              {e.membros.map((m) => {
-                const p = presenca[m.email];
-                return (
-                  <li key={m.email} className="flex items-center gap-3 py-2">
-                    <Avatar nome={nomeMembro(m)} tamanho="size-8" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium">{nomeMembro(m)}</p>
-                      <p className="truncate text-xs text-suave">{cursoSemestre(m.inscritos)}</p>
-                    </div>
-                    {p === "presente" && <Selo tom="sucesso">Presente</Selo>}
-                    {p === "ausente" && <Selo tom="alerta">Ausente</Selo>}
-                  </li>
-                );
-              })}
-            </ul>
+            {/* Passando pela equipe, a mentoria já faz a chamada dela. */}
+            <PresencaEquipe equipe={e.nome} pessoas={presencaDosMembros(e, presenca)} />
 
             <div className="flex flex-wrap gap-2 border-t border-borda pt-3 text-sm">
               {e.repo_github ? (

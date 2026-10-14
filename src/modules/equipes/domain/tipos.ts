@@ -1,5 +1,5 @@
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
-import type { Inscrito } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Inscrito, type Presenca } from "@/modules/pessoas/domain/tipos";
 
 export type CategoriaLink = "github" | "drive" | "figma" | "video" | "apresentacao" | "site" | "dashboard" | "outro";
 
@@ -100,6 +100,12 @@ export const configuracaoDa = (e: Edicao, { paraParticipante = false } = {}): Co
 });
 
 export const nomeMembro = (m: Membro) => m.inscritos?.nome ?? m.email;
+
+/** Integrantes com a presença de cada um (bloco de presença das telas de equipe). */
+export const presencaDosMembros = (e: Equipe, presenca: Record<string, Presenca | null>) =>
+  e.membros
+    .filter((m) => m.situacao === "confirmado")
+    .map((m) => ({ email: m.email, nome: nomeMembro(m), detalhe: cursoSemestre(m.inscritos), presenca: presenca[m.email] ?? null }));
 
 export const confirmados = (e: Equipe) => e.membros.filter((m) => m.situacao === "confirmado");
 

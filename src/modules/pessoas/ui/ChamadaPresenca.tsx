@@ -1,16 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { useFormStatus } from "react-dom";
-import { registrarPresenca } from "@/modules/pessoas/application/actions";
-import { cursoSemestre, type Participante, type Presenca } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Participante } from "@/modules/pessoas/domain/tipos";
+import { MarcarPresenca } from "@/modules/pessoas/ui/MarcarPresenca";
 import { casaBusca } from "@/shared/lib/texto";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { Avatar } from "@/shared/ui/Avatar";
-import { Girando } from "@/shared/ui/Botao";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { FiltrosChips } from "@/shared/ui/FiltrosChips";
-import { Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
 
 export type AlunoChamada = Pick<Participante, "email" | "nome" | "curso" | "semestre" | "equipe_nome" | "presenca">;
@@ -79,55 +76,19 @@ export function ChamadaPresenca({ alunos }: { alunos: AlunoChamada[] }) {
         <ul className="divide-y divide-borda">
           {lista.map((a) => (
             <li key={a.email} className="flex flex-wrap items-center gap-3 py-2.5">
-              <Avatar nome={a.nome} />
+              <Avatar nome={a.nome} tamanho="size-9" />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium">{a.nome}</p>
                 <p className="truncate text-xs text-suave">
                   {[cursoSemestre(a), a.equipe_nome ?? "sem equipe"].filter(Boolean).join(" · ")}
                 </p>
               </div>
-              {/* No celular os botões descem para a linha de baixo, largos, e o nome não é cortado. */}
-              <div className="flex w-full gap-1.5 pl-12 sm:w-auto sm:shrink-0 sm:pl-0" role="group" aria-label={`Presença de ${a.nome}`}>
-                <Marcar aluno={a} valor="presente" />
-                <Marcar aluno={a} valor="ausente" />
-              </div>
+              <MarcarPresenca pessoa={a} />
             </li>
           ))}
         </ul>
       )}
     </section>
-  );
-}
-
-/** Um dos dois botões da chamada. O que já está marcado fica destacado e não reenvia. */
-function Marcar({ aluno, valor }: { aluno: AlunoChamada; valor: Presenca }) {
-  const marcado = aluno.presenca === valor;
-  return (
-    <Formulario action={registrarPresenca} acaoDesfazer={registrarPresenca} className="flex-1 sm:flex-none">
-      <Ocultos valores={{ email: aluno.email, presenca: valor, anterior: aluno.presenca ?? "", nome: aluno.nome }} />
-      <BotaoMarcar valor={valor} marcado={marcado} />
-    </Formulario>
-  );
-}
-
-function BotaoMarcar({ valor, marcado }: { valor: Presenca; marcado: boolean }) {
-  const { pending } = useFormStatus();
-  const presente = valor === "presente";
-  const estilo = marcado
-    ? presente
-      ? "border-transparent bg-emerald-600 text-white"
-      : "border-transparent bg-amber-500 text-amber-950"
-    : "border-borda-forte bg-superficie-solida text-suave hover:text-foreground";
-  return (
-    <button
-      type="submit"
-      aria-pressed={marcado}
-      disabled={marcado || pending}
-      className={`inline-flex min-h-10 w-full items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition disabled:cursor-default sm:min-h-9 sm:w-auto ${estilo}`}
-    >
-      {pending ? <Girando className="size-3.5" /> : <Icone nome={presente ? "ok" : "fechar"} className="size-3.5" />}
-      {presente ? "Presente" : "Ausente"}
-    </button>
   );
 }
 

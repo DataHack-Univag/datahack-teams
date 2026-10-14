@@ -133,7 +133,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como faço a chamada?",
     resposta:
-      "Em “Pessoas”, marque cada aluno como “Presente” ou “Ausente”. Use a busca para achar pelo nome ou pela equipe e o filtro “Sem registro” para ver quem falta. Errou? Toque em “Desfazer” no aviso ou marque de novo.",
+      "Pela equipe: em “Equipes”, cada equipe tem os integrantes com “Presente” e “Ausente” e o atalho “Marcar todos presentes” (na organização, abra “Presença” no card da equipe). Pela lista: em “Pessoas”, use a busca e o filtro “Sem registro” para ver quem falta. Errou? Toque em “Desfazer” no aviso ou marque de novo.",
     publicos: ["mentoria", "organizacao"],
   },
   {

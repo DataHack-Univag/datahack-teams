@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
-import { configuracaoDa, situacaoEquipe } from "@/modules/equipes/domain/tipos";
+import { configuracaoDa, presencaDosMembros, situacaoEquipe } from "@/modules/equipes/domain/tipos";
 import { buscarEquipe } from "@/modules/equipes/infra/repositorio";
 import { ArquivarEquipe } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
 import { AnalisarProposta } from "@/modules/equipes/ui/Propostas";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
-import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
+import { listarSemEquipe, presencaDaEdicao } from "@/modules/pessoas/infra/repositorio";
+import { PresencaEquipe } from "@/modules/pessoas/ui/MarcarPresenca";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 import { Selo } from "@/shared/ui/Selo";
@@ -14,7 +15,11 @@ import { Selo } from "@/shared/ui/Selo";
 export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/[id]">) {
   const { id } = await params;
   const { cliente, usuario, edicao } = await sessaoAtual();
-  const [equipe, disponiveis] = await Promise.all([buscarEquipe(cliente, id), listarSemEquipe(cliente, edicao.id)]);
+  const [equipe, disponiveis, presenca] = await Promise.all([
+    buscarEquipe(cliente, id),
+    listarSemEquipe(cliente, edicao.id),
+    presencaDaEdicao(cliente, edicao.id),
+  ]);
   if (!equipe || equipe.edicao_id !== edicao.id) notFound();
   const situacao = situacaoEquipe(equipe.situacao);
   const emAnalise = equipe.situacao === "formando" || equipe.situacao === "aguardando_aprovacao";
@@ -39,6 +44,12 @@ export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/
       />
       {emAnalise && <AnalisarProposta equipe={equipe} />}
       <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={configuracaoDa(edicao)} meuEmail={usuario.email} organizador rotulo="Equipe" />
+      {equipe.situacao === "aprovada" && equipe.membros.length > 0 && (
+        <section className="card space-y-3">
+          <h2 className="text-lg font-semibold">Presença no evento</h2>
+          <PresencaEquipe equipe={equipe.nome} pessoas={presencaDosMembros(equipe, presenca)} />
+        </section>
+      )}
       {equipe.situacao === "aprovada" && <ArquivarEquipe equipe={equipe} />}
     </Pagina>
   );
