@@ -212,6 +212,99 @@ select pg_temp.falha($q$select registrar_presenca((select id from edicoes where 
 select pg_temp.como('p62@teste.local');
 select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'presente')$q$, 'Só a organização e a mentoria');
 
+-- ---------------------------------------------------------------- 013 · mapa
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1); r jsonb;
+begin
+  r := importar_mapa(v_ed, '{"pisos":[{"nome":"Térreo","salas":[{"nome":"Lab 1","largura_m":8,"profundidade_m":6,"elementos":[{"tipo":"bancada","rotulo":"B1","x_m":1,"y_m":1,"largura_m":3.2,"profundidade_m":0.8,"lugares":2}]}]}]}'::jsonb);
+  assert r = '{"pisos": 1, "salas": 1, "elementos": 1}'::jsonb, 'importa piso, sala e bancada';
+  assert (exportar_mapa(v_ed) #>> '{pisos,0,salas,0,elementos,0,largura_m}')::numeric = 3.2, 'exporta em metros';
+end $$;
+select pg_temp.falha($q$select importar_mapa((select id from edicoes where numero = 1), '{"pisos":[{"nome":"Térreo","salas":[{"nome":"Lab 1","largura_m":8,"profundidade_m":6}]}]}'::jsonb)$q$, 'já existe');
+select pg_temp.como('p1@teste.local');
+do $$ begin
+  assert (select count(*) from mapa_elementos) = 1, 'aluno vê o mapa da edição';
+  update mapa_elementos set x_cm = 0;
+  assert (select x_cm from mapa_elementos limit 1) = 100, 'aluno não mexe no mapa';
+end $$;
+select pg_temp.falha($q$select importar_mapa((select id from edicoes where numero = 1), '{"pisos":[{"nome":"X","salas":[]}]}'::jsonb)$q$, 'Só a organização');
+select pg_temp.falha($q$delete from mapa_elementos$q$, 'permission denied');
+
+-- ---------------------------------------------------------------- 014 · equipes no mapa
+-- (usa a sala Lab 1 importada no bloco 013: uma bancada B1 com 2 lugares)
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed uuid := (select id from edicoes where numero = 1);
+  v_b1 uuid := (select id from mapa_elementos where rotulo = 'B1' and removido_em is null);
+  v_e1 uuid; v_e2 uuid; r jsonb;
+begin
+  select id into v_e1 from equipes where edicao_id = v_ed and situacao = 'aprovada' and removido_em is null order by nome limit 1;
+  select id into v_e2 from equipes where edicao_id = v_ed and situacao = 'aprovada' and removido_em is null and id <> v_e1 order by nome limit 1;
+  perform set_config('dh.e1', v_e1::text, false);
+  perform alocar_equipe(v_e1, v_b1, 1);
+  perform alocar_equipe(v_e2, v_b1, 2);
+  r := alocar_equipe(v_e1, v_b1, 2);
+  assert r ->> 'trocou_com' is not null, 'lugar ocupado: as duas trocam';
+  assert (select lugar from alocacoes where equipe_id = v_e2 and ate is null) = 1, 'a outra foi para o lugar antigo';
+  assert (select count(*) from alocacoes where equipe_id = v_e1) = 2, 'o lugar anterior fica no histórico';
+  perform desalocar_equipe(v_e2);
+  assert not exists (select 1 from alocacoes where equipe_id = v_e2 and ate is null), 'tirar do lugar';
+  update equipes set icone = '🐼' where id = v_e1;
+end $$;
+select pg_temp.falha($q$select alocar_equipe(current_setting('dh.e1')::uuid, (select id from mapa_elementos where rotulo = 'B1'), 3)$q$, '2 lugar');
+
+select pg_temp.como('p1@teste.local');
+select pg_temp.falha($q$select alocar_equipe(current_setting('dh.e1')::uuid, (select id from mapa_elementos where rotulo = 'B1'), 1)$q$, 'Só a organização');
+do $$ begin
+  assert (select count(*) from alocacoes where ate is null) = 1, 'aluno vê onde as equipes estão';
+end $$;
+
+-- ---------------------------------------------------------------- 015 · chamados
+-- (a edição 1 volta a ser a atual; quem pede ajuda é um integrante de uma equipe aprovada dela)
+reset role;
+update edicoes set atual = false;
+update edicoes set atual = true where numero = 1;
+select set_config('dh.aluno', (select m.email from membros m join equipes e on e.id = m.equipe_id
+                               join edicoes ed on ed.id = e.edicao_id and ed.numero = 1
+                              where m.saiu_em is null and m.situacao = 'confirmado' and e.situacao = 'aprovada' and e.removido_em is null
+                              order by m.email limit 1), false);
+set role authenticated;
+select pg_temp.como(current_setting('dh.aluno'));
+do $$
+declare v_id uuid;
+begin
+  v_id := abrir_chamado('duvida', 'Como junto as bases?');
+  perform set_config('dh.chamado', v_id::text, false);
+  assert (select situacao from chamados where id = v_id) = 'aberto', 'equipe abre o chamado';
+end $$;
+select pg_temp.falha($q$select abrir_chamado('problema')$q$, 'já tem um pedido');
+select pg_temp.falha($q$select atender_chamado(current_setting('dh.chamado')::uuid)$q$, 'Só a mentoria e a organização');
+
+-- outra equipe não vê o chamado
+select pg_temp.como((select m.email from membros m join equipes e on e.id = m.equipe_id
+                      where m.saiu_em is null and m.situacao = 'confirmado' and e.situacao = 'aprovada' and e.removido_em is null
+                        and m.equipe_id <> (select equipe_id from chamados where id = current_setting('dh.chamado')::uuid) limit 1));
+do $$ begin assert (select count(*) from chamados) = 0, 'outra equipe não vê o chamado'; end $$;
+
+select pg_temp.como('mentor@teste.local');
+do $$
+declare v_id uuid := current_setting('dh.chamado')::uuid;
+begin
+  assert (select count(*) from chamados) = 1, 'mentoria vê o chamado';
+  perform atender_chamado(v_id);
+  assert (select atendido_por from chamados where id = v_id) = 'mentor@teste.local', 'vou atender';
+  perform atender_chamado(v_id, true);
+  assert (select situacao from chamados where id = v_id) = 'resolvido', 'resolvido';
+  perform reabrir_chamado(v_id);
+  assert (select situacao from chamados where id = v_id) = 'aberto', 'desfazer reabre';
+end $$;
+
+select pg_temp.como(current_setting('dh.aluno'));
+select fechar_chamado_da_equipe(current_setting('dh.chamado')::uuid, true);
+do $$ begin assert (select situacao from chamados where id = current_setting('dh.chamado')::uuid) = 'resolvido', 'a equipe avisa que resolveu'; end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010, 011 e 012 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 015 conferem.'

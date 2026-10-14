@@ -34,6 +34,10 @@ const CAMINHOS = {
   relogio: "M12 22a10 10 0 1 0 0-20 10 10 0 0 0 0 20M12 6v6l4 2",
   telao: "M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5",
   gerador: "M12 3l1.9 5.8H20l-4.9 3.6 1.9 5.8-5-3.6-5 3.6 1.9-5.8L4 8.8h6.1z",
+  mapa: "M9 4 3 6v14l6-2 6 2 6-2V4l-6 2zM9 4v14M15 6v14",
+  girar: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
+  copiar: "M9 9h11v11H9zM5 15H4V4h11v1",
+  imagem: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01",
 } as const;
 
 export type NomeIcone = keyof typeof CAMINHOS;

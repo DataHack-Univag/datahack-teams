@@ -6,6 +6,68 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export type Database = {
   public: {
     Tables: {
+      alocacoes: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          equipe_id: string;
+          elemento_id: string;
+          lugar: number;
+          desde: string;
+          ate: string | null;
+          por: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          equipe_id: string;
+          elemento_id: string;
+          lugar: number;
+          desde?: string;
+          ate?: string | null;
+          por?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          equipe_id?: string;
+          elemento_id?: string;
+          lugar?: number;
+          desde?: string;
+          ate?: string | null;
+          por?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "alocacoes_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_elemento_id_fkey";
+            columns: ["elemento_id"];
+            isOneToOne: false;
+            referencedRelation: "mapa_elementos";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_equipe_id_fkey";
+            columns: ["equipe_id"];
+            isOneToOne: false;
+            referencedRelation: "equipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "alocacoes_por_fkey";
+            columns: ["por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+        ];
+      };
       avaliacoes_legado: {
         Row: {
           id: string;
@@ -89,6 +151,87 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "edicoes";
             referencedColumns: ["id"];
+          },
+        ];
+      };
+      chamados: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          equipe_id: string;
+          tipo: string;
+          mensagem: string | null;
+          situacao: string;
+          aberto_por: string | null;
+          aberto_em: string;
+          atendido_por: string | null;
+          atendido_em: string | null;
+          fechado_por: string | null;
+          fechado_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          equipe_id: string;
+          tipo: string;
+          mensagem?: string | null;
+          situacao?: string;
+          aberto_por?: string | null;
+          aberto_em?: string;
+          atendido_por?: string | null;
+          atendido_em?: string | null;
+          fechado_por?: string | null;
+          fechado_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          equipe_id?: string;
+          tipo?: string;
+          mensagem?: string | null;
+          situacao?: string;
+          aberto_por?: string | null;
+          aberto_em?: string;
+          atendido_por?: string | null;
+          atendido_em?: string | null;
+          fechado_por?: string | null;
+          fechado_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "chamados_aberto_por_fkey";
+            columns: ["aberto_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "chamados_atendido_por_fkey";
+            columns: ["atendido_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "chamados_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chamados_equipe_id_fkey";
+            columns: ["equipe_id"];
+            isOneToOne: false;
+            referencedRelation: "equipes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "chamados_fechado_por_fkey";
+            columns: ["fechado_por"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
           },
         ];
       };
@@ -292,6 +435,7 @@ export type Database = {
           motivo_analise: string | null;
           removido_em: string | null;
           removido_por: string | null;
+          icone: string | null;
         };
         Insert: {
           id?: string;
@@ -312,6 +456,7 @@ export type Database = {
           motivo_analise?: string | null;
           removido_em?: string | null;
           removido_por?: string | null;
+          icone?: string | null;
         };
         Update: {
           id?: string;
@@ -332,6 +477,7 @@ export type Database = {
           motivo_analise?: string | null;
           removido_em?: string | null;
           removido_por?: string | null;
+          icone?: string | null;
         };
         Relationships: [
           {
@@ -576,6 +722,72 @@ export type Database = {
             isOneToOne: false;
             referencedRelation: "pessoas";
             referencedColumns: ["email"];
+          },
+        ];
+      };
+      mapa_elementos: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          sala_id: string;
+          tipo: string;
+          rotulo: string | null;
+          x_cm: number;
+          y_cm: number;
+          largura_cm: number;
+          profundidade_cm: number;
+          rotacao: number;
+          lugares: number | null;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          sala_id: string;
+          tipo: string;
+          rotulo?: string | null;
+          x_cm: number;
+          y_cm: number;
+          largura_cm: number;
+          profundidade_cm: number;
+          rotacao?: number;
+          lugares?: number | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          sala_id?: string;
+          tipo?: string;
+          rotulo?: string | null;
+          x_cm?: number;
+          y_cm?: number;
+          largura_cm?: number;
+          profundidade_cm?: number;
+          rotacao?: number;
+          lugares?: number | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mapa_elementos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mapa_elementos_sala_id_fkey";
+            columns: ["sala_id"];
+            isOneToOne: false;
+            referencedRelation: "salas";
+            referencedColumns: ["id"];
           },
         ];
       };
@@ -1062,6 +1274,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      pisos: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          nome: string;
+          ordem: number;
+          criado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          nome: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          nome?: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pisos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       regras_desempate: {
         Row: {
           id: string;
@@ -1178,6 +1425,63 @@ export type Database = {
           },
         ];
       };
+      salas: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          piso_id: string;
+          nome: string;
+          largura_cm: number;
+          profundidade_cm: number;
+          fundo: string | null;
+          ordem: number;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          piso_id: string;
+          nome: string;
+          largura_cm: number;
+          profundidade_cm: number;
+          fundo?: string | null;
+          ordem?: number;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          piso_id?: string;
+          nome?: string;
+          largura_cm?: number;
+          profundidade_cm?: number;
+          fundo?: string | null;
+          ordem?: number;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "salas_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "salas_piso_id_fkey";
+            columns: ["piso_id"];
+            isOneToOne: false;
+            referencedRelation: "pisos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trocas: {
         Row: {
           id: string;
@@ -1268,11 +1572,15 @@ export type Database = {
     };
     Views: { [_ in never]: never };
     Functions: {
+      abrir_chamado: { Args: { p_tipo: string; p_mensagem?: string; p_como?: string }; Returns: string };
       aceitar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: string };
+      alocar_equipe: { Args: { p_equipe: string; p_elemento: string; p_lugar: number }; Returns: Json };
       analisar_equipe: { Args: { p_equipe: string; p_aprovar: boolean; p_motivo?: string }; Returns: undefined };
       aplicar_equipes: { Args: { p_equipes: Json; p_substituir?: boolean; p_edicao?: string }; Returns: number };
       arquivar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       arquivar_ficha: { Args: { p_ficha: string }; Returns: undefined };
+      atende_chamados: { Args: { p_edicao: string }; Returns: boolean };
+      atender_chamado: { Args: { p_chamado: string; p_resolver?: boolean }; Returns: undefined };
       atualizar_situacao_proposta: { Args: { p_equipe: string }; Returns: undefined };
       cancelar_proposta: { Args: { p_equipe: string; p_como?: string }; Returns: undefined };
       cancelar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
@@ -1281,16 +1589,20 @@ export type Database = {
       criar_equipe: { Args: { p_nome: string; p_repo: string; p_edicao?: string }; Returns: string };
       definir_edicao_atual: { Args: { p_edicao: string }; Returns: undefined };
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
+      desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
+      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador_de: { Args: { p_edicao: string }; Returns: boolean };
       email_atual: { Args: Record<PropertyKey, never>; Returns: string };
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
+      exportar_mapa: { Args: { p_edicao: string }; Returns: Json };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
+      fechar_chamado_da_equipe: { Args: { p_chamado: string; p_resolvido: boolean; p_como?: string }; Returns: undefined };
+      importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
       nome_de: { Args: { p_email: string }; Returns: string };
@@ -1302,6 +1614,7 @@ export type Database = {
       pode_avaliar: { Args: { p_rubrica: string }; Returns: boolean };
       propor_equipe: { Args: { p_nome: string; p_emails: string[]; p_repo?: string; p_como?: string }; Returns: string };
       quem_age: { Args: { p_como: string }; Returns: string };
+      reabrir_chamado: { Args: { p_chamado: string }; Returns: undefined };
       recusar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
       registrar_presenca: { Args: { p_edicao: string; p_email: string; p_presenca: string }; Returns: undefined };
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };

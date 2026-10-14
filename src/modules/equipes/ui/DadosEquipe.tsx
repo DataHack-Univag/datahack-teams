@@ -1,6 +1,8 @@
 import { atualizarEquipe, verificarRepo } from "@/modules/equipes/application/actions";
 import type { permissoesEquipe } from "@/modules/equipes/domain/permissoes";
 import { nomeMembro, type Equipe } from "@/modules/equipes/domain/tipos";
+import { EscolherIcone } from "@/modules/equipes/ui/EscolherIcone";
+import { IconeEquipe } from "@/modules/equipes/ui/IconeEquipe";
 import { StatusRepo } from "@/modules/equipes/ui/StatusRepo";
 import { Aviso } from "@/shared/ui/Aviso";
 import { Campo } from "@/shared/ui/Campo";
@@ -10,13 +12,14 @@ import { Icone } from "@/shared/ui/Icone";
 type Permissoes = ReturnType<typeof permissoesEquipe>;
 
 /** Topo do painel da equipe: nome, líder, repositório e o que falta fazer. */
-export function DadosEquipe({ equipe, p, rotulo = "Sua equipe" }: { equipe: Equipe; p: Permissoes; rotulo?: string }) {
+export function DadosEquipe({ equipe, p, rotulo = "Sua equipe", local }: { equipe: Equipe; p: Permissoes; rotulo?: string; local?: string | null }) {
   return (
     <section className="card faixa-topo space-y-4">
       <div>
         <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">{rotulo}</p>
-        <h1 className="text-3xl font-extrabold break-words sm:text-4xl">
-          <span className="grad-text">{equipe.nome}</span>
+        <h1 className="flex items-center gap-3 text-3xl font-extrabold break-words sm:text-4xl">
+          <IconeEquipe equipe={equipe} tamanho="size-12 text-2xl sm:size-14 sm:text-3xl" />
+          <span className="grad-text min-w-0">{equipe.nome}</span>
         </h1>
         {p.lider && (
           <p className="mt-1 truncate text-sm text-suave">
@@ -25,7 +28,15 @@ export function DadosEquipe({ equipe, p, rotulo = "Sua equipe" }: { equipe: Equi
             {p.souLider && " (você)"}
           </p>
         )}
+        {local && (
+          <p className="mt-1 flex items-center gap-1.5 text-sm">
+            <Icone nome="mapa" className="size-4 text-marca" />
+            No evento: <strong className="font-semibold">{local}</strong>
+          </p>
+        )}
       </div>
+
+      {p.podeEditarDados && <EscolherIcone equipe={equipe} />}
 
       {/* Pendências em destaque (heurística 1): o que a equipe ainda precisa fazer. */}
       {!p.lider && (

@@ -123,6 +123,24 @@ export const TOPICOS: Topico[] = [
       "Em Pessoas, abra qualquer aluno ou avaliador e use “Ver como esta pessoa”. Você navega exatamente como ela; nas fichas das bancas nada é salvo durante a simulação.",
     publicos: ["organizacao"],
   },
+  {
+    pergunta: "Como monto o mapa do evento (croqui)?",
+    resposta:
+      "Em Mais → Mapa, crie cada sala com as medidas aproximadas e toque em “Desenhar” (o editor ocupa a tela toda). Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…), arraste para o lugar e puxe as alças para o tamanho que quiser. Para mexer em vários de uma vez: Shift ou Ctrl + clique, um retângulo no vazio ou “Selecionar vários”. Zoom: roda do mouse, pinça com dois dedos ou os botões no canto (0 ajusta à tela); para mover a vista, segure Espaço e arraste, use a “Mão” ou dois dedos. Salas iguais (3 labs iguais)? Desenhe uma e use “Duplicar sala”. O croqui sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Como coloco as equipes nas bancadas do mapa?",
+    resposta:
+      "Em Mapa → “Distribuir equipes”. No computador, arraste a equipe da lista até um lugar da bancada; no celular, toque na equipe e depois no lugar. Soltar num lugar ocupado troca as duas equipes. Toda mudança tem “Desfazer”, e o histórico de onde cada equipe esteve fica guardado. Para imprimir com as equipes: Croqui → “Com as equipes”.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Tenho um desenho no papel. Dá para importar?",
+    resposta:
+      "Sim, de dois jeitos. Em Mapa → “Importar um desenho”, copie as instruções, mande para uma IA junto com a foto do desenho e cole o JSON que ela devolver: o sistema confere antes de importar. Ou abra a sala e, em “Medidas e fundo da sala”, ponha a foto como fundo e desenhe as bancadas por cima. PDF não é lido direto: tire um print da planta.",
+    publicos: ["organizacao"],
+  },
   // ------------------------------------------------ mentoria
   {
     pergunta: "O que a mentoria vê no sistema?",
@@ -137,6 +155,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["mentoria", "organizacao"],
   },
   {
+    pergunta: "Como atendo os pedidos de ajuda?",
+    resposta:
+      "Em “Chamados” aparecem as equipes que pediram ajuda, na ordem: problemas primeiro, depois quem espera há mais tempo, com o lugar no mapa. Toque em “Vou atender” (a equipe vê que você está indo) e, no fim, em “Resolvido”. Errou? Use “Desfazer”. O número ao lado de “Chamados” no menu mostra quantos estão esperando.",
+    publicos: ["mentoria", "organizacao"],
+  },
+  {
     pergunta: "Marcar ausente tira o aluno da equipe?",
     resposta: "Não. Ausência só registra que ele não estava no evento: o aluno continua inscrito e na equipe. Mudanças de equipe são com a organização.",
     publicos: ["mentoria", "organizacao"],
@@ -146,6 +170,22 @@ export const TOPICOS: Topico[] = [
     resposta:
       "Em Pessoas, cadastre a pessoa com a função “Mentoria” e o e-mail dela (com a edição certa escolhida no topo). No primeiro acesso ela cria a senha com esse e-mail. Para conferir o que ela vê, use “Ver como”.",
     publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Onde fica a minha equipe no evento?",
+    resposta: "Em “Minha equipe”, abaixo do nome, aparece o lugar no mapa (sala e bancada), assim que a organização distribuir as equipes.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Como peço ajuda durante o evento?",
+    resposta:
+      "Em “Minha equipe”, no quadro “Precisa de ajuda?”, toque em “Estamos com uma dúvida” ou “Estamos com um problema” (dá para deixar um recado). A mentoria vê na hora, com a bancada de vocês piscando no mapa. Quando alguém estiver a caminho, aparece o nome de quem vem. Resolveram sozinhos? Toque em “Já resolvemos”.",
+    publicos: ["aluno"],
+  },
+  {
+    pergunta: "Como escolho o ícone da equipe?",
+    resposta: "O líder (ou a organização) abre “Minha equipe” e toca em “Escolher um ícone para a equipe”. O ícone aparece no mapa do evento e nos cards da equipe.",
+    publicos: ["aluno", "organizacao"],
   },
   // ------------------------------------------------ todos
   {

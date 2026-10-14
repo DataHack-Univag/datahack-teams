@@ -1,5 +1,6 @@
 import { listarEquipes } from "@/modules/equipes/infra/repositorio";
 import { EquipesMentoria } from "@/modules/equipes/ui/EquipesMentoria";
+import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -10,7 +11,7 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 // Mentoria → Equipes: todas as equipes da edição, com quem está presente.
 export default async function MentoriaEquipes() {
   const { cliente, edicao } = await sessaoAtual();
-  const [equipes, pessoas] = await Promise.all([listarEquipes(cliente, edicao.id), listarParticipantes(cliente, edicao.id)]);
+  const [equipes, pessoas, locais] = await Promise.all([listarEquipes(cliente, edicao.id), listarParticipantes(cliente, edicao.id), locaisDaEdicao(cliente, edicao.id)]);
   const alunos = pessoas.filter((p) => p.papel === "aluno");
   const presenca = Object.fromEntries(alunos.map((a) => [a.email, a.presenca]));
   const semEquipe = alunos.filter((a) => !a.equipe_id).length;
@@ -33,7 +34,7 @@ export default async function MentoriaEquipes() {
           Eles aparecem em Pessoas, com o curso e a presença.
         </Aviso>
       )}
-      <EquipesMentoria equipes={equipes} presenca={presenca} />
+      <EquipesMentoria equipes={equipes} presenca={presenca} locais={locais} />
     </Pagina>
   );
 }

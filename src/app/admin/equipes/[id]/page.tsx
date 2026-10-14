@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { configuracaoDa, presencaDosMembros, situacaoEquipe } from "@/modules/equipes/domain/tipos";
 import { buscarEquipe } from "@/modules/equipes/infra/repositorio";
+import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { ArquivarEquipe } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
 import { AnalisarProposta } from "@/modules/equipes/ui/Propostas";
@@ -15,10 +16,11 @@ import { Selo } from "@/shared/ui/Selo";
 export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/[id]">) {
   const { id } = await params;
   const { cliente, usuario, edicao } = await sessaoAtual();
-  const [equipe, disponiveis, presenca] = await Promise.all([
+  const [equipe, disponiveis, presenca, locais] = await Promise.all([
     buscarEquipe(cliente, id),
     listarSemEquipe(cliente, edicao.id),
     presencaDaEdicao(cliente, edicao.id),
+    locaisDaEdicao(cliente, edicao.id),
   ]);
   if (!equipe || equipe.edicao_id !== edicao.id) notFound();
   const situacao = situacaoEquipe(equipe.situacao);
@@ -43,7 +45,7 @@ export default async function EquipeAdmin({ params }: PageProps<"/admin/equipes/
         }
       />
       {emAnalise && <AnalisarProposta equipe={equipe} />}
-      <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={configuracaoDa(edicao)} meuEmail={usuario.email} organizador rotulo="Equipe" />
+      <PainelEquipe equipe={equipe} disponiveis={disponiveis} config={configuracaoDa(edicao)} meuEmail={usuario.email} organizador rotulo="Equipe" local={locais[equipe.id]} />
       {equipe.situacao === "aprovada" && equipe.membros.length > 0 && (
         <section className="card space-y-3">
           <h2 className="text-lg font-semibold">Presença no evento</h2>

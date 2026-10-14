@@ -4,7 +4,7 @@ import type { Comando } from "@/shared/ui/PaletaComandos";
 import type { ItemNav } from "@/shared/ui/Navegacao";
 
 /** Organização: 6 abas na ordem do evento. No celular: 4 na barra + "Mais". */
-export function navOrganizacao(contagens: { trocas?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
+export function navOrganizacao(contagens: { trocas?: number; chamados?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
   return {
     itens: [
       { href: "/admin", rotulo: "Painel", icone: "painel" },
@@ -13,8 +13,10 @@ export function navOrganizacao(contagens: { trocas?: number } = {}): { itens: It
       { href: "/admin/ranking", rotulo: "Ranking", icone: "ranking", prefixos: ["/admin/ranking"] },
     ],
     mais: [
+      { href: "/admin/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/admin/chamados"], contagem: contagens.chamados },
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
+      { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
       { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes"] },
       { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
     ],
@@ -30,9 +32,10 @@ export function navBancas(): ItemNav[] {
 }
 
 /** Mentoria: acompanhar as equipes e registrar a presença dos alunos. */
-export function navMentoria(): ItemNav[] {
+export function navMentoria(contagens: { chamados?: number } = {}): ItemNav[] {
   return [
     { href: "/mentoria/equipes", rotulo: "Equipes", icone: "equipe", prefixos: ["/mentoria/equipes"] },
+    { href: "/mentoria/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/mentoria/chamados"], contagem: contagens.chamados },
     { href: "/mentoria/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/mentoria/pessoas"] },
     { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
   ];
@@ -64,4 +67,7 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },
   { grupo: "Telas", rotulo: "Cadastrar pessoa", href: "/admin/pessoas#cadastrar", icone: "mais_novo" },
+  { grupo: "Telas", rotulo: "Croqui do evento", href: "/admin/mapa/croqui", icone: "mapa" },
+  { grupo: "Telas", rotulo: "Distribuir equipes no mapa", href: "/admin/mapa/equipes", icone: "equipe" },
+  { grupo: "Telas", rotulo: "Pedidos de ajuda (chamados)", href: "/admin/chamados", icone: "sino" },
 ];

@@ -17,6 +17,7 @@ export function PainelEquipe({
   organizador,
   disponiveis,
   rotulo,
+  local,
 }: {
   equipe: Equipe;
   config: Configuracao;
@@ -24,6 +25,8 @@ export function PainelEquipe({
   organizador: boolean;
   disponiveis?: Inscrito[];
   rotulo?: string;
+  /** Onde a equipe fica no mapa do evento ("Lab 1 · B2"). */
+  local?: string | null;
 }) {
   const p = permissoesEquipe({ equipe, config, meuEmail, organizador });
   return (
@@ -33,7 +36,7 @@ export function PainelEquipe({
           {organizador ? "Os alunos só visualizam; você, como organização, ainda pode editar." : "Você ainda pode ver tudo, mas não alterar."}
         </Aviso>
       )}
-      <DadosEquipe equipe={equipe} p={p} rotulo={rotulo} />
+      <DadosEquipe equipe={equipe} p={p} rotulo={rotulo} local={local} />
       <Integrantes equipe={equipe} config={config} p={p} meuEmail={meuEmail} organizador={organizador} disponiveis={disponiveis} />
       <LinksEntrega equipe={equipe} podeEditar={p.podeEditar} />
     </div>
