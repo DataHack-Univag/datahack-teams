@@ -2,11 +2,11 @@ import Link from "next/link";
 import { adicionarMembro, definirLider, removerMembro } from "@/modules/equipes/application/actions";
 import type { permissoesEquipe } from "@/modules/equipes/domain/permissoes";
 import { nomeMembro, type Configuracao, type Equipe } from "@/modules/equipes/domain/tipos";
-import type { Inscrito } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Inscrito } from "@/modules/pessoas/domain/tipos";
 import { Aviso } from "@/shared/ui/Aviso";
 import { Avatar } from "@/shared/ui/Avatar";
-import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { EscolherPessoas } from "@/shared/ui/EscolherPessoas";
+import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
 
@@ -147,7 +147,7 @@ export function Integrantes({
               opcoes={disponiveis.map((i) => ({
                 email: i.email,
                 nome: i.nome,
-                detalhe: [i.curso, i.semestre && `${i.semestre}º sem.`].filter(Boolean).join(" · "),
+                detalhe: cursoSemestre(i),
               }))}
               maximo={1}
               dica={`${disponiveis.length} aluno(s) sem equipe.`}

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { normalizarRepo } from "./github";
 import { pendenciasEquipe, permissoesEquipe, situacaoRepo } from "./permissoes";
-import type { Equipe } from "./tipos";
+import type { Edicao } from "@/modules/edicoes/domain/tipos";
+import { configuracaoDa, type Equipe } from "./tipos";
 
 describe("normalizarRepo", () => {
   it.each([
@@ -28,7 +29,7 @@ const equipe = (extra: Partial<Equipe> = {}): Equipe =>
     links: [],
     ...extra,
   }) as Equipe;
-const config = { max_membros: 2, min_membros: 1, edicao_bloqueada: false, permite_trocas: true, modo_formacao: "gerador" as const };
+const config = { max_membros: 2, min_membros: 1, edicao_bloqueada: false, motivo_bloqueio: null, permite_trocas: true, modo_formacao: "gerador" as const };
 
 describe("permissoesEquipe", () => {
   it("sem líder: qualquer integrante escolhe o líder, mas não edita os dados", () => {
@@ -61,5 +62,21 @@ describe("pendências", () => {
     expect(pendenciasEquipe(equipe({ lider_email: "ana@x.com", repo_github: "https://github.com/a/b", repo_publico: true }))).toEqual([]);
     expect(situacaoRepo({ repo_github: "https://github.com/a/b", repo_publico: false })).toBe("privado");
     expect(situacaoRepo({ repo_github: "https://github.com/a/b", repo_publico: null })).toBe("nao_verificado");
+  });
+});
+
+describe("configuracaoDa", () => {
+  const edicao = (e: Partial<Edicao>) =>
+    ({ max_membros: 6, min_membros: 2, equipes_travadas: false, situacao: "em_andamento", atual: true, permite_trocas: true, modo_formacao: "gerador", nome: "Edição 1", ...e }) as Edicao;
+
+  it("edição que já passou fica só para consulta para alunos e bancas, não para a organização", () => {
+    const passada = edicao({ atual: false });
+    expect(configuracaoDa(passada, { paraParticipante: true })).toMatchObject({ edicao_bloqueada: true, motivo_bloqueio: expect.stringContaining("já terminou") });
+    expect(configuracaoDa(passada)).toMatchObject({ edicao_bloqueada: false, motivo_bloqueio: null });
+  });
+
+  it("edição encerrada ou travada bloqueia com o motivo certo", () => {
+    expect(configuracaoDa(edicao({ situacao: "encerrada" })).motivo_bloqueio).toBe("Edição encerrada");
+    expect(configuracaoDa(edicao({ equipes_travadas: true })).motivo_bloqueio).toBe("Edição bloqueada pela organização");
   });
 });

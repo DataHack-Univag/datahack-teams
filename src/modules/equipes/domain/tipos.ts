@@ -73,14 +73,28 @@ export type Configuracao = {
   min_membros: number;
   /** Trava de edição pelos alunos (fim do prazo ou edição encerrada). */
   edicao_bloqueada: boolean;
+  /** Por que está travada, para o aviso da tela (heurística 1). */
+  motivo_bloqueio: string | null;
   permite_trocas: boolean;
   modo_formacao: Edicao["modo_formacao"];
 };
 
-export const configuracaoDa = (e: Edicao): Configuracao => ({
+/**
+ * Regras das equipes na edição. Para alunos e bancas, uma edição que não é mais a atual
+ * fica só para consulta: as ações do banco valem para a edição atual (`paraParticipante`).
+ */
+export const configuracaoDa = (e: Edicao, { paraParticipante = false } = {}): Configuracao => ({
   max_membros: e.max_membros,
   min_membros: e.min_membros,
-  edicao_bloqueada: e.equipes_travadas || e.situacao === "encerrada",
+  edicao_bloqueada: e.equipes_travadas || e.situacao === "encerrada" || (paraParticipante && !e.atual),
+  motivo_bloqueio:
+    paraParticipante && !e.atual
+      ? `A ${e.nome} já terminou: aqui fica o registro da sua equipe.`
+      : e.situacao === "encerrada"
+        ? "Edição encerrada"
+        : e.equipes_travadas
+          ? "Edição bloqueada pela organização"
+          : null,
   permite_trocas: e.permite_trocas,
   modo_formacao: e.modo_formacao,
 });

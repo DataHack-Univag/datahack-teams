@@ -6,6 +6,7 @@ import { listarEquipes, listarPropostas } from "@/modules/equipes/infra/reposito
 import { CartaoEquipe } from "@/modules/equipes/ui/CartaoEquipe";
 import { CriarEquipe, FormRegrasEquipes } from "@/modules/equipes/ui/FormulariosOrganizacao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
+import { cursoSemestre } from "@/modules/pessoas/domain/tipos";
 import { listarSemEquipe } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
@@ -122,7 +123,7 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
                 {semEquipe.map((i) => (
                   <li key={i.email} className="py-2">
                     <p className="text-sm font-medium">{i.nome}</p>
-                    <p className="truncate text-xs text-suave">{[i.curso, i.semestre && `${i.semestre}º sem.`, i.email].filter(Boolean).join(" · ")}</p>
+                    <p className="truncate text-xs text-suave">{[cursoSemestre(i), i.email].filter(Boolean).join(" · ")}</p>
                   </li>
                 ))}
               </ul>

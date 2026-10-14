@@ -124,28 +124,24 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
-**Projeto que já existe** (as 9 migrações já foram aplicadas à mão pelo SQL Editor):
-marque-as como aplicadas uma vez, sem rodar nada no banco:
+**Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
+(a 011 em 12/10/2026). O banco de produção não guarda o histórico do `supabase db push`, então
+**não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
-```bash
-supabase migration repair --status applied 20261006000001 20261007000002 20261007000003 \
-  20261008000004 20261008000005 20261009000006 20261009000007 20261010000008 20261010000009
-```
+1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
+   (seção "Testes do banco" abaixo).
+2. Faça o backup (`pg_dump` do Session pooler) e anote as contagens das tabelas principais.
+3. Cole o arquivo no **SQL Editor** e rode. O script vai inteiro de uma vez: se der erro, nada muda.
+4. Confira as contagens e só então faça o merge do app na `main` (a Vercel publica a `main`).
+   Se a migração muda colunas que o app lê, o app novo e a migração precisam ir juntos.
 
-A partir daí, mudanças novas no banco viram um arquivo novo em `supabase/migrations/`
-(`supabase migration new <nome>`), testado no Postgres local antes da produção.
+**Ligações com `pessoas`:** várias tabelas têm mais de uma chave para `pessoas` (ex.:
+`participacoes.email` e `participacoes.presenca_por`). Ao trazer o nome junto numa consulta,
+diga qual ligação usar (`pessoa:pessoas!participacoes_email_fkey(nome)`). Sem isso, a API do
+Supabase recusa a consulta como ambígua assim que surge uma segunda chave — foi o que derrubou
+o login depois da 011. O Postgres local não pega esse erro, porque não tem a API na frente.
+
 Se a lista de inscrições mudar: `node scripts/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql [slug-da-edicao]`.
-
-**Aplicar a migração 010 (edições) na produção** — muda o formato do banco, então o app
-antigo (branch `main`) para de funcionar assim que ela roda. Faça tudo na mesma janela:
-
-1. Backup: Supabase → Database → Backups (ou `pg_dump`), e anote as contagens
-   (`select count(*) from inscritos`, `equipes`, `membros`, `avaliacoes`, `trocas`).
-2. Teste antes no Postgres local (seção "Testes do banco" abaixo).
-3. `supabase db push` (aplica só a 010) — ela roda numa transação: se algo falhar, nada muda.
-4. Confira: `select count(*) from participacoes`, `fichas`, `notas_criterio` (= número de
-   notas em `avaliacoes_legado`) e o ranking na tela, que deve ser o mesmo de antes.
-5. Publique o app novo (merge da branch `refatoracao` na `main`) logo em seguida.
 
 > `seed.sql`, `INSCRIÇÕES.txt` e `inscritos-datahack.csv` contêm dados pessoais e
 > estão no `.gitignore`. Não versionar.
@@ -209,6 +205,7 @@ psql -d datahack_teams_teste -f supabase/teste/shim_supabase.sql
 for f in supabase/migrations/2026100*.sql supabase/migrations/20261010*.sql; do psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f "$f"; done
 node supabase/teste/dados_sinteticos.mjs | psql -d datahack_teams_teste   # dados SINTÉTICOS, no formato antigo
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261011000010_edicoes.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261012000011_presenca.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { alterarFuncao, removerParticipante, restaurarParticipante } from "@/modules/pessoas/application/actions";
 import { funcaoDe, opcoesFuncao, rotuloFuncao, type BancaResumo } from "@/modules/pessoas/domain/papeis";
-import type { Participante } from "@/modules/pessoas/domain/tipos";
+import { cursoSemestre, type Participante } from "@/modules/pessoas/domain/tipos";
 import { FormPessoa } from "@/modules/pessoas/ui/FormPessoa";
 import { casaBusca } from "@/shared/lib/texto";
 import { Avatar } from "@/shared/ui/Avatar";
@@ -141,7 +141,7 @@ export function ListaPessoas({
                       )}
                     </p>
                     <p className="truncate text-xs text-suave">
-                      {[p.curso, p.semestre && `${p.semestre}º sem.`, p.email].filter(Boolean).join(" · ")}
+                      {[cursoSemestre(p), p.email].filter(Boolean).join(" · ")}
                     </p>
                   </div>
                   {p.papel === "aluno" && (

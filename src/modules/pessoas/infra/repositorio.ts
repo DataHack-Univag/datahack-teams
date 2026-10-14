@@ -126,13 +126,14 @@ export async function listarPessoasResumo(cliente: Cliente, edicaoId: string): P
 }
 
 export async function contarAlunos(cliente: Cliente, edicaoId: string): Promise<number> {
-  const { count } = await cliente
+  const r = await cliente
     .from("participacoes")
     .select("*", { count: "exact", head: true })
     .eq("edicao_id", edicaoId)
     .eq("papel", "aluno")
     .is("removido_em", null);
-  return count ?? 0;
+  exigir(r, "a contagem de alunos");
+  return r.count ?? 0;
 }
 
 // ---------------------------------------------------------------- gravação
@@ -208,12 +209,12 @@ export async function mudarFuncao(cliente: Cliente, edicaoId: string, email: str
 /** id da banca pelo código (na edição). */
 export async function idDaBanca(cliente: Cliente, edicaoId: string, codigo: string | null): Promise<string | null> {
   if (!codigo) return null;
-  const { data } = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("codigo", codigo).maybeSingle();
-  return data?.id ?? null;
+  const r = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("codigo", codigo).maybeSingle();
+  return exigir(r, "as bancas")?.id ?? null;
 }
 
 /** id da banca da organização na edição. */
 export async function idDaBancaOrganizacao(cliente: Cliente, edicaoId: string): Promise<string | null> {
-  const { data } = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("da_organizacao", true).limit(1).maybeSingle();
-  return data?.id ?? null;
+  const r = await cliente.from("bancas").select("id").eq("edicao_id", edicaoId).eq("da_organizacao", true).limit(1).maybeSingle();
+  return exigir(r, "as bancas")?.id ?? null;
 }

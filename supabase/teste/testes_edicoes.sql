@@ -156,6 +156,27 @@ end $$;
 select pg_temp.como('p1@teste.local');
 select pg_temp.falha($q$select pedir_troca(current_setting('dh.equipe')::uuid)$q$, 'não há troca');
 
+-- ---------------------------------------------------------------- 011 · presença
+-- Só a organização registra presença; aluno não se marca presente.
+select pg_temp.como('p1@teste.local');
+do $$ begin
+  update participacoes set presenca = 'presente' where email = 'p1@teste.local';
+  assert not exists (select 1 from participacoes where email = 'p1@teste.local' and presenca is not null),
+    'aluno não pode registrar a própria presença';
+end $$;
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1);
+begin
+  update participacoes set presenca = 'ausente', presenca_em = now(), presenca_por = 'p56@teste.local'
+   where edicao_id = v_ed and email = 'p4@teste.local';
+  assert (select presenca from participacoes where edicao_id = v_ed and email = 'p4@teste.local') = 'ausente', 'organização marca ausência';
+  update membros set saiu_em = now(), motivo_saida = 'ausente' where edicao_id = v_ed and email = 'p4@teste.local' and saiu_em is null;
+  assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'p4@teste.local' and removido_em is null),
+    'ausente continua inscrito na edição';
+end $$;
+select pg_temp.falha($q$update participacoes set presenca = 'talvez' where email = 'p4@teste.local'$q$, 'presenca_check');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras da migração 010 conferem.'
+\echo 'OK: todas as regras das migrações 010 e 011 conferem.'
