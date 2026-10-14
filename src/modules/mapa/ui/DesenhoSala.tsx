@@ -2,6 +2,7 @@ import type { PointerEvent as EventoPonteiro, ReactNode } from "react";
 import { medida, TIPOS } from "@/modules/mapa/domain/catalogo";
 import { lugaresDoElemento, type Ocupacao } from "@/modules/mapa/domain/alocacao";
 import { caixa, type Elemento, type Sala } from "@/modules/mapa/domain/tipos";
+import { iniciais } from "@/shared/lib/texto";
 
 // Desenho da sala em SVG, em centímetros (1 unidade = 1 cm): editor, miniaturas e croqui
 // usam este mesmo desenho, então o croqui sai igual ao que se vê na tela e em escala.
@@ -117,8 +118,18 @@ function Lugares({
               />
             )}
             {equipe && (
-              <text x={l.x + l.largura / 2} y={l.y + l.profundidade / 2 - nomeTam * 0.6} textAnchor="middle" dominantBaseline="central" fontSize={icone} pointerEvents="none">
-                {equipe.icone ?? "●"}
+              // ícone escolhido pela equipe; sem ícone, as iniciais (como nos cards)
+              <text
+                x={l.x + l.largura / 2}
+                y={l.y + l.profundidade / 2 - nomeTam * 0.6}
+                textAnchor="middle"
+                dominantBaseline="central"
+                fontSize={equipe.icone ? icone : icone * 0.6}
+                fontWeight={equipe.icone ? undefined : 800}
+                fill={equipe.icone ? undefined : "var(--marca)"}
+                pointerEvents="none"
+              >
+                {equipe.icone ?? iniciais(equipe.nome)}
               </text>
             )}
             <text
