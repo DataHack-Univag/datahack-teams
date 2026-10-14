@@ -579,6 +579,72 @@ export type Database = {
           },
         ];
       };
+      mapa_elementos: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          sala_id: string;
+          tipo: string;
+          rotulo: string | null;
+          x_cm: number;
+          y_cm: number;
+          largura_cm: number;
+          profundidade_cm: number;
+          rotacao: number;
+          lugares: number | null;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          sala_id: string;
+          tipo: string;
+          rotulo?: string | null;
+          x_cm: number;
+          y_cm: number;
+          largura_cm: number;
+          profundidade_cm: number;
+          rotacao?: number;
+          lugares?: number | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          sala_id?: string;
+          tipo?: string;
+          rotulo?: string | null;
+          x_cm?: number;
+          y_cm?: number;
+          largura_cm?: number;
+          profundidade_cm?: number;
+          rotacao?: number;
+          lugares?: number | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "mapa_elementos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "mapa_elementos_sala_id_fkey";
+            columns: ["sala_id"];
+            isOneToOne: false;
+            referencedRelation: "salas";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       materiais: {
         Row: {
           id: string;
@@ -1062,6 +1128,41 @@ export type Database = {
         };
         Relationships: [];
       };
+      pisos: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          nome: string;
+          ordem: number;
+          criado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          nome: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          nome?: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "pisos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       regras_desempate: {
         Row: {
           id: string;
@@ -1178,6 +1279,63 @@ export type Database = {
           },
         ];
       };
+      salas: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          piso_id: string;
+          nome: string;
+          largura_cm: number;
+          profundidade_cm: number;
+          fundo: string | null;
+          ordem: number;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          piso_id: string;
+          nome: string;
+          largura_cm: number;
+          profundidade_cm: number;
+          fundo?: string | null;
+          ordem?: number;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          piso_id?: string;
+          nome?: string;
+          largura_cm?: number;
+          profundidade_cm?: number;
+          fundo?: string | null;
+          ordem?: number;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "salas_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "salas_piso_id_fkey";
+            columns: ["piso_id"];
+            isOneToOne: false;
+            referencedRelation: "pisos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trocas: {
         Row: {
           id: string;
@@ -1290,9 +1448,11 @@ export type Database = {
       eh_organizador_de: { Args: { p_edicao: string }; Returns: boolean };
       email_atual: { Args: Record<PropertyKey, never>; Returns: string };
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
+      exportar_mapa: { Args: { p_edicao: string }; Returns: Json };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
+      importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
-      minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
+      minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
       papel_atual: { Args: Record<PropertyKey, never>; Returns: string };

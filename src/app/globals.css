@@ -255,3 +255,41 @@ body {
     transition: none !important;
   }
 }
+
+/* Impressão (croqui do mapa): só o que estiver marcado com data-imprimir sai no papel,
+   sempre no tema claro, sem menu nem cabeçalho do sistema. */
+@media print {
+  :root {
+    --background: #ffffff;
+    --foreground: #000b38;
+    --superficie: #ffffff;
+    --superficie-solida: #ffffff;
+    --borda: rgb(0 40 160 / 0.18);
+    --borda-forte: rgb(0 40 160 / 0.35);
+    --suave: #4a5a8c;
+    --marca: #0078b0;
+    --marca-fundo: rgb(0 144 200 / 0.12);
+    --azul: #1530e0;
+    --magenta: #c4119f;
+    --verde: #0b8a55;
+    color-scheme: light;
+  }
+  body * {
+    visibility: hidden;
+  }
+  [data-imprimir],
+  [data-imprimir] * {
+    visibility: visible;
+  }
+  [data-imprimir] {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+  }
+  [data-imprimir] .sala-croqui {
+    break-inside: avoid;
+  }
+  [data-nao-imprimir] {
+    display: none !important;
+  }
+}

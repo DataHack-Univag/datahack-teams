@@ -15,6 +15,7 @@ export function navOrganizacao(contagens: { trocas?: number } = {}): { itens: It
     mais: [
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
+      { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
       { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes"] },
       { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
     ],
@@ -64,4 +65,5 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },
   { grupo: "Telas", rotulo: "Cadastrar pessoa", href: "/admin/pessoas#cadastrar", icone: "mais_novo" },
+  { grupo: "Telas", rotulo: "Croqui do evento", href: "/admin/mapa/croqui", icone: "mapa" },
 ];

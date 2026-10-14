@@ -123,6 +123,18 @@ export const TOPICOS: Topico[] = [
       "Em Pessoas, abra qualquer aluno ou avaliador e use “Ver como esta pessoa”. Você navega exatamente como ela; nas fichas das bancas nada é salvo durante a simulação.",
     publicos: ["organizacao"],
   },
+  {
+    pergunta: "Como monto o mapa do evento (croqui)?",
+    resposta:
+      "Em Mais → Mapa, crie cada sala com as medidas aproximadas e toque em “Desenhar”. Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…) e arraste para o lugar; “Colocar uma fileira” põe várias bancadas numeradas de uma vez. O croqui para a universidade sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
+    publicos: ["organizacao"],
+  },
+  {
+    pergunta: "Tenho um desenho no papel. Dá para importar?",
+    resposta:
+      "Sim, de dois jeitos. Em Mapa → “Importar um desenho”, copie as instruções, mande para uma IA junto com a foto do desenho e cole o JSON que ela devolver: o sistema confere antes de importar. Ou abra a sala e, em “Medidas e fundo da sala”, ponha a foto como fundo e desenhe as bancadas por cima. PDF não é lido direto: tire um print da planta.",
+    publicos: ["organizacao"],
+  },
   // ------------------------------------------------ mentoria
   {
     pergunta: "O que a mentoria vê no sistema?",

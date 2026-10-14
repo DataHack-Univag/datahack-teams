@@ -212,6 +212,25 @@ select pg_temp.falha($q$select registrar_presenca((select id from edicoes where 
 select pg_temp.como('p62@teste.local');
 select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'presente')$q$, 'Só a organização e a mentoria');
 
+-- ---------------------------------------------------------------- 013 · mapa
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := (select id from edicoes where numero = 1); r jsonb;
+begin
+  r := importar_mapa(v_ed, '{"pisos":[{"nome":"Térreo","salas":[{"nome":"Lab 1","largura_m":8,"profundidade_m":6,"elementos":[{"tipo":"bancada","rotulo":"B1","x_m":1,"y_m":1,"largura_m":3.2,"profundidade_m":0.8,"lugares":2}]}]}]}'::jsonb);
+  assert r = '{"pisos": 1, "salas": 1, "elementos": 1}'::jsonb, 'importa piso, sala e bancada';
+  assert (exportar_mapa(v_ed) #>> '{pisos,0,salas,0,elementos,0,largura_m}')::numeric = 3.2, 'exporta em metros';
+end $$;
+select pg_temp.falha($q$select importar_mapa((select id from edicoes where numero = 1), '{"pisos":[{"nome":"Térreo","salas":[{"nome":"Lab 1","largura_m":8,"profundidade_m":6}]}]}'::jsonb)$q$, 'já existe');
+select pg_temp.como('p1@teste.local');
+do $$ begin
+  assert (select count(*) from mapa_elementos) = 1, 'aluno vê o mapa da edição';
+  update mapa_elementos set x_cm = 0;
+  assert (select x_cm from mapa_elementos limit 1) = 100, 'aluno não mexe no mapa';
+end $$;
+select pg_temp.falha($q$select importar_mapa((select id from edicoes where numero = 1), '{"pisos":[{"nome":"X","salas":[]}]}'::jsonb)$q$, 'Só a organização');
+select pg_temp.falha($q$delete from mapa_elementos$q$, 'permission denied');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010, 011 e 012 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 013 conferem.'
