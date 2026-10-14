@@ -206,6 +206,10 @@ export async function mudarFuncao(cliente: Cliente, edicaoId: string, email: str
   return { mudou: !!data?.length, error };
 }
 
+/** Presença de um aluno no evento (organização ou mentoria; null limpa o registro). */
+export const registrarPresenca = (cliente: Cliente, edicaoId: string, email: string, presenca: Presenca | null) =>
+  cliente.rpc("registrar_presenca", { p_edicao: edicaoId, p_email: email, p_presenca: presenca as string });
+
 /** id da banca pelo código (na edição). */
 export async function idDaBanca(cliente: Cliente, edicaoId: string, codigo: string | null): Promise<string | null> {
   if (!codigo) return null;

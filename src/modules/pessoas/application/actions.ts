@@ -92,6 +92,26 @@ export const alterarFuncao = criarAcao(z.object({ email, funcao }), async (d) =>
   return sucesso("Função atualizada. As fichas já lançadas continuam valendo.");
 });
 
+/** "presente", "ausente" ou vazio (sem registro, usado pelo desfazer). */
+const presenca = z.enum(["presente", "ausente", ""], { message: "Presença inválida." }).transform((v) => v || null);
+
+/**
+ * Marca o aluno como presente ou ausente (organização e mentoria). O aviso traz o
+ * "desfazer", que volta ao registro anterior (heurística 3).
+ */
+export const registrarPresenca = criarAcao(
+  z.object({ email, presenca, anterior: presenca.optional(), nome: z.string().optional() }),
+  async (d) => {
+    const { cliente, edicao } = await sessaoAtual();
+    const { error } = await repo.registrarPresenca(cliente, edicao.id, d.email, d.presenca);
+    if (error) return falha(traduzirErro(error));
+    atualizarTelas();
+    const quem = d.nome || "Aluno";
+    const texto = d.presenca === "presente" ? `${quem}: presente.` : d.presenca === "ausente" ? `${quem}: ausente.` : `Presença de ${quem} sem registro.`;
+    return sucesso(texto, { email: d.email, presenca: d.anterior ?? "", anterior: d.presenca ?? "", nome: quem });
+  },
+);
+
 export async function sair() {
   await encerrarSessao(await clienteServidor());
   redirect("/login");

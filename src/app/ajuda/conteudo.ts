@@ -1,6 +1,6 @@
 // Perguntas da ajuda por público (heurística 10). Texto simples, sem jargão.
 
-export type Publico = "aluno" | "banca" | "organizacao";
+export type Publico = "aluno" | "banca" | "mentoria" | "organizacao";
 export type Topico = { pergunta: string; resposta: string; publicos: Publico[] };
 
 export const TOPICOS: Topico[] = [
@@ -114,7 +114,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "O que é o selo “Ausente” em Pessoas?",
     resposta:
-      "É quem estava inscrito mas não compareceu ao evento. A pessoa continua na edição e no histórico (ausência não é remoção); se estava numa equipe, saiu dela com o motivo “ausente”. Use o filtro “Ausentes no evento” para ver a lista.",
+      "É quem estava inscrito mas não compareceu ao evento (marcado na chamada, em Pessoas → Presença). A pessoa continua na edição, na equipe e no histórico: ausência não é remoção. Na Edição 1, os ausentes que estavam numa equipe saíram dela com o motivo “ausente”. Use o filtro “Ausentes no evento” para ver a lista.",
     publicos: ["organizacao"],
   },
   {
@@ -123,15 +123,39 @@ export const TOPICOS: Topico[] = [
       "Em Pessoas, abra qualquer aluno ou avaliador e use “Ver como esta pessoa”. Você navega exatamente como ela; nas fichas das bancas nada é salvo durante a simulação.",
     publicos: ["organizacao"],
   },
+  // ------------------------------------------------ mentoria
+  {
+    pergunta: "O que a mentoria vê no sistema?",
+    resposta:
+      "Em “Equipes”, todas as equipes da edição: integrantes, líder, quem está presente, repositório e links de entrega. Em “Pessoas”, os alunos com curso, equipe e presença. Notas e fichas das bancas ficam só com a organização e as bancas.",
+    publicos: ["mentoria"],
+  },
+  {
+    pergunta: "Como faço a chamada?",
+    resposta:
+      "Em “Pessoas”, marque cada aluno como “Presente” ou “Ausente”. Use a busca para achar pelo nome ou pela equipe e o filtro “Sem registro” para ver quem falta. Errou? Toque em “Desfazer” no aviso ou marque de novo.",
+    publicos: ["mentoria", "organizacao"],
+  },
+  {
+    pergunta: "Marcar ausente tira o aluno da equipe?",
+    resposta: "Não. Ausência só registra que ele não estava no evento: o aluno continua inscrito e na equipe. Mudanças de equipe são com a organização.",
+    publicos: ["mentoria", "organizacao"],
+  },
+  {
+    pergunta: "Como dou acesso a um mentor?",
+    resposta:
+      "Em Pessoas, cadastre a pessoa com a função “Mentoria” e o e-mail dela (com a edição certa escolhida no topo). No primeiro acesso ela cria a senha com esse e-mail. Para conferir o que ela vê, use “Ver como”.",
+    publicos: ["organizacao"],
+  },
   // ------------------------------------------------ todos
   {
     pergunta: "Existe uma busca rápida?",
     resposta: "Sim: Ctrl+K (ou o botão de busca no topo) abre a busca de telas, equipes e pessoas.",
-    publicos: ["aluno", "banca", "organizacao"],
+    publicos: ["aluno", "banca", "mentoria", "organizacao"],
   },
   {
     pergunta: "Esqueci a senha. E agora?",
     resposta: "Na tela de entrada, clique em “Esqueci a senha” e abra o link enviado ao seu e-mail, de preferência no mesmo navegador.",
-    publicos: ["aluno", "banca", "organizacao"],
+    publicos: ["aluno", "banca", "mentoria", "organizacao"],
   },
 ];

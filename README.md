@@ -119,13 +119,15 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
     os dados; as tabelas antigas ficam guardadas como `*_legado`.
 11. `…11_presenca` — presença no evento por participação (presente/ausente, quando e quem marcou)
     e o motivo de saída "ausente" para quem estava numa equipe e não compareceu.
+12. `…12_mentoria` — mentores entram no sistema: veem equipes e alunos da edição e registram a
+    presença pela função `registrar_presenca` (a única coisa que a mentoria altera).
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; a 012, da mentoria, ainda não). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -206,6 +208,7 @@ for f in supabase/migrations/2026100*.sql supabase/migrations/20261010*.sql; do 
 node supabase/teste/dados_sinteticos.mjs | psql -d datahack_teams_teste   # dados SINTÉTICOS, no formato antigo
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261011000010_edicoes.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261012000011_presenca.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000012_mentoria.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

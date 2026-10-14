@@ -24,7 +24,7 @@ export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
     ...comandosExtrasOrganizacao,
     ...equipes.map((e) => ({ grupo: "Equipes", rotulo: e.nome, href: `/admin/equipes/${e.id}`, icone: "equipe" as const, detalhe: `${e.total} integrantes` })),
     ...pessoas
-      .filter((p) => p.papel !== "organizador" && p.papel !== "mentor")
+      .filter((p) => p.papel !== "organizador")
       .map((p) => ({ grupo: "Ver como", rotulo: p.nome, href: `/ver-como?email=${encodeURIComponent(p.email)}`, icone: "olho" as const, detalhe: rotuloPapel(p.papel) })),
     ...pessoas.map((p) => ({ grupo: "Pessoas", rotulo: p.nome, href: `/admin/pessoas?busca=${encodeURIComponent(p.nome)}`, icone: "pessoas" as const, detalhe: p.email })),
   ];

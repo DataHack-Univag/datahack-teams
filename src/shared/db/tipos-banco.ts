@@ -1292,7 +1292,7 @@ export type Database = {
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
-      minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
+      minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
       papel_atual: { Args: Record<PropertyKey, never>; Returns: string };
@@ -1303,6 +1303,7 @@ export type Database = {
       propor_equipe: { Args: { p_nome: string; p_emails: string[]; p_repo?: string; p_como?: string }; Returns: string };
       quem_age: { Args: { p_como: string }; Returns: string };
       recusar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
+      registrar_presenca: { Args: { p_edicao: string; p_email: string; p_presenca: string }; Returns: undefined };
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };
       responder_convite: { Args: { p_equipe: string; p_aceitar: boolean; p_como?: string }; Returns: undefined };
       salvar_ficha: { Args: { p_equipe: string; p_rubrica: string; p_notas: Json; p_comentario?: string }; Returns: string };

@@ -3,8 +3,8 @@
 
 export type ErroBanco = { code?: string; message: string };
 
-/** Códigos de "coluna/tabela não existe": quase sempre falta aplicar uma migração. */
-const FALTA_MIGRACAO = ["42703", "42P01", "PGRST204", "PGRST205"];
+/** Códigos de "coluna, tabela ou função não existe": quase sempre falta aplicar uma migração. */
+const FALTA_MIGRACAO = ["42703", "42P01", "42883", "PGRST202", "PGRST204", "PGRST205"];
 
 export function traduzirErro(e: ErroBanco): string {
   // raise exception das funções SQL: a mensagem já é escrita em português para o usuário.
