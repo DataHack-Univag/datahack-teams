@@ -31,9 +31,9 @@ const limite = (rotulo: string) => inteiroOpcional(rotulo, 1, 20).refine((v) => 
 /** Troca a edição que a organização está administrando (seletor do cabeçalho). */
 export async function escolherEdicao(formulario: FormData) {
   const alvo = String(formulario.get("edicao") ?? "");
-  const { edicoesOrganizadas } = await sessaoAtual();
-  if (edicoesOrganizadas.some((e) => e.id === alvo)) {
-    await gravarEdicaoEscolhida(alvo);
+  const { edicoesDoUsuario, edicoesOrganizadas } = await sessaoAtual();
+  if (edicoesDoUsuario.some((e) => e.id === alvo)) {
+    await gravarEdicaoEscolhida(alvo, { lembrar: edicoesOrganizadas.length > 0 });
     await apagarSimulacao();
   }
   atualizarTelas();

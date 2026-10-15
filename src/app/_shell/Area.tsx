@@ -2,6 +2,7 @@ import { Suspense, type ReactNode } from "react";
 import { Cabecalho } from "@/app/_shell/Cabecalho";
 import { FaixaSimulacao } from "@/app/_shell/FaixaSimulacao";
 import { SeletorEdicao } from "@/app/_shell/SeletorEdicao";
+import { escolherEdicao } from "@/modules/edicoes/application/actions";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { inicioDoPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { Navegacao, type ItemNav } from "@/shared/ui/Navegacao";
@@ -30,8 +31,11 @@ export async function Area({
   children: ReactNode;
 }) {
   // No "ver como", a faixa amarela lembra que é uma simulação e oferece a saída.
-  const { simulacao, usuario, real, edicao, edicoesOrganizadas } = await sessaoAtual();
+  const { simulacao, usuario, real, edicao, edicoesOrganizadas, edicoesDoUsuario } = await sessaoAtual();
   const organiza = real.papel === "organizador";
+  // Quem participou de mais de uma edição pode consultar as anteriores.
+  const consultaOutras = !organiza && edicoesDoUsuario.length > 1;
+  const atual = edicoesDoUsuario.find((e) => e.atual);
   return (
     <>
       {simulacao && <FaixaSimulacao nome={usuario.nome} papel={usuario.papel} />}
@@ -41,8 +45,28 @@ export async function Area({
         avatar={avatar}
         inicio={inicioDoPapel(papel)}
         simulacao={simulacao}
-        edicao={organiza && !simulacao ? <SeletorEdicao edicoes={edicoesOrganizadas} escolhida={edicao.id} /> : null}
+        edicao={
+          organiza && !simulacao ? (
+            <SeletorEdicao edicoes={edicoesOrganizadas} escolhida={edicao.id} />
+          ) : consultaOutras && !simulacao ? (
+            <SeletorEdicao edicoes={edicoesDoUsuario} escolhida={edicao.id} participante />
+          ) : null
+        }
       />
+      {consultaOutras && !edicao.atual && (
+        <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
+          <span>
+            Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que já passou: só para consulta.
+          </span>
+          {atual && (
+            <form action={escolherEdicao}>
+              <input type="hidden" name="edicao" value={atual.id} />
+              <input type="hidden" name="voltar" value="/" />
+              <button className="font-semibold text-marca underline">Voltar para a edição atual</button>
+            </form>
+          )}
+        </div>
+      )}
       {organiza && !edicao.atual && (
         <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
           Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que não é a edição atual dos alunos e das bancas.
