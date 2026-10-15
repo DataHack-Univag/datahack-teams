@@ -374,6 +374,84 @@ do $$ begin assert (select count(*) from instituicoes) >= 2, 'aluno vê as insti
 select pg_temp.falha($q$insert into instituicoes (nome) values ('Fake')$q$, 'row-level security');
 select pg_temp.falha($q$select definir_acesso_edicao(current_setting('dh.ed_acesso')::uuid, '{"acesso":"aberto"}'::jsonb, '{}')$q$, 'Só a organização');
 
+-- ---------------------------------------------------------------- 018 · formulário de inscrição
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed   uuid := current_setting('dh.ed_acesso')::uuid;   -- a edição aberta do bloco 017
+  v_ed1  uuid := (select id from edicoes where numero = 1);
+  v_uf   uuid := (select id from instituicoes where sigla = 'UFMT');
+  v_err  text[];
+begin
+  assert (select count(*) from campos_inscricao where edicao_id = v_ed1 and removido_em is null) = 2, 'edição 1 pergunta curso e semestre';
+  assert (select count(*) from inscricoes where edicao_id = v_ed1 and situacao = 'aprovada') > 0, 'alunos da edição 1 viraram inscrições';
+  assert (select instituicao_id from inscricoes where edicao_id = v_ed1 limit 1) = (select id from instituicoes where sigla = 'UNIVAG'), 'evento fechado: instituição do evento';
+
+  perform definir_campos_inscricao(v_ed, $j$[
+    {"chave":"cidade","rotulo":"Cidade","tipo":"texto","obrigatorio":true},
+    {"chave":"instituicao","rotulo":"Instituição","tipo":"instituicao","obrigatorio":true},
+    {"chave":"trabalha","rotulo":"Está trabalhando?","tipo":"sim_nao","obrigatorio":true},
+    {"chave":"cargo","rotulo":"Cargo","tipo":"escolha","opcoes":["Estagiário","Outro"],"condicao":{"campo":"trabalha","igual":true},"obrigatorio":true},
+    {"chave":"cargo_outro","rotulo":"Qual o seu cargo?","tipo":"texto","condicao":{"campo":"cargo","igual":"Outro"},"obrigatorio":true},
+    {"chave":"camiseta","rotulo":"Camiseta","tipo":"escolha","opcoes":["P","M","G"],"obrigatorio":false},
+    {"chave":"termo","rotulo":"Aceito","tipo":"aceite","obrigatorio":true}
+  ]$j$::jsonb);
+  assert (select count(*) from campos_inscricao where edicao_id = v_ed and removido_em is null) = 7, 'formulário salvo';
+  assert (select catalogo_id is not null from campos_inscricao where edicao_id = v_ed and chave = 'cargo'), 'pergunta do catálogo ligada a ele';
+
+  v_err := validar_respostas(v_ed, '{}'::jsonb);
+  assert cardinality(v_err) = 4, 'faltam cidade, instituição, trabalha e o termo (camiseta é opcional): ' || array_to_string(v_err, ' | ');
+  v_err := validar_respostas(v_ed, jsonb_build_object('cidade', 'Sinop', 'instituicao', v_uf, 'trabalha', false, 'termo', true));
+  assert cardinality(v_err) = 0, 'quem não trabalha não responde cargo: ' || array_to_string(v_err, ' | ');
+  v_err := validar_respostas(v_ed, jsonb_build_object('cidade', 'Sinop', 'instituicao', 'outra', 'trabalha', true, 'cargo', 'Outro', 'termo', true));
+  assert v_err = array['Responda: Qual o seu cargo?'], 'cargo Outro pede o texto: ' || array_to_string(v_err, ' | ');
+  v_err := validar_respostas(v_ed, jsonb_build_object('cidade', 'Sinop', 'instituicao', 'outra', 'trabalha', false, 'cargo', 'Estagiário', 'camiseta', 'XXL', 'cpf', '1', 'termo', true));
+  assert cardinality(v_err) = 3, 'cargo que não se aplica, opção fora da lista e pergunta inexistente: ' || array_to_string(v_err, ' | ');
+
+  -- inscrição pelo formulário: respostas conferidas e instituição na coluna própria
+  insert into inscricoes (edicao_id, email, respostas, origem)
+  values (v_ed, 'p20@teste.local', jsonb_build_object('cidade', 'Sinop', 'instituicao', v_uf, 'trabalha', false, 'termo', true), 'formulario');
+  assert (select instituicao_id from inscricoes where edicao_id = v_ed and email = 'p20@teste.local') = v_uf, 'instituição gravada';
+  assert (select situacao from inscricoes where edicao_id = v_ed and email = 'p20@teste.local') = 'pendente', 'formulário começa pendente';
+
+  -- tirar uma pergunta arquiva; pôr de volta reativa
+  perform definir_campos_inscricao(v_ed, '[{"chave":"cidade","rotulo":"Cidade","tipo":"texto"}]'::jsonb);
+  assert (select count(*) from campos_inscricao where edicao_id = v_ed and removido_em is not null) = 6, 'perguntas tiradas ficam arquivadas';
+  perform set_config('dh.ed_form', v_ed::text, false);
+end $$;
+select pg_temp.falha($q$insert into inscricoes (edicao_id, email, respostas, origem) values (current_setting('dh.ed_form')::uuid, 'p21@teste.local', '{}', 'formulario')$q$, 'Responda: Cidade');
+select pg_temp.falha($q$select definir_campos_inscricao(current_setting('dh.ed_form')::uuid, '[{"chave":"cargo","rotulo":"Cargo","tipo":"escolha","opcoes":["A"],"condicao":{"campo":"trabalha","igual":true}}]')$q$, 'precisa vir antes');
+select pg_temp.falha($q$select definir_campos_inscricao(current_setting('dh.ed_form')::uuid, '[{"chave":"x","rotulo":"X","tipo":"escolha","opcoes":[]}]')$q$, 'pelo menos uma opção');
+select pg_temp.falha($q$delete from inscricoes$q$, 'permission denied');
+
+-- aluno cadastrado em Pessoas vira inscrição aprovada, e acompanha as mudanças
+do $$
+declare v_ed1 uuid := (select id from edicoes where numero = 1);
+begin
+  insert into pessoas (email, nome) values ('novo@teste.local', 'Aluno Novo') on conflict do nothing;
+  insert into participacoes (edicao_id, email, papel, curso, semestre) values (v_ed1, 'novo@teste.local', 'aluno', 'SI', 3);
+  assert (select respostas from inscricoes where edicao_id = v_ed1 and email = 'novo@teste.local') = '{"curso":"SI","semestre":3}'::jsonb, 'inscrição criada com curso e semestre';
+  update participacoes set semestre = 4 where edicao_id = v_ed1 and email = 'novo@teste.local';
+  assert (select respostas ->> 'semestre' from inscricoes where edicao_id = v_ed1 and email = 'novo@teste.local') = '4', 'semestre acompanha';
+  update participacoes set removido_em = now() where edicao_id = v_ed1 and email = 'novo@teste.local';
+  assert (select situacao from inscricoes where edicao_id = v_ed1 and email = 'novo@teste.local') = 'cancelada', 'removido = inscrição cancelada';
+end $$;
+
+-- aluno vê só a própria inscrição e não muda o formulário
+select pg_temp.como('p1@teste.local');
+do $$ begin
+  assert (select count(*) from inscricoes where email <> 'p1@teste.local') = 0, 'aluno vê só as suas inscrições';
+  assert (select count(*) from perguntas_catalogo) >= 10, 'aluno lê o catálogo';
+end $$;
+select pg_temp.falha($q$select definir_campos_inscricao(current_setting('dh.ed_form')::uuid, '[]')$q$, 'Só a organização');
+do $$
+declare n int;
+begin
+  update inscricoes set situacao = 'aprovada' where situacao = 'aprovada';
+  get diagnostics n = row_count;
+  assert n = 0, 'aluno não muda inscrição (nem a própria)';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 017 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 018 conferem.'

@@ -154,6 +154,75 @@ export type Database = {
           },
         ];
       };
+      campos_inscricao: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          chave: string;
+          rotulo: string;
+          ajuda: string | null;
+          tipo: string;
+          opcoes: Json | null;
+          condicao: Json | null;
+          obrigatorio: boolean;
+          sensivel: boolean;
+          ordem: number;
+          catalogo_id: string | null;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          chave: string;
+          rotulo: string;
+          ajuda?: string | null;
+          tipo: string;
+          opcoes?: Json | null;
+          condicao?: Json | null;
+          obrigatorio?: boolean;
+          sensivel?: boolean;
+          ordem?: number;
+          catalogo_id?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          chave?: string;
+          rotulo?: string;
+          ajuda?: string | null;
+          tipo?: string;
+          opcoes?: Json | null;
+          condicao?: Json | null;
+          obrigatorio?: boolean;
+          sensivel?: boolean;
+          ordem?: number;
+          catalogo_id?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "campos_inscricao_catalogo_id_fkey";
+            columns: ["catalogo_id"];
+            isOneToOne: false;
+            referencedRelation: "perguntas_catalogo";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "campos_inscricao_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       chamados: {
         Row: {
           id: string;
@@ -723,6 +792,76 @@ export type Database = {
           em?: string;
         };
         Relationships: [];
+      };
+      inscricoes: {
+        Row: {
+          id: string;
+          edicao_id: string;
+          email: string;
+          instituicao_id: string | null;
+          respostas: Json;
+          situacao: string;
+          origem: string;
+          termo_versao: number | null;
+          termo_aceito_em: string | null;
+          decidido_por: string | null;
+          decidido_em: string | null;
+          criado_em: string;
+          atualizado_em: string;
+        };
+        Insert: {
+          id?: string;
+          edicao_id: string;
+          email: string;
+          instituicao_id?: string | null;
+          respostas?: Json;
+          situacao?: string;
+          origem: string;
+          termo_versao?: number | null;
+          termo_aceito_em?: string | null;
+          decidido_por?: string | null;
+          decidido_em?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+        };
+        Update: {
+          id?: string;
+          edicao_id?: string;
+          email?: string;
+          instituicao_id?: string | null;
+          respostas?: Json;
+          situacao?: string;
+          origem?: string;
+          termo_versao?: number | null;
+          termo_aceito_em?: string | null;
+          decidido_por?: string | null;
+          decidido_em?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "inscricoes_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "inscricoes_email_fkey";
+            columns: ["email"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+          {
+            foreignKeyName: "inscricoes_instituicao_id_fkey";
+            columns: ["instituicao_id"];
+            isOneToOne: false;
+            referencedRelation: "instituicoes";
+            referencedColumns: ["id"];
+          },
+        ];
       };
       instituicoes: {
         Row: {
@@ -1325,6 +1464,51 @@ export type Database = {
           },
         ];
       };
+      perguntas_catalogo: {
+        Row: {
+          id: string;
+          grupo: string;
+          chave: string;
+          rotulo: string;
+          ajuda: string | null;
+          tipo: string;
+          opcoes: Json | null;
+          condicao: Json | null;
+          sensivel: boolean;
+          traz: string[];
+          ordem: number;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          grupo: string;
+          chave: string;
+          rotulo: string;
+          ajuda?: string | null;
+          tipo: string;
+          opcoes?: Json | null;
+          condicao?: Json | null;
+          sensivel?: boolean;
+          traz?: string[];
+          ordem?: number;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          grupo?: string;
+          chave?: string;
+          rotulo?: string;
+          ajuda?: string | null;
+          tipo?: string;
+          opcoes?: Json | null;
+          condicao?: Json | null;
+          sensivel?: boolean;
+          traz?: string[];
+          ordem?: number;
+          removido_em?: string | null;
+        };
+        Relationships: [];
+      };
       pessoas: {
         Row: {
           email: string;
@@ -1687,6 +1871,7 @@ export type Database = {
       criar_edicao: { Args: { p_dados: Json; p_copiar_de?: string }; Returns: string };
       criar_equipe: { Args: { p_nome: string; p_repo: string; p_edicao?: string }; Returns: string };
       definir_acesso_edicao: { Args: { p_edicao: string; p_dados: Json; p_instituicoes: string[] }; Returns: undefined };
+      definir_campos_inscricao: { Args: { p_edicao: string; p_campos: Json }; Returns: undefined };
       definir_edicao_atual: { Args: { p_edicao: string }; Returns: undefined };
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
@@ -1704,7 +1889,7 @@ export type Database = {
       fechar_chamado_da_equipe: { Args: { p_chamado: string; p_resolvido: boolean; p_como?: string }; Returns: undefined };
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
-      minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
+      minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
       papel_atual: { Args: Record<PropertyKey, never>; Returns: string };
@@ -1721,6 +1906,7 @@ export type Database = {
       responder_convite: { Args: { p_equipe: string; p_aceitar: boolean; p_como?: string }; Returns: undefined };
       salvar_ficha: { Args: { p_equipe: string; p_rubrica: string; p_notas: Json; p_comentario?: string }; Returns: string };
       substituir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: Json };
+      validar_respostas: { Args: { p_edicao: string; p_respostas: Json }; Returns: string[] };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

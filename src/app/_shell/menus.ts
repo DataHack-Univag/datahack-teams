@@ -65,6 +65,7 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Regulamento da edição", href: "/admin/edicoes/regulamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Acesso e marca da edição", href: "/admin/edicoes#acesso", icone: "instituicao" },
   { grupo: "Telas", rotulo: "Instituições", href: "/admin/instituicoes", icone: "instituicao" },
+  { grupo: "Telas", rotulo: "Formulário de inscrição", href: "/admin/edicoes/inscricao", icone: "editar" },
   { grupo: "Telas", rotulo: "Andamento das fichas", href: "/admin/avaliacao?aba=andamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },

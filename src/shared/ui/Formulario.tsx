@@ -145,6 +145,7 @@ export function BotaoEnviar({
   className,
   title,
   enviando,
+  desativado = false,
 }: {
   children: ReactNode;
   variante?: Variante;
@@ -154,10 +155,12 @@ export function BotaoEnviar({
   title?: string;
   /** Texto enquanto envia (padrão: o mesmo). */
   enviando?: string;
+  /** Nada a enviar ainda (ex.: sem mudanças). */
+  desativado?: boolean;
 }) {
   const { pending } = useFormStatus();
   return (
-    <Botao type="submit" variante={variante} tamanho={tamanho} icone={pending ? undefined : icone} className={className} disabled={pending} title={title} aria-label={title}>
+    <Botao type="submit" variante={variante} tamanho={tamanho} icone={pending ? undefined : icone} className={className} disabled={pending || desativado} title={title} aria-label={title}>
       {pending && <Girando />}
       {pending && enviando ? enviando : children}
     </Botao>

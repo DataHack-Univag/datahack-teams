@@ -118,6 +118,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como escolho o que perguntar na inscrição?",
+    resposta:
+      "Em Mais → Edições → “Formulário de inscrição”. Comece de um modelo (Universidade ou Evento aberto) ou adicione perguntas prontas (curso, semestre, cargo, camiseta, restrição alimentar…) e crie as suas. Para cada uma, escolha se é obrigatória ou opcional e a ordem. A prévia ao lado mostra o formulário como o candidato vê, e dá para testar o envio. Cada edição tem o seu formulário.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Por que não existe “apagar”?",
     resposta:
       "Para nada se perder entre edições: remover uma equipe, um link, uma ficha ou uma pessoa arquiva o registro, e toda alteração fica no histórico. As listas mostram só o que está ativo.",

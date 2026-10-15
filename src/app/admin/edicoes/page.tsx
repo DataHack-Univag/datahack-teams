@@ -40,6 +40,9 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
             <BotaoLink href="/admin/instituicoes" icone="instituicao">
               Instituições
             </BotaoLink>
+            <BotaoLink href="/admin/edicoes/inscricao" icone="editar">
+              Formulário de inscrição
+            </BotaoLink>
             <BotaoLink href="/admin/edicoes/regulamento" icone="avaliacao">
               Regulamento desta edição
             </BotaoLink>
