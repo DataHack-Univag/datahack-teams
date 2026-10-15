@@ -9,6 +9,7 @@ import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
 import { decimalOpcional, email, inteiroOpcional, texto } from "@/shared/acao/campos";
 import { falha, SEM_PERMISSAO, sucesso } from "@/shared/acao/resultado";
 import { encerrarSessao } from "@/shared/auth/autenticacao";
+import { apagarEdicaoEscolhida } from "@/shared/auth/edicao";
 import { traduzirErro } from "@/shared/db/erros";
 import { clienteServidor } from "@/shared/db/servidor";
 
@@ -143,6 +144,7 @@ export const registrarPresencas = criarAcao(
 );
 
 export async function sair() {
+  await apagarEdicaoEscolhida();
   await encerrarSessao(await clienteServidor());
   redirect("/login");
 }

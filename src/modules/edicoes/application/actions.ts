@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { z } from "zod";
-import { conferirRegulamento, regulamentoDoCanonico, type RegulamentoCanonico } from "@/modules/avaliacao/domain/regulamento";
+import { conferirEstrutura, conferirRegulamento, regulamentoDoCanonico, type RegulamentoCanonico } from "@/modules/avaliacao/domain/regulamento";
 import { MODOS_FORMACAO, SITUACOES_EDICAO } from "@/modules/edicoes/domain/tipos";
 import * as repo from "@/modules/edicoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -31,9 +31,9 @@ const limite = (rotulo: string) => inteiroOpcional(rotulo, 1, 20).refine((v) => 
 /** Troca a edição que a organização está administrando (seletor do cabeçalho). */
 export async function escolherEdicao(formulario: FormData) {
   const alvo = String(formulario.get("edicao") ?? "");
-  const { edicoesOrganizadas } = await sessaoAtual();
-  if (edicoesOrganizadas.some((e) => e.id === alvo)) {
-    await gravarEdicaoEscolhida(alvo);
+  const { edicoesDoUsuario, edicoesOrganizadas } = await sessaoAtual();
+  if (edicoesDoUsuario.some((e) => e.id === alvo)) {
+    await gravarEdicaoEscolhida(alvo, { lembrar: edicoesOrganizadas.length > 0 });
     await apagarSimulacao();
   }
   atualizarTelas();
@@ -137,13 +137,16 @@ export const tornarAtual = criarAcao(z.object({ id }), async (d) => {
 });
 
 /** Importa o regulamento (JSON no formato canônico) numa edição que ainda não tem um. */
-export const importarRegulamento = criarAcao(z.object({ id, json: z.string().min(2, "Cole o JSON do regulamento.") }), async (d) => {
+export const importarRegulamento = criarAcao(z.object({ id, json: z.string().min(2, "Cole o JSON do regulamento."), substituir: caixa }), async (d) => {
   let canonico: RegulamentoCanonico;
   try {
-    canonico = JSON.parse(d.json);
+    // Aceita o JSON colado direto da IA, mesmo dentro de ```json … ```.
+    canonico = JSON.parse(d.json.trim().replace(/^```(json)?|```$/g, ""));
   } catch {
-    return falha("O texto colado não é um JSON válido. Use o arquivo exportado de outra edição (config/regulamento_2026.json).");
+    return falha("O texto colado não é um JSON válido. Copie só o JSON (de { até }), sem texto antes ou depois.");
   }
+  const estrutura = conferirEstrutura(canonico);
+  if (estrutura.length) return falha(`O regulamento tem problemas: ${estrutura.join(" ")}`);
   try {
     const erros = conferirRegulamento(regulamentoDoCanonico(canonico));
     if (erros.length) return falha(`O regulamento tem problemas: ${erros.join(" ")}`);
@@ -151,6 +154,17 @@ export const importarRegulamento = criarAcao(z.object({ id, json: z.string().min
     return falha("O JSON não está no formato de regulamento (bancas, níveis, fases, rubricas, penalidades, desempate).");
   }
   const { cliente } = await sessaoAtual();
+  if (d.substituir) {
+    const { data, error } = await repo.substituirRegulamento(cliente, d.id, canonico);
+    if (error) return falha(traduzirErro(error));
+    atualizarTelas();
+    const semBanca = (data as { avaliadores_sem_banca?: number } | null)?.avaliadores_sem_banca ?? 0;
+    return sucesso(
+      semBanca
+        ? `Regulamento trocado. ${semBanca} avaliador(es) ficaram sem banca (a banca deles não existe mais): escolha a banca em Pessoas.`
+        : "Regulamento trocado. O anterior ficou guardado no histórico.",
+    );
+  }
   const { error } = await repo.definirRegulamento(cliente, d.id, canonico);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();

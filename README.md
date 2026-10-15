@@ -128,13 +128,15 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
     **Rode antes de publicar o app**: a lista de equipes passa a ler a coluna `icone`.
 15. `…15_chamados` — pedidos de ajuda das equipes (dúvida/problema): a equipe abre, cancela ou
     avisa que resolveu; mentoria e organização atendem. Só a equipe, a mentoria e a organização veem.
+16. `…16_substituir_regulamento` — trocar o regulamento por outro JSON enquanto a edição não tem
+    fichas (para planejar com uma IA); o anterior vai inteiro para o histórico.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 015 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se da 012 à 016 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -219,6 +221,7 @@ psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/202610
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000013_mapa.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000014_mapa_equipes.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000015_chamados.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261015000016_substituir_regulamento.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

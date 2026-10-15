@@ -1620,6 +1620,7 @@ export type Database = {
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };
       responder_convite: { Args: { p_equipe: string; p_aceitar: boolean; p_como?: string }; Returns: undefined };
       salvar_ficha: { Args: { p_equipe: string; p_rubrica: string; p_notas: Json; p_comentario?: string }; Returns: string };
+      substituir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };

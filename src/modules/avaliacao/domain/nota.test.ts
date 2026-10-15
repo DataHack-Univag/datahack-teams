@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import canonico from "../../../../config/regulamento_2026.json";
 import { montarRanking } from "./consolidacao";
 import { compararRanking, consolidarEquipe, consolidarRubrica, notaFicha } from "./nota";
-import { conferirRegulamento, regulamentoDoCanonico, type RegulamentoCanonico, type Rubrica } from "./regulamento";
+import { conferirEstrutura, conferirRegulamento, regulamentoDoCanonico, type RegulamentoCanonico, type Rubrica } from "./regulamento";
 import type { Ficha } from "./tipos";
 
 const REG = regulamentoDoCanonico(canonico as RegulamentoCanonico);
@@ -100,5 +100,18 @@ describe("ranking", () => {
     expect(compararRanking(a, b)).toBeGreaterThan(0);
     expect(compararRanking(b, a)).toBeLessThan(0);
     expect(compararRanking(a, { ...a })).toBe(0);
+  });
+});
+
+describe("importar regulamento", () => {
+  it("o regulamento de 2026 passa na conferência de estrutura", () => {
+    expect(conferirEstrutura(canonico)).toEqual([]);
+  });
+  it("aponta onde está o problema", () => {
+    const ruim = { ...canonico, rubricas: [{ ...canonico.rubricas[0], fase: "F9", banca: "x" }], desempate: [{ descricao: "?", tipo: "rubrica", rubrica: "NAO" }] };
+    const erros = conferirEstrutura(ruim);
+    expect(erros.some((e) => e.includes("fase “F9” não existe"))).toBe(true);
+    expect(erros.some((e) => e.includes("banca “x” não existe"))).toBe(true);
+    expect(erros.some((e) => e.includes("rubrica “NAO” não existe"))).toBe(true);
   });
 });

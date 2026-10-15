@@ -12,8 +12,9 @@ import { clienteServidor } from "@/shared/db/servidor";
 
 /**
  * Usuário logado, a edição da tela e o papel dele nessa edição (cacheado por requisição).
- *  - alunos e bancas: sempre a edição atual (ou a mais recente de que participam);
- *  - organização: a edição escolhida no seletor, entre as que organiza.
+ *  - por padrão, a edição atual (ou a mais recente de que a pessoa participa);
+ *  - quem participou de mais de uma edição escolhe outra no seletor do topo: a organização
+ *    para administrar, os demais para consultar as anteriores (só leitura).
  * Quem está logado mas não participa de nenhuma edição é deslogado com aviso.
  */
 export const sessaoAtual = cache(async () => {
@@ -29,7 +30,7 @@ export const sessaoAtual = cache(async () => {
 
   const escolhida = await edicaoEscolhida();
   const edicao: Edicao | undefined =
-    (escolhida && organiza.has(escolhida) ? edicoes.find((e) => e.id === escolhida) : undefined) ??
+    (escolhida && participa.has(escolhida) ? edicoes.find((e) => e.id === escolhida) : undefined) ??
     edicoes.find((e) => e.atual && participa.has(e.id)) ??
     edicoes.find((e) => participa.has(e.id));
 
@@ -60,6 +61,8 @@ export const sessaoAtual = cache(async () => {
     edicao,
     /** Edições que a organização pode administrar (para o seletor). */
     edicoesOrganizadas: edicoes.filter((e) => organiza.has(e.id)),
+    /** Todas as edições de que a pessoa participa (seletor de quem não é da organização). */
+    edicoesDoUsuario: edicoes.filter((e) => participa.has(e.id)),
     organizador: usuario.papel === "organizador",
     avaliador: ehAvaliador(usuario.papel),
     mentor: usuario.papel === "mentor",

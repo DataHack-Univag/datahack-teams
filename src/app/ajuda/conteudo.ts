@@ -100,6 +100,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como cadastro as fases e as rubricas de uma edição?",
+    resposta:
+      "Em Mais → Edições → “Regulamento desta edição”. Toque em “Copiar instruções para a IA”, mande para uma IA dizendo como serão as fases, as bancas e o que avaliar (ou escolha “Começar de um modelo” para partir de outra edição) e cole o JSON que ela devolver. O sistema confere a estrutura e os pesos antes de gravar. Enquanto não houver fichas, dá para trocar o regulamento quantas vezes precisar; o anterior fica no histórico.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Como preparo a próxima edição do evento?",
     resposta:
       "Em Mais → Edições, crie a edição copiando o regulamento e a organização da anterior. Ajuste datas, formato e regras das equipes, cadastre alunos e bancas em Pessoas (com a edição nova escolhida no topo) e, quando o evento começar, use “Tornar a edição atual”.",

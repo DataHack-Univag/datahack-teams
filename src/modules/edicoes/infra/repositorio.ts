@@ -43,6 +43,10 @@ export const definirEdicaoAtual = (cliente: Cliente, id: string) => cliente.rpc(
 export const definirRegulamento = (cliente: Cliente, id: string, json: unknown) =>
   cliente.rpc("definir_regulamento", { p_edicao: id, p_json: json as Json });
 
+/** Troca o regulamento inteiro (só sem fichas); o anterior vai para o histórico. */
+export const substituirRegulamento = (cliente: Cliente, id: string, json: unknown) =>
+  cliente.rpc("substituir_regulamento", { p_edicao: id, p_json: json as Json });
+
 /** Quantas equipes, alunos e fichas cada edição tem (painel de edições). */
 export async function resumoEdicoes(cliente: Cliente): Promise<Map<string, { alunos: number; equipes: number; fichas: number }>> {
   const [p, e, f] = await Promise.all([
