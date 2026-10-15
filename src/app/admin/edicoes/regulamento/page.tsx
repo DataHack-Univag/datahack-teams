@@ -1,7 +1,7 @@
 import { conferirRegulamento } from "@/modules/avaliacao/domain/regulamento";
 import { carregarRegulamento } from "@/modules/avaliacao/infra/repositorio";
 import { AjudaCalculo } from "@/modules/avaliacao/ui/AjudaCalculo";
-import { FormImportarRegulamento } from "@/modules/edicoes/ui/Edicoes";
+import { ImportarRegulamento, type ModeloRegulamento } from "@/modules/edicoes/ui/ImportarRegulamento";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { Aviso } from "@/shared/ui/Aviso";
 import { BotaoLink } from "@/shared/ui/Botao";
@@ -10,8 +10,22 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Regulamento da avaliação da edição: fases, rubricas, critérios, níveis, penalidades e desempate.
 export default async function RegulamentoEdicao() {
-  const { cliente, edicao } = await sessaoAtual();
-  const reg = await carregarRegulamento(cliente, edicao.id);
+  const { cliente, edicao, edicoesOrganizadas } = await sessaoAtual();
+  const [reg, fichas, modelos] = await Promise.all([
+    carregarRegulamento(cliente, edicao.id),
+    cliente.from("fichas").select("*", { count: "exact", head: true }).eq("edicao_id", edicao.id),
+    // Regulamentos das outras edições, para usar como ponto de partida.
+    Promise.all(
+      edicoesOrganizadas
+        .filter((e) => e.id !== edicao.id)
+        .map(async (e): Promise<ModeloRegulamento | null> => {
+          const { data } = await cliente.rpc("exportar_regulamento", { p_edicao: e.id });
+          const r = data as { rubricas?: unknown[] } | null;
+          return r?.rubricas?.length ? { rotulo: `Edição ${e.numero} · ${e.nome}`, json: JSON.stringify(data, null, 2) } : null;
+        }),
+    ).then((l) => l.filter((m): m is ModeloRegulamento => !!m)),
+  ]);
+  const temFichas = (fichas.count ?? 0) > 0;
   const problemas = conferirRegulamento(reg);
   const nomeBanca = (c: string) => reg.bancas.find((b) => b.codigo === c)?.nome ?? c;
 
@@ -37,11 +51,11 @@ export default async function RegulamentoEdicao() {
       {reg.rubricas.length === 0 ? (
         <>
           <EstadoVazio icone="avaliacao" titulo="Esta edição ainda não tem regulamento">
-            Cole abaixo o regulamento de outra edição (botão “Baixar regulamento” na edição anterior) e ajuste os pesos e textos antes de importar.
+            Monte o regulamento (fases, rubricas, critérios, níveis, penalidades e desempate) em JSON, com a ajuda de uma IA ou a partir de outra edição, e importe abaixo.
           </EstadoVazio>
           <section className="card space-y-3">
             <h2 className="text-lg font-semibold">Importar regulamento</h2>
-            <FormImportarRegulamento edicao={edicao} />
+            <ImportarRegulamento edicaoId={edicao.id} substituir={false} modelos={modelos} />
           </section>
         </>
       ) : (
@@ -59,10 +73,23 @@ export default async function RegulamentoEdicao() {
               Rubricas somam 100% da nota final e os critérios de cada rubrica somam 100.
             </Aviso>
           )}
-          <Aviso tom="info">
-            Depois que a edição tem fichas lançadas, pesos, fatores e a estrutura do regulamento ficam travados no banco (mudariam notas já
-            dadas). Os textos podem ser corrigidos.
-          </Aviso>
+          {temFichas ? (
+            <Aviso tom="info">
+              Esta edição já tem fichas lançadas: pesos, fatores e a estrutura do regulamento ficam travados (mudariam notas já dadas). Os textos
+              podem ser corrigidos.
+            </Aviso>
+          ) : (
+            <details className="card group">
+              <summary className="cursor-pointer font-semibold text-marca select-none">Trocar o regulamento (importar outro JSON)</summary>
+              <p className="mt-2 text-sm text-suave">
+                Enquanto não houver fichas, dá para trocar o regulamento quantas vezes precisar. Dica: baixe o atual, peça os ajustes para uma IA e
+                cole o resultado aqui.
+              </p>
+              <div className="mt-3">
+                <ImportarRegulamento edicaoId={edicao.id} substituir modelos={modelos} />
+              </div>
+            </details>
+          )}
 
           <section className="card space-y-2">
             <h2 className="text-lg font-semibold">Níveis</h2>

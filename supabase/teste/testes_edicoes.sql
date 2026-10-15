@@ -305,6 +305,31 @@ select pg_temp.como(current_setting('dh.aluno'));
 select fechar_chamado_da_equipe(current_setting('dh.chamado')::uuid, true);
 do $$ begin assert (select situacao from chamados where id = current_setting('dh.chamado')::uuid) = 'resolvido', 'a equipe avisa que resolveu'; end $$;
 
+-- ---------------------------------------------------------------- 016 · substituir o regulamento
+select pg_temp.como('p56@teste.local');
+select pg_temp.falha($q$select substituir_regulamento((select id from edicoes where numero = 1), exportar_regulamento((select id from edicoes where numero = 1)))$q$, 'já tem fichas');
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  v_ed uuid;
+  v_reg jsonb;
+  r jsonb;
+begin
+  v_ed := criar_edicao('{"slug":"datahack-teste-reg","nome":"Edição de teste do regulamento"}'::jsonb, v_ed1);
+  insert into participacoes (edicao_id, email, papel, banca_id)
+  values (v_ed, 'p62@teste.local', 'avaliador', (select id from bancas where edicao_id = v_ed and codigo = 'professores'));
+  -- novo regulamento: só uma rubrica de negócio valendo 100%
+  v_reg := jsonb_set(exportar_regulamento(v_ed1), '{fases}', '[{"codigo":"NEG","nome":"Negócio","peso":100}]'::jsonb);
+  v_reg := jsonb_set(v_reg, '{rubricas}', (select jsonb_agg(jsonb_set(x, '{peso_final}', '100')) from jsonb_array_elements(v_reg -> 'rubricas') x where x ->> 'codigo' = 'NEG'));
+  v_reg := jsonb_set(v_reg, '{desempate}', '[{"descricao":"Decisão das bancas","tipo":"manual"}]'::jsonb);
+  r := substituir_regulamento(v_ed, v_reg);
+  assert (select count(*) from rubricas where edicao_id = v_ed) = 1, 'regulamento trocado';
+  assert (select count(*) from historico where tabela = 'regulamento' and operacao = 'SUBSTITUIR') = 1, 'o anterior fica no histórico';
+  assert (select b.codigo from participacoes p join bancas b on b.id = p.banca_id where p.edicao_id = v_ed and p.email = 'p62@teste.local') = 'professores', 'a banca da pessoa é religada pelo código';
+  assert (r ->> 'avaliadores_sem_banca')::int = 0, 'ninguém ficou sem banca';
+end $$;
+select pg_temp.falha($q$delete from bancas where codigo = 'professores'$q$, 'permission denied');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 015 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 016 conferem.'

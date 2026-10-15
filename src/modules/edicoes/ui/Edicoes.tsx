@@ -1,4 +1,4 @@
-import { criarEdicao, escolherEdicao, importarRegulamento, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
+import { criarEdicao, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
 import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, SITUACOES_EDICAO, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
@@ -153,29 +153,6 @@ export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edi
       <div className="sm:col-span-2">
         <BotaoEnviar icone="mais_novo">Criar edição</BotaoEnviar>
       </div>
-    </Formulario>
-  );
-}
-
-/** Importar o regulamento (JSON canônico) numa edição sem regulamento. */
-export function FormImportarRegulamento({ edicao }: { edicao: Edicao }) {
-  return (
-    <Formulario action={importarRegulamento} className="space-y-3">
-      <Ocultos valores={{ id: edicao.id }} />
-      <AreaTexto
-        rotulo="Regulamento (JSON)"
-        name="json"
-        rows={8}
-        required
-        className="font-mono"
-        dica={
-          <>
-            Mesmo formato de <code>config/regulamento_2026.json</code> ou do botão “Baixar regulamento” de outra edição. O sistema confere os
-            pesos antes de importar.
-          </>
-        }
-      />
-      <BotaoEnviar icone="baixar">Importar regulamento</BotaoEnviar>
     </Formulario>
   );
 }
