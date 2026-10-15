@@ -3,9 +3,8 @@
 import { useState } from "react";
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { salvarAcessoEdicao } from "@/modules/instituicoes/application/actions";
-import { ACESSOS, APROVACOES, paraCampoDataHora, type Acesso, type Instituicao } from "@/modules/instituicoes/domain/tipos";
+import { ACESSOS, APROVACOES, COR_PADRAO, paraCampoDataHora, type Acesso, type Instituicao } from "@/modules/instituicoes/domain/tipos";
 import { CampoLogo } from "@/modules/instituicoes/ui/CampoLogo";
-import { LogoSvg } from "@/modules/instituicoes/ui/LogoSvg";
 import { Campo, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 
@@ -16,11 +15,9 @@ import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 export function FormAcessoEdicao({ edicao, instituicoes, escolhidas }: { edicao: Edicao; instituicoes: Instituicao[]; escolhidas: string[] }) {
   const [acesso, setAcesso] = useState<Acesso>(edicao.acesso ?? "lista");
   const [marcadas, setMarcadas] = useState<string[]>(escolhidas);
-  const [cor, setCor] = useState(edicao.marca?.cor ?? "#1f6fd1");
+  const [cor, setCor] = useState(edicao.marca?.cor ?? COR_PADRAO);
   const [usarCor, setUsarCor] = useState(!!edicao.marca?.cor);
   const inscricaoPublica = acesso !== "lista";
-  // A ordem das instituições é a da lista; a primeira com logo vira a logo da edição.
-  const ordenadas = instituicoes.filter((i) => marcadas.includes(i.id));
 
   const alternar = (id: string) => setMarcadas((m) => (m.includes(id) ? m.filter((x) => x !== id) : [...m, id]));
 
@@ -52,9 +49,9 @@ export function FormAcessoEdicao({ edicao, instituicoes, escolhidas }: { edicao:
           {acesso !== "instituicoes" && <span className="ml-1 font-normal text-suave">(opcional)</span>}
         </legend>
         <p className="text-xs text-suave">
-          {acesso === "lista" && "A instituição do evento. A logo dela aparece no topo das telas, se a edição não tiver logo própria."}
+          {acesso === "lista" && "A instituição que promove o evento."}
           {acesso === "instituicoes" && "Só quem é destas instituições pode se inscrever. A instituição é informada pela pessoa (o e-mail é o pessoal)."}
-          {acesso === "aberto" && "Qualquer instituição pode participar. Marque aqui as que apoiam o evento, se quiser mostrar a logo delas."}
+          {acesso === "aberto" && "Qualquer instituição pode participar. Marque aqui as que apoiam ou promovem o evento."}
         </p>
         {instituicoes.length ? (
           <div className="flex flex-wrap gap-2">
@@ -109,34 +106,26 @@ export function FormAcessoEdicao({ edicao, instituicoes, escolhidas }: { edicao:
         />
         <div className="space-y-1">
           <span className="rotulo">
-            Cor principal <span className="ml-1 font-normal text-suave">(opcional)</span>
+            Cor da edição <span className="ml-1 font-normal text-suave">(opcional)</span>
           </span>
           <div className="flex items-center gap-2">
             <input type="checkbox" checked={usarCor} onChange={(e) => setUsarCor(e.target.checked)} aria-label="Usar cor própria" className="size-5 accent-[var(--marca)]" />
-            <input type="color" value={cor} onChange={(e) => setCor(e.target.value)} disabled={!usarCor} aria-label="Cor principal" className="h-10 w-16 cursor-pointer rounded-lg border border-borda disabled:opacity-40" />
-            <span className="font-mono text-xs text-suave">{usarCor ? cor : "cor padrão do sistema"}</span>
+            <input type="color" value={cor} onChange={(e) => setCor(e.target.value)} disabled={!usarCor} aria-label="Cor da edição" className="h-10 w-16 cursor-pointer rounded-lg border border-borda disabled:opacity-40" />
+            <span className="font-mono text-xs text-suave">{usarCor ? cor : "azul-marinho padrão"}</span>
           </div>
+          <span className="block text-xs text-suave">Fundo da logo, faixa no topo das telas e cor da edição no menu de edições.</span>
           <input type="hidden" name="cor" value={usarCor ? cor : ""} />
         </div>
         <div className="sm:col-span-2">
           <CampoLogo
-            rotulo="Logo própria do evento"
-            inicial={edicao.marca?.logo_svg}
-            dica={
-              ordenadas.some((i) => i.logo_svg)
-                ? `Em branco: usa a logo de ${ordenadas.find((i) => i.logo_svg)?.sigla ?? "da instituição"}.`
-                : "Arquivo .svg de até 200 KB. Sem logo: aparece só a marca do DATAHack."
-            }
+            name="logo"
+            tipo="imagem"
+            rotulo="Logo da edição"
+            inicial={edicao.marca?.logo}
+            cor={usarCor ? cor : null}
+            dica="A imagem do canto de cima das telas (PNG, JPG, WEBP ou SVG, até ~500 KB). Sem logo, aparece só “DATAHack”."
           />
         </div>
-        {!edicao.marca?.logo_svg && ordenadas.find((i) => i.logo_svg) && (
-          <p className="flex items-center gap-2 text-xs text-suave sm:col-span-2">
-            Logo usada hoje:
-            <span className="rounded bg-white p-1">
-              <LogoSvg svg={ordenadas.find((i) => i.logo_svg)!.logo_svg!} nome="da instituição" className="h-6 w-auto" />
-            </span>
-          </p>
-        )}
       </fieldset>
 
       <div>

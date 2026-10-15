@@ -346,6 +346,8 @@ begin
   v_ed := criar_edicao('{"slug":"datahack-teste-acesso","nome":"Edição de teste do acesso"}'::jsonb, v_ed1);
   assert (select acesso from edicoes where id = v_ed) = 'lista', 'acesso copiado';
   assert (select count(*) from edicao_instituicoes where edicao_id = v_ed and removido_em is null) = 1, 'instituições copiadas';
+  assert (select marca ->> 'logo' from edicoes where id = v_ed1) = '/logo-datahack.png', 'a Edição 1 fica com a logo de sempre';
+  assert (select marca from edicoes where id = v_ed) = '{}'::jsonb, 'a edição nova começa sem logo';
   -- vira evento de várias instituições, com marca própria
   perform definir_acesso_edicao(v_ed, '{"acesso":"instituicoes","aprovacao":"manual","vagas":"120","marca":{"nome_publico":"DATAHack Cuiabá","cor":"#0f8a5f"}}'::jsonb, array[v_uf, v_uv]);
   assert (select vagas from edicoes where id = v_ed) = 120, 'vagas gravadas';
@@ -360,6 +362,7 @@ begin
   perform set_config('dh.ed_acesso', v_ed::text, false);
 end $$;
 select pg_temp.falha($q$select definir_acesso_edicao(current_setting('dh.ed_acesso')::uuid, '{"acesso":"instituicoes"}'::jsonb, '{}')$q$, 'ao menos uma instituição');
+select pg_temp.falha($q$select definir_acesso_edicao(current_setting('dh.ed_acesso')::uuid, '{"acesso":"aberto","marca":{"logo":"javascript:alert(1)"}}'::jsonb, '{}')$q$, 'edicoes_marca_check');
 select pg_temp.falha($q$insert into instituicoes (nome, logo_svg) values ('Logo perigosa', '<svg onload="alert(1)"></svg>')$q$, 'instituicoes_logo_svg_check');
 select pg_temp.falha($q$insert into instituicoes (nome, logo_svg) values ('Logo com script', '<svg><script>alert(1)</script></svg>')$q$, 'instituicoes_logo_svg_check');
 insert into instituicoes (nome, logo_svg) values ('Logo boa', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>');

@@ -1,6 +1,7 @@
 import { criarEdicao, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
 import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, SITUACOES_EDICAO, type Edicao } from "@/modules/edicoes/domain/tipos";
-import { ACESSOS, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
+import { ACESSOS, COR_PADRAO, resolverMarca, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
+import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Selo } from "@/shared/ui/Selo";
@@ -16,22 +17,27 @@ export function CartaoEdicao({
   /** É a edição que a organização está vendo agora. */
   vendo: boolean;
 }) {
+  const marca = resolverMarca(edicao);
   return (
-    <article className={`card min-w-0 space-y-3 ${edicao.atual ? "destaque-grad" : "faixa-topo"}`}>
+    <article
+      className={`card min-w-0 space-y-3 border-t-4 ${edicao.atual ? "destaque-grad" : ""}`}
+      style={{ borderTopColor: marca.cor ?? COR_PADRAO }}
+    >
       <div className="flex flex-wrap items-start justify-between gap-2">
-        <div className="min-w-0">
-          <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Edição {edicao.numero}</p>
-          <h2 className="text-lg font-bold break-words">{edicao.nome}</h2>
-          <p className="text-xs text-suave">
-            {periodo(edicao)}
-            {edicao.local ? ` · ${edicao.local}` : ""}
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-1.5">
+        <LogoEdicao marca={marca} className="h-10 w-28" />
+        <div className="flex flex-wrap justify-end gap-1.5">
           {edicao.atual && <Selo tom="sucesso">Atual</Selo>}
           {vendo && <Selo tom="marca">Você está vendo</Selo>}
           <Selo tom="neutro">{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
         </div>
+      </div>
+      <div className="min-w-0">
+        <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Edição {edicao.numero}</p>
+        <h2 className="text-lg font-bold break-words">{edicao.nome}</h2>
+        <p className="text-xs text-suave">
+          {periodo(edicao)}
+          {edicao.local ? ` · ${edicao.local}` : ""}
+        </p>
       </div>
       {edicao.descricao && <p className="text-sm text-suave">{edicao.descricao}</p>}
       <dl className="grid grid-cols-3 gap-2 text-center">

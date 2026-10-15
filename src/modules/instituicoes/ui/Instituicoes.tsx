@@ -21,7 +21,7 @@ export function FormInstituicao({ instituicao }: { instituicao?: Instituicao }) 
       <Campo rotulo="UF" name="uf" maxLength={2} defaultValue={i?.uf ?? ""} placeholder="MT" />
       <Campo rotulo="Site" name="site" maxLength={300} defaultValue={i?.site ?? ""} placeholder="https://…" inputMode="url" className="sm:col-span-2" />
       <div className="sm:col-span-2">
-        <CampoLogo inicial={i?.logo_svg} dica="Arquivo .svg de até 200 KB. Aparece no topo das telas das edições desta instituição." />
+        <CampoLogo inicial={i?.logo_svg} dica="Arquivo .svg de até 200 KB, para identificar a instituição na lista." />
       </div>
       <div className="sm:col-span-2">
         <BotaoEnviar icone="ok">{i ? "Salvar instituição" : "Cadastrar instituição"}</BotaoEnviar>

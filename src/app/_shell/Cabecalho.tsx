@@ -1,14 +1,14 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
 import type { MarcaResolvida } from "@/modules/instituicoes/domain/tipos";
-import { LogoSvg } from "@/modules/instituicoes/ui/LogoSvg";
+import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { sair } from "@/modules/pessoas/application/actions";
 import { rotuloPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { primeiroNome } from "@/shared/lib/texto";
 import { Avatar } from "@/shared/ui/Avatar";
 import { BotaoTema } from "@/shared/ui/BotaoTema";
-import { Icone } from "@/shared/ui/Icone";
 import { Logo } from "@/shared/ui/Logo";
+import { Icone } from "@/shared/ui/Icone";
 import { BotaoBusca } from "@/shared/ui/PaletaComandos";
 
 /** Cabeçalho de todas as áreas logadas: logo, papel, busca, tema e sair. */
@@ -29,7 +29,7 @@ export function Cabecalho({
   simulacao?: boolean;
   /** Seletor da edição (só a organização). */
   edicao?: ReactNode;
-  /** Logo e cor da edição (da própria edição ou da instituição). */
+  /** Logo e cor da edição que a pessoa está vendo. */
   marca?: MarcaResolvida;
 }) {
   return (
@@ -38,13 +38,8 @@ export function Cabecalho({
       className={`border-b border-borda bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-[14px] ${simulacao ? "" : "sticky top-0 z-20"}`}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5 sm:gap-3">
-        <Link href={inicio} className="mr-auto flex min-w-0 items-center gap-2" aria-label="Ir para o início">
-          <Logo className="w-28 shrink-0 sm:w-32" />
-          {marca?.logo && (
-            <span className="hidden h-9 items-center rounded-lg bg-white px-2 ring-1 ring-borda sm:flex" title={marca.nome}>
-              <LogoSvg svg={marca.logo} nome={marca.nome} className="h-6 max-w-28" />
-            </span>
-          )}
+        <Link href={inicio} className="mr-auto" aria-label={`${marca?.nome ?? "DATAHack"}: ir para o início`}>
+          {marca ? <LogoEdicao marca={marca} className="h-10 w-28 sm:w-32" /> : <Logo className="w-28 sm:w-32" />}
         </Link>
 
         {edicao}

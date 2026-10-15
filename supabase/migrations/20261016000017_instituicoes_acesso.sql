@@ -4,7 +4,7 @@
 -- várias instituições e um evento aberto a todos. Isso passa a ser configuração da edição:
 --   acesso        lista (a organização importa quem participa) | instituicoes | aberto
 --   instituições  quais participam (edicao_instituicoes)
---   marca         nome público, cor e logo (senão vale a logo da instituição)
+--   marca         nome público, cor e a logo que aparece no topo das telas
 -- As edições que já existem viram "lista" + Univag: nada muda para quem usa.
 -- =============================================================================
 
@@ -45,8 +45,14 @@ alter table public.edicoes
   add column vagas int check (vagas is null or vagas between 1 and 100000),
   add column inscricao_abre_em timestamptz,
   add column inscricao_fecha_em timestamptz,
-  -- {"nome_publico": "...", "cor": "#1f6fd1", "logo_svg": "<svg…>"} (tudo opcional)
-  add column marca jsonb not null default '{}'::jsonb check (jsonb_typeof(marca) = 'object' and pg_column_size(marca) <= 250000),
+  -- {"nome_publico": "...", "cor": "#000b38", "logo": "data:image/png;base64,…" | "/logo.png"} (tudo opcional).
+  -- A logo é sempre mostrada como imagem (<img>), que não executa nada (nem num SVG).
+  add column marca jsonb not null default '{}'::jsonb check (
+    jsonb_typeof(marca) = 'object'
+    and octet_length(marca::text) <= 1000000
+    and (marca ->> 'cor' is null or marca ->> 'cor' ~ '^#[0-9a-fA-F]{6}$')
+    and (marca ->> 'logo' is null or marca ->> 'logo' ~ '^(data:image/(png|jpeg|webp|svg\+xml)[;,]|/[A-Za-z0-9_./-]+$)')
+  ),
   add constraint edicoes_inscricao_periodo check (inscricao_fecha_em is null or inscricao_abre_em is null or inscricao_fecha_em > inscricao_abre_em);
 
 -- Quais instituições participam da edição. Tirar uma = removido_em (nada é apagado).
@@ -131,7 +137,7 @@ revoke all on function public.definir_acesso_edicao(uuid, jsonb, uuid[]) from pu
 grant execute on function public.definir_acesso_edicao(uuid, jsonb, uuid[]) to authenticated;
 
 -- -----------------------------------------------------------------------------
--- 5. Edição nova copia também o acesso, a marca e as instituições
+-- 5. Edição nova copia também o acesso e as instituições
 -- -----------------------------------------------------------------------------
 create or replace function public.criar_edicao(p_dados jsonb, p_copiar_de uuid default null)
 returns uuid language plpgsql security definer set search_path = public
@@ -156,8 +162,8 @@ begin
           coalesce(p_dados -> 'metadados', '{}'::jsonb), email_atual(),
           coalesce(p_dados ->> 'acesso', v_base.acesso, 'lista'),
           coalesce(v_base.aprovacao, 'automatica'),
-          -- O nome público é da edição de origem: não faz sentido copiar.
-          coalesce(v_base.marca - 'nome_publico', '{}'::jsonb))
+          -- A marca (nome público, cor, logo) é de cada edição: a nova começa sem.
+          '{}'::jsonb)
   returning id into v_id;
 
   if p_copiar_de is not null then
@@ -188,3 +194,9 @@ values ('Centro Universitário de Várzea Grande', 'UNIVAG', 'Várzea Grande', '
 
 insert into public.edicao_instituicoes (edicao_id, instituicao_id)
 select e.id, i.id from public.edicoes e cross join public.instituicoes i where i.sigla = 'UNIVAG';
+
+-- A logo de sempre (placa azul-marinho) fica com a Edição 1, a do DATAHack Univag 2026.
+-- Sem mexer no "atualizado_em" da edição (a data de mudança dela continua a de verdade).
+alter table public.edicoes disable trigger edicoes_atualizado_em;
+update public.edicoes set marca = '{"logo": "/logo-datahack.png", "cor": "#000b38"}'::jsonb where numero = 1;
+alter table public.edicoes enable trigger edicoes_atualizado_em;

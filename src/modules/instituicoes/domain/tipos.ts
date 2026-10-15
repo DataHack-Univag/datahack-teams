@@ -53,27 +53,45 @@ export const rotuloAcesso = (a: string) => ACESSOS.find((x) => x.valor === a)?.r
 
 // ---------------------------------------------------------------- marca
 
-export type MarcaEdicao = { nome_publico?: string; cor?: string; logo_svg?: string };
+/**
+ * A "cara" da edição. `logo` é a imagem do topo das telas: um data URL (PNG, JPG, WEBP ou SVG
+ * enviado pela organização) ou um arquivo do próprio sistema ("/logo-datahack.png").
+ * `cor` pinta a placa da logo e a faixa no topo.
+ */
+export type MarcaEdicao = { nome_publico?: string; cor?: string; logo?: string };
 
-/** O que o cabeçalho mostra: logo da edição → logo da 1ª instituição → só a marca do DATAHack. */
-export type MarcaResolvida = { nome: string; cor: string | null; logo: string | null; origem: "edicao" | "instituicao" | null };
+/** O que o cabeçalho e o menu de edições mostram. Sem logo, aparece só o nome "DATAHack". */
+export type MarcaResolvida = { nome: string; cor: string | null; logo: string | null };
 
-export function resolverMarca(
-  edicao: { nome: string; marca?: MarcaEdicao | null },
-  instituicoes: Pick<Instituicao, "nome" | "sigla" | "logo_svg">[],
-): MarcaResolvida {
+export function resolverMarca(edicao: { nome: string; marca?: MarcaEdicao | null }): MarcaResolvida {
   const m = edicao.marca ?? {};
-  const daInstituicao = instituicoes.find((i) => i.logo_svg);
   return {
     nome: m.nome_publico?.trim() || edicao.nome,
     cor: m.cor && COR.test(m.cor) ? m.cor : null,
-    logo: m.logo_svg ?? daInstituicao?.logo_svg ?? null,
-    origem: m.logo_svg ? "edicao" : daInstituicao ? "instituicao" : null,
+    logo: m.logo && logoValida(m.logo) ? m.logo : null,
   };
 }
 
 const COR = /^#[0-9a-fA-F]{6}$/;
 export const corValida = (c: string) => COR.test(c);
+
+/** Placa padrão da logo (o azul-marinho do DATAHack). */
+export const COR_PADRAO = "#000b38";
+
+// ---------------------------------------------------------------- logo da edição (imagem)
+
+/** Limite do arquivo da logo, depois de virar texto (data URL). */
+export const LIMITE_LOGO = 700_000;
+
+const LOGO = /^(data:image\/(png|jpeg|webp|svg\+xml)[;,]|\/[A-Za-z0-9_./-]+$)/;
+export const logoValida = (logo: string) => LOGO.test(logo) && logo.length <= LIMITE_LOGO;
+
+/** Confere a logo da edição (data URL ou caminho); devolve o problema em texto ou null. */
+export function conferirLogo(logo: string): string | null {
+  if (!LOGO.test(logo)) return "Use uma imagem PNG, JPG, WEBP ou SVG.";
+  if (logo.length > LIMITE_LOGO) return `A logo ficou com ${Math.round(logo.length / 1000)} KB; o limite é ${LIMITE_LOGO / 1000} KB. Use uma imagem menor.`;
+  return null;
+}
 
 // ---------------------------------------------------------------- logo em SVG
 

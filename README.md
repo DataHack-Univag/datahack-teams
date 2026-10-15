@@ -131,8 +131,11 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 16. `…16_substituir_regulamento` — trocar o regulamento por outro JSON enquanto a edição não tem
     fichas (para planejar com uma IA); o anterior vai inteiro para o histórico.
 17. `…17_instituicoes_acesso` — instituições (com logo SVG) e, por edição, quem pode participar
-    (lista, instituições escolhidas ou aberto), vagas, período de inscrição e marca (nome, cor,
-    logo). As edições de antes viram "lista" + Univag. Função `definir_acesso_edicao`.
+    (lista, instituições escolhidas ou aberto), vagas, período de inscrição e marca (nome, cor e a
+    logo do topo das telas). As edições de antes viram "lista" + Univag; a Edição 1 fica com a logo
+    de sempre e as outras sem logo. Função `definir_acesso_edicao`.
+    **Rode antes de publicar o app**: sem ela o cabeçalho volta à logo de sempre, mas o menu de
+    edições e a tela de acesso ficam incompletos.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`

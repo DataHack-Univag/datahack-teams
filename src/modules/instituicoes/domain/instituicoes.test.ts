@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { conferirSvg, resolverMarca, svgComoImagem } from "./tipos";
+import { conferirLogo, conferirSvg, resolverMarca, svgComoImagem } from "./tipos";
 
 const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>';
 
@@ -20,16 +20,21 @@ describe("logo em SVG", () => {
 });
 
 describe("marca da edição", () => {
-  const univag = { nome: "Centro Universitário de Várzea Grande", sigla: "UNIVAG", logo_svg: svg };
-
-  it("usa a logo da edição, senão a da instituição, senão nenhuma", () => {
-    expect(resolverMarca({ nome: "Edição 1", marca: {} }, [univag])).toEqual({ nome: "Edição 1", cor: null, logo: svg, origem: "instituicao" });
-    expect(resolverMarca({ nome: "Edição 4", marca: { nome_publico: "DATAHack MT", logo_svg: "<svg/>", cor: "#e05a1b" } }, [univag])).toEqual({
-      nome: "DATAHack MT",
-      cor: "#e05a1b",
-      logo: "<svg/>",
-      origem: "edicao",
+  it("usa a logo da própria edição; sem logo, só o nome", () => {
+    expect(resolverMarca({ nome: "Edição 1", marca: { logo: "/logo-datahack.png", cor: "#000b38" } })).toEqual({
+      nome: "Edição 1",
+      cor: "#000b38",
+      logo: "/logo-datahack.png",
     });
-    expect(resolverMarca({ nome: "Edição 5", marca: { cor: "vermelho" } }, [{ ...univag, logo_svg: null }])).toMatchObject({ cor: null, logo: null, origem: null });
+    expect(resolverMarca({ nome: "Edição 4", marca: { nome_publico: "DATAHack MT" } })).toEqual({ nome: "DATAHack MT", cor: null, logo: null });
+    expect(resolverMarca({ nome: "Edição 5", marca: { cor: "vermelho", logo: "javascript:alert(1)" } })).toMatchObject({ cor: null, logo: null });
+  });
+
+  it("aceita imagem ou arquivo do sistema como logo", () => {
+    expect(conferirLogo("data:image/png;base64,iVBORw0KGgo=")).toBeNull();
+    expect(conferirLogo("data:image/svg+xml;charset=utf-8,%3Csvg")).toBeNull();
+    expect(conferirLogo("/logo-datahack.png")).toBeNull();
+    expect(conferirLogo("data:text/html,<script>")).toContain("PNG");
+    expect(conferirLogo(`data:image/png;base64,${"A".repeat(700_001)}`)).toContain("limite");
   });
 });

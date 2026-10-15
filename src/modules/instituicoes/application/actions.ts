@@ -1,7 +1,7 @@
 "use server";
 
 import { z } from "zod";
-import { ACESSOS, APROVACOES, conferirSvg, corValida, FUSO_MT, TIPOS_INSTITUICAO, type MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
+import { ACESSOS, APROVACOES, conferirLogo, conferirSvg, corValida, FUSO_MT, TIPOS_INSTITUICAO, type MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
 import * as repo from "@/modules/instituicoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
@@ -12,7 +12,7 @@ import { traduzirErro } from "@/shared/db/erros";
 // Toda permissão real é do banco: só a organização cadastra instituições e define o acesso.
 
 /** Logo vinda do campo oculto: vazio = sem logo; senão precisa passar na conferência. */
-const logo = z
+const logoSvg = z
   .string()
   .optional()
   .transform((v) => v?.trim() || null)
@@ -38,7 +38,7 @@ export const salvarInstituicao = criarAcao(
       "Escolha o tipo da instituição.",
     ),
     site: textoOpcional(300),
-    logo_svg: logo,
+    logo_svg: logoSvg,
   }),
   async ({ id: idInstituicao, ...dados }) => {
     const { cliente } = await sessaoAtual();
@@ -94,7 +94,14 @@ export const salvarAcessoEdicao = criarAcao(
       .optional()
       .transform((v) => v?.trim() || null)
       .refine((v) => v === null || corValida(v), "Escolha a cor pelo seletor."),
-    logo_svg: logo,
+    logo: z
+      .string()
+      .optional()
+      .transform((v) => v?.trim() || null)
+      .superRefine((v, ctx) => {
+        const problema = v ? conferirLogo(v) : null;
+        if (problema) ctx.addIssue({ code: "custom", message: problema });
+      }),
   }),
   async (d, _bruto, formulario) => {
     if (d.inscricao_abre_em && d.inscricao_fecha_em && d.inscricao_fecha_em <= d.inscricao_abre_em)
@@ -105,7 +112,7 @@ export const salvarAcessoEdicao = criarAcao(
     const marca: MarcaEdicao = {};
     if (d.nome_publico) marca.nome_publico = d.nome_publico;
     if (d.cor) marca.cor = d.cor;
-    if (d.logo_svg) marca.logo_svg = d.logo_svg;
+    if (d.logo) marca.logo = d.logo;
 
     const { cliente } = await sessaoAtual();
     const { error } = await repo.definirAcessoEdicao(
