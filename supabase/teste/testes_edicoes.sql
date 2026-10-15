@@ -383,7 +383,7 @@ declare
   v_uf   uuid := (select id from instituicoes where sigla = 'UFMT');
   v_err  text[];
 begin
-  assert (select count(*) from campos_inscricao where edicao_id = v_ed1 and removido_em is null) = 2, 'edição 1 pergunta curso e semestre';
+  assert (select count(*) from campos_inscricao where edicao_id = v_ed1 and removido_em is null and chave in ('curso', 'semestre')) = 2, 'edição 1 pergunta curso e semestre';
   assert (select count(*) from inscricoes where edicao_id = v_ed1 and situacao = 'aprovada') > 0, 'alunos da edição 1 viraram inscrições';
   assert (select instituicao_id from inscricoes where edicao_id = v_ed1 limit 1) = (select id from instituicoes where sigla = 'UNIVAG'), 'evento fechado: instituição do evento';
 
@@ -568,6 +568,37 @@ begin
 end $$;
 select pg_temp.falha($q$select fazer_checkin((select id from edicoes where numero = 1), 'ZZZZZZZZ')$q$, 'Código não encontrado');
 
+-- ---------------------------------------------------------------- 022 · CR no formulário e cadastro pela organização
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  v_email text := (select email from inscricoes where edicao_id = v_ed1 and situacao = 'aprovada' order by email limit 1);
+begin
+  assert (select array_agg(chave order by ordem) from campos_inscricao where edicao_id = v_ed1 and removido_em is null) = array['curso', 'semestre', 'cr'], 'edição 1: curso, semestre e CR';
+  insert into notas (edicao_id, email, nota) values (v_ed1, v_email, 7.5)
+  on conflict (edicao_id, email) do update set nota = excluded.nota;
+  assert (select (respostas ->> 'cr')::numeric from inscricoes where edicao_id = v_ed1 and email = v_email) = 7.5, 'a nota vai para a inscrição';
+  update notas set nota = null where edicao_id = v_ed1 and email = v_email;
+  assert not (select respostas ? 'cr' from inscricoes where edicao_id = v_ed1 and email = v_email), 'sem nota, sem CR';
+
+  perform definir_campos_inscricao(v_ed1, $j$[
+    {"chave":"curso","rotulo":"Curso","tipo":"texto"},
+    {"chave":"semestre","rotulo":"Semestre","tipo":"numero","opcoes":{"min":1,"max":12}},
+    {"chave":"cr","rotulo":"CR","tipo":"numero","opcoes":{"min":0,"max":10},"obrigatorio":false,"sensivel":true},
+    {"chave":"camiseta","rotulo":"Camiseta","tipo":"escolha","opcoes":["P","M","G"]}
+  ]$j$::jsonb);
+  perform salvar_respostas_organizacao(v_ed1, v_email, '{"camiseta":"M","curso":"ignorado"}');
+  assert (select respostas ->> 'camiseta' from inscricoes where edicao_id = v_ed1 and email = v_email) = 'M', 'organização preenche a camiseta';
+  assert (select respostas ->> 'curso' from inscricoes where edicao_id = v_ed1 and email = v_email) is distinct from 'ignorado', 'curso não vem por aqui';
+  perform salvar_respostas_organizacao(v_ed1, v_email, '{}');
+  assert not (select respostas ? 'camiseta' from inscricoes where edicao_id = v_ed1 and email = v_email), 'em branco tira a resposta';
+  perform set_config('dh.email_cad', v_email, false);
+end $$;
+select pg_temp.falha($q$select salvar_respostas_organizacao((select id from edicoes where numero = 1), current_setting('dh.email_cad'), '{"camiseta":"XXL"}')$q$, 'escolha uma das opções');
+select pg_temp.como('p1@teste.local');
+select pg_temp.falha($q$select salvar_respostas_organizacao((select id from edicoes where numero = 1), 'p1@teste.local', '{}')$q$, 'Só a organização');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 021 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 022 conferem.'

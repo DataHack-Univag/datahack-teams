@@ -142,7 +142,8 @@ export async function contarAlunos(cliente: Cliente, edicaoId: string): Promise<
 export async function salvarParticipacao(
   cliente: Cliente,
   edicaoId: string,
-  dados: { email: string; nome: string; curso: string | null; semestre: number | null; papel: Papel; bancaId: string | null },
+  /** curso/semestre `undefined` = a edição não pergunta: fica como está. */
+  dados: { email: string; nome: string; curso?: string | null; semestre?: number | null; papel: Papel; bancaId: string | null },
   emailOriginal?: string,
 ): Promise<ErroBanco | null> {
   // Troca de e-mail: o cadastro muda e as referências acompanham (on update cascade).
@@ -159,8 +160,8 @@ export async function salvarParticipacao(
       email: dados.email,
       papel: dados.papel,
       banca_id: dados.bancaId,
-      curso: dados.curso,
-      semestre: dados.semestre,
+      ...(dados.curso !== undefined && { curso: dados.curso }),
+      ...(dados.semestre !== undefined && { semestre: dados.semestre }),
       removido_em: null,
     },
     { onConflict: "edicao_id,email" },

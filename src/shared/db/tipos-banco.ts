@@ -1948,7 +1948,7 @@ export type Database = {
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
+      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
       edicao_publica: { Args: { p_slug: string }; Returns: Json };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
@@ -1984,6 +1984,7 @@ export type Database = {
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };
       responder_convite: { Args: { p_equipe: string; p_aceitar: boolean; p_como?: string }; Returns: undefined };
       salvar_ficha: { Args: { p_equipe: string; p_rubrica: string; p_notas: Json; p_comentario?: string }; Returns: string };
+      salvar_respostas_organizacao: { Args: { p_edicao: string; p_email: string; p_respostas: Json }; Returns: undefined };
       situacao_inscricao: { Args: { p_edicao: string }; Returns: string };
       substituir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: Json };
       validar_respostas: { Args: { p_edicao: string; p_respostas: Json }; Returns: string[] };

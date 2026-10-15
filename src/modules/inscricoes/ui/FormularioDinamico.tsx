@@ -105,7 +105,8 @@ function Entrada({
         <input
           {...comum}
           type="number"
-          inputMode="numeric"
+          inputMode="decimal"
+          step="any"
           min={faixa.min}
           max={faixa.max}
           className="campo"

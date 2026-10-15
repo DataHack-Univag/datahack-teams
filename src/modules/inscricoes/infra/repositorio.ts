@@ -141,3 +141,15 @@ export async function contarPendentes(cliente: Cliente, edicaoId: string): Promi
   const r = await cliente.from("inscricoes").select("id", { count: "exact", head: true }).eq("edicao_id", edicaoId).eq("situacao", "pendente");
   return r.error ? 0 : (r.count ?? 0);
 }
+
+// ---------------------------------------------------------------- cadastro pela organização
+
+/** Respostas de cada pessoa na edição (por e-mail), para o cadastro em Pessoas. */
+export async function respostasDaEdicao(cliente: Cliente, edicaoId: string): Promise<Record<string, Respostas>> {
+  const r = await cliente.from("inscricoes").select("email, respostas").eq("edicao_id", edicaoId);
+  return Object.fromEntries((exigir(r, "as respostas da inscrição") ?? []).map((x) => [x.email, (x.respostas ?? {}) as Respostas]));
+}
+
+/** A organização preenche as perguntas da edição para alguém (curso, semestre e CR vão por outro caminho). */
+export const salvarRespostasOrganizacao = (cliente: Cliente, edicaoId: string, email: string, respostas: Respostas) =>
+  cliente.rpc("salvar_respostas_organizacao", { p_edicao: edicaoId, p_email: email, p_respostas: respostas as unknown as Json });

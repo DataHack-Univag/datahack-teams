@@ -1,5 +1,8 @@
 "use server";
 
+import type { Respostas } from "@/modules/inscricoes/domain/campos";
+import { salvarRespostasOrganizacao } from "@/modules/inscricoes/infra/repositorio";
+
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -47,15 +50,34 @@ export const salvarParticipante = criarAcao(
     const error = await repo.salvarParticipacao(
       cliente,
       edicao.id,
-      { email: d.email, nome: d.nome, curso: d.curso, semestre: d.semestre, papel: d.funcao.papel, bancaId: idBanca },
+      {
+        email: d.email,
+        nome: d.nome,
+        // Campo que o formulário da edição não mostra não chega: fica como está.
+        curso: bruto.curso === undefined ? undefined : d.curso,
+        semestre: bruto.semestre === undefined ? undefined : d.semestre,
+        papel: d.funcao.papel,
+        bancaId: idBanca,
+      },
       original,
     );
     if (error) return falha(traduzirErro(error));
 
     // Nota vazia ou 0 = sem nota (ex.: calouro). Num cadastro novo de quem já existe, vazio não apaga a nota.
-    if (original || bruto.nota?.trim()) {
+    if (bruto.nota !== undefined && (original || bruto.nota.trim())) {
       const erroNota = await repo.salvarNota(cliente, edicao.id, d.email, d.nota ? d.nota : null);
       if (erroNota) return falha(traduzirErro(erroNota));
+    }
+    // As outras perguntas do formulário da edição (só aluno tem inscrição).
+    if (bruto.respostas !== undefined && d.funcao.papel === "aluno") {
+      let respostas: Respostas = {};
+      try {
+        respostas = JSON.parse(bruto.respostas || "{}");
+      } catch {
+        return falha("Não foi possível ler as outras perguntas. Recarregue a página e tente de novo.");
+      }
+      const { error: erroResp } = await salvarRespostasOrganizacao(cliente, edicao.id, d.email, respostas);
+      if (erroResp) return falha(`Pessoa salva, mas as outras perguntas não: ${traduzirErro(erroResp)}`);
     }
     atualizarTelas();
     return sucesso(original ? "Dados salvos." : `${d.nome} está na ${edicao.nome}. Já pode criar a senha em “Primeiro acesso”.`);

@@ -151,13 +151,16 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 21. `…21_checkin_qr` — check-in por QR: código de 8 caracteres por participante e edição
     (`checkin_codigos`, só lido por `meu_codigo_checkin`) e `fazer_checkin`, que marca a presença
     (mentoria e organização).
+22. `…22_cr_no_formulario` — o CR (nota média) vira pergunta do formulário (sensível) nas edições
+    que perguntam curso e semestre, acompanhando a tabela `notas` (de onde o gerador lê). O
+    cadastro em Pessoas segue as perguntas da edição (`salvar_respostas_organizacao`).
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 021 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se da 012 à 022 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -248,6 +251,7 @@ psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/202610
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000019_logo_edicao.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000020_inscricao_publica.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000021_checkin_qr.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000022_cr_no_formulario.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

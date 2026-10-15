@@ -1,8 +1,10 @@
 import { SubAbasPessoas } from "@/app/admin/pessoas/SubAbasPessoas";
 import { carregarRegulamento } from "@/modules/avaliacao/infra/repositorio";
+import { instituicoesDaEdicao, listarInstituicoes } from "@/modules/instituicoes/infra/repositorio";
+import { camposDaEdicao, respostasDaEdicao } from "@/modules/inscricoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
-import { FormPessoa } from "@/modules/pessoas/ui/FormPessoa";
+import { FormPessoa, type FormularioCadastro } from "@/modules/pessoas/ui/FormPessoa";
 import { ListaPessoas } from "@/modules/pessoas/ui/ListaPessoas";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
@@ -11,7 +13,24 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 export default async function AdminPessoas({ searchParams }: PageProps<"/admin/pessoas">) {
   const { filtro, busca } = await searchParams;
   const { cliente, usuario, edicao } = await sessaoAtual();
-  const [pessoas, reg] = await Promise.all([listarParticipantes(cliente, edicao.id), carregarRegulamento(cliente, edicao.id)]);
+  const acesso = edicao.acesso ?? "lista";
+  const [pessoas, reg, formulario] = await Promise.all([
+    listarParticipantes(cliente, edicao.id),
+    carregarRegulamento(cliente, edicao.id),
+    // O cadastro segue as perguntas da edição; sem as migrações 018/022, fica o de sempre.
+    Promise.all([
+      camposDaEdicao(cliente, edicao.id),
+      respostasDaEdicao(cliente, edicao.id),
+      acesso === "instituicoes" ? instituicoesDaEdicao(cliente, edicao.id) : listarInstituicoes(cliente),
+    ])
+      .then(([campos, respostas, insts]): FormularioCadastro => ({
+        campos,
+        respostas,
+        instituicoes: insts.map((i) => ({ id: i.id, nome: i.sigla ? `${i.sigla} · ${i.nome}` : i.nome })),
+        aceitaOutra: acesso !== "instituicoes",
+      }))
+      .catch(() => undefined),
+  ]);
   const bancas = reg.bancas;
   const alunos = pessoas.filter((p) => p.papel === "aluno");
 
@@ -30,7 +49,7 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
               <li>
                 Para mudar a função de alguém (ex.: aluno → banca), abra a pessoa e troque a <strong>Função nesta edição</strong>.
               </li>
-              <li>A nota média só aparece para a organização e serve para o gerador equilibrar as equipes.</li>
+              <li>O cadastro mostra as perguntas do formulário da edição (Edições → Formulário de inscrição). O CR só aparece para a organização e serve para o gerador equilibrar as equipes.</li>
               <li>Mentores entram com o e-mail deles e fazem a chamada na aba Presença (a organização também pode).</li>
             </ul>
           </BotaoAjuda>
@@ -42,7 +61,7 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
       <details id="cadastrar" className="card group scroll-mt-24">
         <summary className="cursor-pointer font-semibold text-marca select-none">+ Cadastrar pessoa</summary>
         <div className="mt-4">
-          <FormPessoa bancas={bancas} />
+          <FormPessoa bancas={bancas} formulario={formulario} />
         </div>
       </details>
 
@@ -51,6 +70,7 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
         key={typeof busca === "string" ? busca : ""}
         pessoas={pessoas}
         bancas={bancas}
+        formulario={formulario}
         meuEmail={usuario.email}
         filtroInicial={typeof filtro === "string" ? filtro : undefined}
         buscaInicial={typeof busca === "string" ? busca : undefined}

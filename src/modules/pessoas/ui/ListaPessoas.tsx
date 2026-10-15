@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { alterarFuncao, removerParticipante, restaurarParticipante } from "@/modules/pessoas/application/actions";
 import { funcaoDe, opcoesFuncao, rotuloFuncao, type BancaResumo } from "@/modules/pessoas/domain/papeis";
 import { cursoSemestre, type Participante } from "@/modules/pessoas/domain/tipos";
-import { FormPessoa } from "@/modules/pessoas/ui/FormPessoa";
+import { FormPessoa, type FormularioCadastro } from "@/modules/pessoas/ui/FormPessoa";
 import { casaBusca } from "@/shared/lib/texto";
 import { Avatar } from "@/shared/ui/Avatar";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
@@ -36,12 +36,15 @@ const CHAVE = "dh-pessoas-filtro";
 export function ListaPessoas({
   pessoas,
   bancas,
+  formulario,
   meuEmail,
   filtroInicial,
   buscaInicial,
 }: {
   pessoas: Participante[];
   bancas: BancaResumo[];
+  /** Perguntas da edição para o cadastro (sem a migração 018/022: curso, semestre e nota). */
+  formulario?: FormularioCadastro;
   meuEmail: string;
   filtroInicial?: string;
   buscaInicial?: string;
@@ -166,7 +169,7 @@ export function ListaPessoas({
                         </Formulario>
                       ))}
                     </div>
-                    <FormPessoa p={p} bancas={bancas} />
+                    <FormPessoa p={p} bancas={bancas} formulario={formulario} />
                     {p.email !== meuEmail && (
                       <Formulario
                         action={removerParticipante}
