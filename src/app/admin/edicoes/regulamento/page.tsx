@@ -1,6 +1,8 @@
 import { conferirRegulamento } from "@/modules/avaliacao/domain/regulamento";
 import { carregarRegulamento } from "@/modules/avaliacao/infra/repositorio";
 import { AjudaCalculo } from "@/modules/avaliacao/ui/AjudaCalculo";
+import type { RegulamentoCanonico } from "@/modules/avaliacao/domain/regulamento";
+import { EditorRegulamento, REGULAMENTO_VAZIO } from "@/modules/edicoes/ui/EditorRegulamento";
 import { ImportarRegulamento, type ModeloRegulamento } from "@/modules/edicoes/ui/ImportarRegulamento";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -26,6 +28,8 @@ export default async function RegulamentoEdicao() {
     ).then((l) => l.filter((m): m is ModeloRegulamento => !!m)),
   ]);
   const temFichas = (fichas.count ?? 0) > 0;
+  // O editor na tela começa com o regulamento atual (ou em branco, numa edição limpa).
+  const atual = reg.rubricas.length ? ((await cliente.rpc("exportar_regulamento", { p_edicao: edicao.id })).data as RegulamentoCanonico | null) : null;
   const problemas = conferirRegulamento(reg);
   const nomeBanca = (c: string) => reg.bancas.find((b) => b.codigo === c)?.nome ?? c;
 
@@ -57,6 +61,12 @@ export default async function RegulamentoEdicao() {
             <h2 className="text-lg font-semibold">Importar regulamento</h2>
             <ImportarRegulamento edicaoId={edicao.id} substituir={false} modelos={modelos} />
           </section>
+          <details className="card group">
+            <summary className="cursor-pointer font-semibold text-marca select-none">Ou monte na tela, fase por fase</summary>
+            <div className="mt-4">
+              <EditorRegulamento edicaoId={edicao.id} inicial={REGULAMENTO_VAZIO} substituir={false} />
+            </div>
+          </details>
         </>
       ) : (
         <>
@@ -87,6 +97,14 @@ export default async function RegulamentoEdicao() {
               </p>
               <div className="mt-3">
                 <ImportarRegulamento edicaoId={edicao.id} substituir modelos={modelos} />
+              </div>
+            </details>
+          )}
+          {!temFichas && atual && (
+            <details className="card group">
+              <summary className="cursor-pointer font-semibold text-marca select-none">Editar na tela, fase por fase</summary>
+              <div className="mt-4">
+                <EditorRegulamento edicaoId={edicao.id} inicial={atual} substituir />
               </div>
             </details>
           )}
