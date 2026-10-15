@@ -3,6 +3,8 @@ import { Cabecalho } from "@/app/_shell/Cabecalho";
 import { FaixaSimulacao } from "@/app/_shell/FaixaSimulacao";
 import { SeletorEdicao } from "@/app/_shell/SeletorEdicao";
 import { escolherEdicao } from "@/modules/edicoes/application/actions";
+import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
+import { instituicoesDaEdicao } from "@/modules/instituicoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { inicioDoPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { Navegacao, type ItemNav } from "@/shared/ui/Navegacao";
@@ -31,7 +33,9 @@ export async function Area({
   children: ReactNode;
 }) {
   // No "ver como", a faixa amarela lembra que é uma simulação e oferece a saída.
-  const { simulacao, usuario, real, edicao, edicoesOrganizadas, edicoesDoUsuario } = await sessaoAtual();
+  const { cliente, simulacao, usuario, real, edicao, edicoesOrganizadas, edicoesDoUsuario } = await sessaoAtual();
+  // A "cara" da edição: logo dela ou da instituição, e a cor (faixa no topo).
+  const marca = resolverMarca(edicao, await instituicoesDaEdicao(cliente, edicao.id));
   const organiza = real.papel === "organizador";
   // Quem participou de mais de uma edição pode consultar as anteriores.
   const consultaOutras = !organiza && edicoesDoUsuario.length > 1;
@@ -45,6 +49,7 @@ export async function Area({
         avatar={avatar}
         inicio={inicioDoPapel(papel)}
         simulacao={simulacao}
+        marca={marca}
         edicao={
           organiza && !simulacao ? (
             <SeletorEdicao edicoes={edicoesOrganizadas} escolhida={edicao.id} />

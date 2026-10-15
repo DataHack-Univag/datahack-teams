@@ -38,6 +38,7 @@ const CAMINHOS = {
   girar: "M20 11a8 8 0 1 0-2.3 5.7M20 4v7h-7",
   copiar: "M9 9h11v11H9zM5 15H4V4h11v1",
   imagem: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01",
+  instituicao: "M3 21h18M5 21V9l7-5 7 5v12M9 21v-5h6v5M9 12h.01M15 12h.01",
 } as const;
 
 export type NomeIcone = keyof typeof CAMINHOS;

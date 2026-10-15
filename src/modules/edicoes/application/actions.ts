@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { z } from "zod";
 import { conferirEstrutura, conferirRegulamento, regulamentoDoCanonico, type RegulamentoCanonico } from "@/modules/avaliacao/domain/regulamento";
 import { MODOS_FORMACAO, SITUACOES_EDICAO } from "@/modules/edicoes/domain/tipos";
+import { ACESSOS } from "@/modules/instituicoes/domain/tipos";
 import * as repo from "@/modules/edicoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { atualizarTelas, criarAcao } from "@/shared/acao/acao";
@@ -112,6 +113,10 @@ export const criarEdicao = criarAcao(
     min_membros: limite("O mínimo de integrantes"),
     max_membros: limite("O máximo de integrantes"),
     permite_trocas: caixa,
+    acesso: umDe(
+      ACESSOS.map((a) => a.valor),
+      "Escolha quem pode participar.",
+    ),
     copiar_de: z.string().optional().transform((v) => v || undefined),
   }),
   async (d) => {

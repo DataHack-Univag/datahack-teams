@@ -112,6 +112,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como faço um evento de outra instituição, de várias ou aberto a todos?",
+    resposta:
+      "Em Mais → Edições → “Acesso e marca da edição”, escolha quem pode participar: fechado (lista da organização, como o DATAHack Univag), instituições escolhidas ou aberto a todos. Marque as instituições (cadastradas em Edições → Instituições, com a logo em SVG) e, se quiser, dê à edição um nome público, uma cor e uma logo própria. A logo aparece no topo das telas daquela edição.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Por que não existe “apagar”?",
     resposta:
       "Para nada se perder entre edições: remover uma equipe, um link, uma ficha ou uma pessoa arquiva o registro, e toda alteração fica no histórico. As listas mostram só o que está ativo.",

@@ -1,5 +1,6 @@
 import { criarEdicao, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
 import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, SITUACOES_EDICAO, type Edicao } from "@/modules/edicoes/domain/tipos";
+import { ACESSOS, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Selo } from "@/shared/ui/Selo";
@@ -48,6 +49,7 @@ export function CartaoEdicao({
       <p className="text-xs text-suave">
         Equipes: {rotuloModo(edicao.modo_formacao).toLowerCase()} · {edicao.min_membros} a {edicao.max_membros} integrantes ·{" "}
         {edicao.permite_trocas ? "com trocas" : "sem trocas"}
+        {edicao.acesso ? ` · ${rotuloAcesso(edicao.acesso).toLowerCase()}` : ""}
       </p>
       {!vendo && (
         // Trocar de edição também por aqui: no celular o seletor do cabeçalho fica escondido (heurística 7).
@@ -126,6 +128,13 @@ export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edi
       <Campo rotulo="Início" name="data_inicio" type="date" />
       <Campo rotulo="Fim" name="data_fim" type="date" />
       <Selecao
+        rotulo="Quem pode participar"
+        name="acesso"
+        defaultValue={base.acesso ?? "lista"}
+        className="sm:col-span-2"
+        opcoes={ACESSOS.map((a) => ({ valor: a.valor, rotulo: `${a.rotulo} — ${a.descricao}` }))}
+      />
+      <Selecao
         rotulo="Como as equipes são formadas"
         name="modo_formacao"
         defaultValue="alunos_propoem"
@@ -146,7 +155,7 @@ export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edi
         ]}
       />
       <p className="text-xs text-suave sm:col-span-2">
-        Copiar traz fases, rubricas, critérios, níveis, penalidades, desempate e os organizadores. Alunos e bancas são cadastrados
+        Copiar traz fases, rubricas, critérios, níveis, penalidades, desempate, os organizadores, as instituições e a logo. Alunos e bancas são cadastrados
         de novo em Pessoas (com a edição nova escolhida no topo). A edição nova nasce como <strong>planejada</strong> e não muda a
         edição atual até você escolher “Tornar a edição atual”.
       </p>

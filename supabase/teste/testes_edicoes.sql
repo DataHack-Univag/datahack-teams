@@ -330,6 +330,47 @@ begin
 end $$;
 select pg_temp.falha($q$delete from bancas where codigo = 'professores'$q$, 'permission denied');
 
+-- ---------------------------------------------------------------- 017 · instituições, acesso e marca
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  v_uv  uuid := (select id from instituicoes where sigla = 'UNIVAG');
+  v_uf  uuid;
+  v_ed  uuid;
+begin
+  assert (select acesso from edicoes where id = v_ed1) = 'lista', 'edições de antes viram lista';
+  assert exists (select 1 from edicao_instituicoes where edicao_id = v_ed1 and instituicao_id = v_uv), 'e ficam ligadas à Univag';
+  insert into instituicoes (nome, sigla, uf) values ('Universidade Federal de Mato Grosso', 'UFMT', 'MT') returning id into v_uf;
+  -- edição nova copiando a 1: herda acesso e instituições
+  v_ed := criar_edicao('{"slug":"datahack-teste-acesso","nome":"Edição de teste do acesso"}'::jsonb, v_ed1);
+  assert (select acesso from edicoes where id = v_ed) = 'lista', 'acesso copiado';
+  assert (select count(*) from edicao_instituicoes where edicao_id = v_ed and removido_em is null) = 1, 'instituições copiadas';
+  -- vira evento de várias instituições, com marca própria
+  perform definir_acesso_edicao(v_ed, '{"acesso":"instituicoes","aprovacao":"manual","vagas":"120","marca":{"nome_publico":"DATAHack Cuiabá","cor":"#0f8a5f"}}'::jsonb, array[v_uf, v_uv]);
+  assert (select vagas from edicoes where id = v_ed) = 120, 'vagas gravadas';
+  assert (select marca ->> 'nome_publico' from edicoes where id = v_ed) = 'DATAHack Cuiabá', 'marca gravada';
+  assert (select array_agg(instituicao_id order by ordem) from edicao_instituicoes where edicao_id = v_ed and removido_em is null) = array[v_uf, v_uv], 'instituições na ordem escolhida';
+  -- tirar a Univag: fica arquivada, não apagada; e volta se escolher de novo
+  perform definir_acesso_edicao(v_ed, '{"acesso":"instituicoes"}'::jsonb, array[v_uf]);
+  assert (select removido_em is not null from edicao_instituicoes where edicao_id = v_ed and instituicao_id = v_uv), 'Univag arquivada';
+  perform definir_acesso_edicao(v_ed, '{"acesso":"aberto"}'::jsonb, array[v_uf, v_uv]);
+  assert (select removido_em is null from edicao_instituicoes where edicao_id = v_ed and instituicao_id = v_uv), 'Univag de volta';
+  assert (select vagas from edicoes where id = v_ed) is null, 'sem vagas = sem limite';
+  perform set_config('dh.ed_acesso', v_ed::text, false);
+end $$;
+select pg_temp.falha($q$select definir_acesso_edicao(current_setting('dh.ed_acesso')::uuid, '{"acesso":"instituicoes"}'::jsonb, '{}')$q$, 'ao menos uma instituição');
+select pg_temp.falha($q$insert into instituicoes (nome, logo_svg) values ('Logo perigosa', '<svg onload="alert(1)"></svg>')$q$, 'instituicoes_logo_svg_check');
+select pg_temp.falha($q$insert into instituicoes (nome, logo_svg) values ('Logo com script', '<svg><script>alert(1)</script></svg>')$q$, 'instituicoes_logo_svg_check');
+insert into instituicoes (nome, logo_svg) values ('Logo boa', '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10"><rect width="10" height="10"/></svg>');
+select pg_temp.falha($q$delete from instituicoes where nome = 'Logo boa'$q$, 'permission denied');
+
+-- aluno lê as instituições (para a logo), mas não cadastra nem muda o acesso
+select pg_temp.como('p1@teste.local');
+do $$ begin assert (select count(*) from instituicoes) >= 2, 'aluno vê as instituições'; end $$;
+select pg_temp.falha($q$insert into instituicoes (nome) values ('Fake')$q$, 'row-level security');
+select pg_temp.falha($q$select definir_acesso_edicao(current_setting('dh.ed_acesso')::uuid, '{"acesso":"aberto"}'::jsonb, '{}')$q$, 'Só a organização');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 016 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 017 conferem.'

@@ -1,5 +1,7 @@
 // Edição do evento: cada DATAHack é uma edição, com regras, formato e regulamento próprios.
 
+import type { Acesso, Aprovacao, MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
+
 export type ModoFormacao = "organizacao" | "gerador" | "alunos_propoem";
 export type SituacaoEdicao = "planejada" | "inscricoes" | "em_andamento" | "encerrada";
 
@@ -25,6 +27,13 @@ export type Edicao = {
   desclassificacao: string | null;
   metadados: Record<string, unknown>;
   criado_em: string;
+  /** Quem pode participar (migração 017; antes dela, toda edição é "lista"). */
+  acesso?: Acesso;
+  aprovacao?: Aprovacao;
+  vagas?: number | null;
+  inscricao_abre_em?: string | null;
+  inscricao_fecha_em?: string | null;
+  marca?: MarcaEdicao;
 };
 
 export const MODOS_FORMACAO: { valor: ModoFormacao; rotulo: string; descricao: string }[] = [

@@ -337,6 +337,45 @@ export type Database = {
           },
         ];
       };
+      edicao_instituicoes: {
+        Row: {
+          edicao_id: string;
+          instituicao_id: string;
+          ordem: number;
+          criado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          edicao_id: string;
+          instituicao_id: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          edicao_id?: string;
+          instituicao_id?: string;
+          ordem?: number;
+          criado_em?: string;
+          removido_em?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "edicao_instituicoes_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "edicao_instituicoes_instituicao_id_fkey";
+            columns: ["instituicao_id"];
+            isOneToOne: false;
+            referencedRelation: "instituicoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       edicoes: {
         Row: {
           id: string;
@@ -362,6 +401,12 @@ export type Database = {
           criado_por: string | null;
           criado_em: string;
           atualizado_em: string;
+          acesso: string;
+          aprovacao: string;
+          vagas: number | null;
+          inscricao_abre_em: string | null;
+          inscricao_fecha_em: string | null;
+          marca: Json;
         };
         Insert: {
           id?: string;
@@ -387,6 +432,12 @@ export type Database = {
           criado_por?: string | null;
           criado_em?: string;
           atualizado_em?: string;
+          acesso?: string;
+          aprovacao?: string;
+          vagas?: number | null;
+          inscricao_abre_em?: string | null;
+          inscricao_fecha_em?: string | null;
+          marca?: Json;
         };
         Update: {
           id?: string;
@@ -412,6 +463,12 @@ export type Database = {
           criado_por?: string | null;
           criado_em?: string;
           atualizado_em?: string;
+          acesso?: string;
+          aprovacao?: string;
+          vagas?: number | null;
+          inscricao_abre_em?: string | null;
+          inscricao_fecha_em?: string | null;
+          marca?: Json;
         };
         Relationships: [];
       };
@@ -664,6 +721,48 @@ export type Database = {
           depois?: Json | null;
           por?: string | null;
           em?: string;
+        };
+        Relationships: [];
+      };
+      instituicoes: {
+        Row: {
+          id: string;
+          nome: string;
+          sigla: string | null;
+          cidade: string | null;
+          uf: string | null;
+          tipo: string;
+          site: string | null;
+          logo_svg: string | null;
+          criado_em: string;
+          atualizado_em: string;
+          removido_em: string | null;
+        };
+        Insert: {
+          id?: string;
+          nome: string;
+          sigla?: string | null;
+          cidade?: string | null;
+          uf?: string | null;
+          tipo?: string;
+          site?: string | null;
+          logo_svg?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
+        };
+        Update: {
+          id?: string;
+          nome?: string;
+          sigla?: string | null;
+          cidade?: string | null;
+          uf?: string | null;
+          tipo?: string;
+          site?: string | null;
+          logo_svg?: string | null;
+          criado_em?: string;
+          atualizado_em?: string;
+          removido_em?: string | null;
         };
         Relationships: [];
       };
@@ -1587,12 +1686,13 @@ export type Database = {
       convidar_integrante: { Args: { p_equipe: string; p_email: string; p_como?: string }; Returns: undefined };
       criar_edicao: { Args: { p_dados: Json; p_copiar_de?: string }; Returns: string };
       criar_equipe: { Args: { p_nome: string; p_repo: string; p_edicao?: string }; Returns: string };
+      definir_acesso_edicao: { Args: { p_edicao: string; p_dados: Json; p_instituicoes: string[] }; Returns: undefined };
       definir_edicao_atual: { Args: { p_edicao: string }; Returns: undefined };
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
+      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador: { Args: Record<PropertyKey, never>; Returns: boolean };

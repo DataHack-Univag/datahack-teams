@@ -17,7 +17,7 @@ export function navOrganizacao(contagens: { trocas?: number; chamados?: number }
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
       { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
-      { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes"] },
+      { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes", "/admin/instituicoes"] },
       { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
     ],
   };
@@ -63,6 +63,8 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Propostas de equipe", href: "/admin/equipes/propostas", icone: "equipe" },
   { grupo: "Telas", rotulo: "Nova edição", href: "/admin/edicoes#nova", icone: "mais_novo" },
   { grupo: "Telas", rotulo: "Regulamento da edição", href: "/admin/edicoes/regulamento", icone: "avaliacao" },
+  { grupo: "Telas", rotulo: "Acesso e marca da edição", href: "/admin/edicoes#acesso", icone: "instituicao" },
+  { grupo: "Telas", rotulo: "Instituições", href: "/admin/instituicoes", icone: "instituicao" },
   { grupo: "Telas", rotulo: "Andamento das fichas", href: "/admin/avaliacao?aba=andamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },

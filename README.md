@@ -130,13 +130,16 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
     avisa que resolveu; mentoria e organização atendem. Só a equipe, a mentoria e a organização veem.
 16. `…16_substituir_regulamento` — trocar o regulamento por outro JSON enquanto a edição não tem
     fichas (para planejar com uma IA); o anterior vai inteiro para o histórico.
+17. `…17_instituicoes_acesso` — instituições (com logo SVG) e, por edição, quem pode participar
+    (lista, instituições escolhidas ou aberto), vagas, período de inscrição e marca (nome, cor,
+    logo). As edições de antes viram "lista" + Univag. Função `definir_acesso_edicao`.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 016 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se da 012 à 017 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -222,6 +225,7 @@ psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/202610
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000014_mapa_equipes.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000015_chamados.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261015000016_substituir_regulamento.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000017_instituicoes_acesso.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```
