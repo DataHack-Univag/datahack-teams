@@ -16,6 +16,7 @@ export function navOrganizacao(contagens: { trocas?: number; chamados?: number; 
       { href: "/admin/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/admin/chamados"], contagem: contagens.chamados },
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
       { href: "/admin/inscricoes", rotulo: "Inscrições", icone: "editar", prefixos: ["/admin/inscricoes"], contagem: contagens.inscricoes },
+      { href: "/admin/checkin", rotulo: "Check-in", icone: "qr", prefixos: ["/admin/checkin"] },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
       { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
       { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes", "/admin/instituicoes"] },
@@ -37,6 +38,7 @@ export function navMentoria(contagens: { chamados?: number } = {}): ItemNav[] {
   return [
     { href: "/mentoria/equipes", rotulo: "Equipes", icone: "equipe", prefixos: ["/mentoria/equipes"] },
     { href: "/mentoria/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/mentoria/chamados"], contagem: contagens.chamados },
+    { href: "/mentoria/checkin", rotulo: "Check-in", icone: "qr", prefixos: ["/mentoria/checkin"] },
     { href: "/mentoria/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/mentoria/pessoas"] },
     { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
   ];

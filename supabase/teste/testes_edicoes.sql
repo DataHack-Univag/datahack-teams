@@ -539,6 +539,35 @@ begin
   assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'pedro@teste.local' and removido_em is null), 'aprovado pela organização = participa';
 end $$;
 
+-- ---------------------------------------------------------------- 021 · check-in por QR
+select pg_temp.como('p1@teste.local');
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  c     text := meu_codigo_checkin(v_ed1);
+begin
+  assert c ~ '^[A-HJ-NP-Z2-9]{8}$', 'código de 8 caracteres';
+  assert meu_codigo_checkin(v_ed1) = c, 'o código não muda';
+  perform set_config('dh.codigo', c, false);
+end $$;
+select pg_temp.falha($q$select * from checkin_codigos$q$, 'permission denied');
+select pg_temp.falha($q$select fazer_checkin((select id from edicoes where numero = 1), current_setting('dh.codigo'))$q$, 'Só a organização e a mentoria');
+
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  r jsonb;
+begin
+  update participacoes set presenca = null where edicao_id = v_ed1 and email = 'p1@teste.local';
+  r := fazer_checkin(v_ed1, lower(current_setting('dh.codigo')));
+  assert not (r ->> 'ja_estava')::boolean and r ->> 'email' = 'p1@teste.local', 'check-in feito (aceita minúsculas)';
+  assert (select presenca from participacoes where edicao_id = v_ed1 and email = 'p1@teste.local') = 'presente', 'presença marcada';
+  r := fazer_checkin(v_ed1, current_setting('dh.codigo'));
+  assert (r ->> 'ja_estava')::boolean, 'segunda leitura avisa que já estava';
+end $$;
+select pg_temp.falha($q$select fazer_checkin((select id from edicoes where numero = 1), 'ZZZZZZZZ')$q$, 'Código não encontrado');
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 020 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 021 conferem.'

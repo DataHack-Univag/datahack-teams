@@ -39,6 +39,7 @@ const CAMINHOS = {
   copiar: "M9 9h11v11H9zM5 15H4V4h11v1",
   imagem: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01",
   instituicao: "M3 21h18M5 21V9l7-5 7 5v12M9 21v-5h6v5M9 12h.01M15 12h.01",
+  qr: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h2v2h-2zM18 14h2v2h-2zM14 18h2v2h-2zM18 18h2v2h-2z",
 } as const;
 
 export type NomeIcone = keyof typeof CAMINHOS;

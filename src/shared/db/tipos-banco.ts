@@ -304,6 +304,42 @@ export type Database = {
           },
         ];
       };
+      checkin_codigos: {
+        Row: {
+          edicao_id: string;
+          email: string;
+          codigo: string;
+          criado_em: string;
+        };
+        Insert: {
+          edicao_id: string;
+          email: string;
+          codigo: string;
+          criado_em?: string;
+        };
+        Update: {
+          edicao_id?: string;
+          email?: string;
+          codigo?: string;
+          criado_em?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "checkin_codigos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "checkin_codigos_email_fkey";
+            columns: ["email"];
+            isOneToOne: false;
+            referencedRelation: "pessoas";
+            referencedColumns: ["email"];
+          },
+        ];
+      };
       configuracao_legado: {
         Row: {
           id: number;
@@ -1912,7 +1948,7 @@ export type Database = {
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
+      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
       edicao_publica: { Args: { p_slug: string }; Returns: Json };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
@@ -1923,10 +1959,13 @@ export type Database = {
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
       exportar_mapa: { Args: { p_edicao: string }; Returns: Json };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
+      fazer_checkin: { Args: { p_edicao: string; p_codigo: string }; Returns: Json };
       fechar_chamado_da_equipe: { Args: { p_chamado: string; p_resolvido: boolean; p_como?: string }; Returns: undefined };
+      gerar_codigo_checkin: { Args: Record<PropertyKey, never>; Returns: string };
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       inscrever_publico: { Args: { p_slug: string; p_nome: string; p_email: string; p_respostas: Json; p_termo_versao?: number }; Returns: Json };
+      meu_codigo_checkin: { Args: { p_edicao: string }; Returns: string };
       minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
       minhas_inscricoes: { Args: Record<PropertyKey, never>; Returns: Json };
       nome_de: { Args: { p_email: string }; Returns: string };

@@ -130,6 +130,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como funciona o check-in por QR code?",
+    resposta:
+      "Cada participante tem um QR de entrada no topo da tela da equipe (na edição atual). Na porta, a mentoria ou a organização abre Check-in, toca em “Abrir câmera” e aponta para o QR: a tela mostra o nome, a equipe e marca a presença na hora (verde), ou avisa que a pessoa já tinha entrado (azul). Se a câmera não ler, dá para digitar o código de 8 letras que aparece embaixo do QR.",
+    publicos: ["organizacao", "mentoria"],
+  },
+  {
     pergunta: "Por que não existe “apagar”?",
     resposta:
       "Para nada se perder entre edições: remover uma equipe, um link, uma ficha ou uma pessoa arquiva o registro, e toda alteração fica no histórico. As listas mostram só o que está ativo.",

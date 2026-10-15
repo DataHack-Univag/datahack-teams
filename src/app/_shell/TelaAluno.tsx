@@ -5,6 +5,8 @@ import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { configuracaoDa } from "@/modules/equipes/domain/tipos";
 import { equipeDoAluno, listarResumo, ultimaRecusa } from "@/modules/equipes/infra/repositorio";
 import { chamadoAtivoDaEquipe } from "@/modules/chamados/infra/repositorio";
+import { meuCodigo } from "@/modules/checkin/infra/repositorio";
+import { MeuQr } from "@/modules/checkin/ui/MeuQr";
 import { AjudaDaEquipe } from "@/modules/chamados/ui/AjudaDaEquipe";
 import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { PainelEquipe } from "@/modules/equipes/ui/PainelEquipe";
@@ -61,6 +63,8 @@ export async function TelaAluno({
   ]);
   // Pedido de ajuda: só para equipe aprovada da edição atual (é onde a mentoria atende).
   const chamado = equipe?.situacao === "aprovada" && edicao.atual ? await chamadoAtivoDaEquipe(cliente, equipe.id) : null;
+  // QR de entrada: só na edição atual ainda não encerrada, e nunca no "ver como" (seria o código de quem simula).
+  const codigo = edicao.atual && edicao.situacao !== "encerrada" && !simulacao ? await meuCodigo(cliente, edicao.id) : null;
 
   const meuVinculo = equipe?.membros.find((m) => m.email === aluno.email);
   const convidado = meuVinculo?.situacao === "convidado";
@@ -92,6 +96,7 @@ export async function TelaAluno({
                 Em <strong>Materiais</strong> estão os desafios e as bases de dados.
               </BoasVindas>
             )}
+            {codigo && <MeuQr codigo={codigo} edicao={edicao.nome} />}
             {troca && troca.recebidos.length > 0 && (
               <PedidosRecebidos recebidos={troca.recebidos} equipes={equipes} meuEmail={aluno.email} souLider={souLider} />
             )}
