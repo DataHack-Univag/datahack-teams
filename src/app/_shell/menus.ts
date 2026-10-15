@@ -4,7 +4,7 @@ import type { Comando } from "@/shared/ui/PaletaComandos";
 import type { ItemNav } from "@/shared/ui/Navegacao";
 
 /** Organização: 6 abas na ordem do evento. No celular: 4 na barra + "Mais". */
-export function navOrganizacao(contagens: { trocas?: number; chamados?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
+export function navOrganizacao(contagens: { trocas?: number; chamados?: number; inscricoes?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
   return {
     itens: [
       { href: "/admin", rotulo: "Painel", icone: "painel" },
@@ -15,6 +15,7 @@ export function navOrganizacao(contagens: { trocas?: number; chamados?: number }
     mais: [
       { href: "/admin/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/admin/chamados"], contagem: contagens.chamados },
       { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
+      { href: "/admin/inscricoes", rotulo: "Inscrições", icone: "editar", prefixos: ["/admin/inscricoes"], contagem: contagens.inscricoes },
       { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
       { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
       { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes", "/admin/instituicoes"] },

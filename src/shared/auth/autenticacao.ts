@@ -19,3 +19,18 @@ export async function usuarioAutenticado(cliente: Cliente): Promise<Autenticado 
 export async function encerrarSessao(cliente: Cliente) {
   await cliente.auth.signOut();
 }
+
+/**
+ * Cria a conta de quem acabou de se inscrever e já deixa logado. O banco só aceita a conta de
+ * quem está em "pessoas" (a inscrição cria a pessoa antes). `jaTinha`: o e-mail já tem senha.
+ */
+export async function criarConta(cliente: Cliente, email: string, senha: string): Promise<{ ok: boolean; jaTinha: boolean; erro?: string }> {
+  const { data, error } = await cliente.auth.signUp({ email, password: senha });
+  if (error) {
+    const jaTinha = /already registered|already exists/i.test(error.message);
+    return { ok: false, jaTinha, erro: jaTinha ? undefined : error.message };
+  }
+  // Com "Confirm email" ligado o Supabase não devolve sessão; sem identidades = e-mail já cadastrado.
+  if (data.user?.identities?.length === 0) return { ok: false, jaTinha: true };
+  return { ok: !!data.session, jaTinha: false, erro: data.session ? undefined : "confirmacao" };
+}

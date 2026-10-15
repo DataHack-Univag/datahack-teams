@@ -124,6 +124,12 @@ export const TOPICOS: Topico[] = [
     publicos: ["organizacao"],
   },
   {
+    pergunta: "Como funciona a inscrição pública (evento aberto ou de várias instituições)?",
+    resposta:
+      "Em Mais → Inscrições fica o link da página de inscrição da edição, para divulgar. A pessoa preenche nome, e-mail, uma senha e as perguntas do formulário, e já fica logada para acompanhar. Com aprovação automática, quem tem vaga entra na hora e o resto vai para a lista de espera (quando alguém cancela, o primeiro da fila entra). Com aprovação pela organização, cada inscrição espera em Inscrições até alguém aprovar, recusar ou pôr na espera. O termo de uso dos dados fica na mesma tela.",
+    publicos: ["organizacao"],
+  },
+  {
     pergunta: "Por que não existe “apagar”?",
     resposta:
       "Para nada se perder entre edições: remover uma equipe, um link, uma ficha ou uma pessoa arquiva o registro, e toda alteração fica no histórico. As listas mostram só o que está ativo.",

@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
 // Rotas acessíveis sem login.
-const PUBLICAS = ["/login", "/auth"];
+const PUBLICAS = ["/login", "/auth", "/inscricao/"];
 
 // Renova a sessão do Supabase a cada requisição e manda para /login quem não está logado.
 export async function proxy(request: NextRequest) {

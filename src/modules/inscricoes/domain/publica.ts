@@ -1,0 +1,53 @@
+// A edição como aparece na página pública de inscrição e o andamento de cada inscrição.
+
+import type { Acesso, Aprovacao, MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
+import type { Campo } from "@/modules/inscricoes/domain/campos";
+
+export type SituacaoInscricoes = "fechada" | "em_breve" | "aberta" | "encerrada";
+export type SituacaoInscricao = "pendente" | "aprovada" | "espera" | "recusada" | "cancelada";
+
+export type EdicaoPublica = {
+  id: string;
+  numero: number;
+  slug: string;
+  nome: string;
+  marca: MarcaEdicao;
+  descricao: string | null;
+  local: string | null;
+  data_inicio: string | null;
+  data_fim: string | null;
+  acesso: Acesso;
+  aprovacao: Aprovacao;
+  vagas: number | null;
+  inscricao_abre_em: string | null;
+  inscricao_fecha_em: string | null;
+  situacao: SituacaoInscricoes;
+  aprovadas: number;
+  campos: Campo[];
+  instituicoes: { id: string; nome: string }[];
+  termo: { versao: number; texto: string } | null;
+};
+
+export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; tom: "sucesso" | "alerta" | "marca" | "erro" | "neutro"; explicacao: string }[] = [
+  { valor: "pendente", rotulo: "Em análise", tom: "alerta", explicacao: "A organização ainda vai analisar a sua inscrição." },
+  { valor: "aprovada", rotulo: "Aprovada", tom: "sucesso", explicacao: "Você está no evento. Entre no sistema para ver sua equipe e as informações." },
+  { valor: "espera", rotulo: "Lista de espera", tom: "marca", explicacao: "As vagas acabaram. Se alguém desistir, você entra na ordem da fila." },
+  { valor: "recusada", rotulo: "Não aprovada", tom: "erro", explicacao: "A organização não aprovou esta inscrição. Em caso de dúvida, fale com ela." },
+  { valor: "cancelada", rotulo: "Cancelada", tom: "neutro", explicacao: "Esta inscrição foi cancelada." },
+];
+
+export const situacaoInscricao = (s: string) => SITUACOES_INSCRICAO.find((x) => x.valor === s) ?? SITUACOES_INSCRICAO[0];
+
+/** Vagas que sobram (null = sem limite). */
+export const vagasRestantes = (e: Pick<EdicaoPublica, "vagas" | "aprovadas">) => (e.vagas === null ? null : Math.max(0, e.vagas - e.aprovadas));
+
+const dataHora = (iso: string) =>
+  new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Cuiaba", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+
+/** Frase do estado das inscrições ("Inscrições abertas até 30/05/2027 18:00"). */
+export function fraseInscricoes(e: Pick<EdicaoPublica, "situacao" | "inscricao_abre_em" | "inscricao_fecha_em">): string {
+  if (e.situacao === "em_breve") return e.inscricao_abre_em ? `As inscrições abrem em ${dataHora(e.inscricao_abre_em)}.` : "As inscrições abrem em breve.";
+  if (e.situacao === "encerrada") return "As inscrições estão encerradas.";
+  if (e.situacao === "fechada") return "Este evento é só para convidados da organização.";
+  return e.inscricao_fecha_em ? `Inscrições abertas até ${dataHora(e.inscricao_fecha_em)}.` : "Inscrições abertas.";
+}

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { cache } from "react";
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { listarEdicoes } from "@/modules/edicoes/infra/repositorio";
+import { minhasInscricoes } from "@/modules/inscricoes/infra/repositorio";
 import { ehAvaliador } from "@/modules/pessoas/domain/papeis";
 import type { Inscrito } from "@/modules/pessoas/domain/tipos";
 import { buscarInscrito, emailNormalizado, participacoesDe } from "@/modules/pessoas/infra/repositorio";
@@ -15,7 +16,8 @@ import { clienteServidor } from "@/shared/db/servidor";
  *  - por padrão, a edição atual (ou a mais recente de que a pessoa participa);
  *  - quem participou de mais de uma edição escolhe outra no seletor do topo: a organização
  *    para administrar, os demais para consultar as anteriores (só leitura).
- * Quem está logado mas não participa de nenhuma edição é deslogado com aviso.
+ * Quem está logado mas não participa de nenhuma edição vai acompanhar a inscrição (se tiver
+ * uma) ou é deslogado com aviso.
  */
 export const sessaoAtual = cache(async () => {
   const cliente = await clienteServidor();
@@ -36,6 +38,8 @@ export const sessaoAtual = cache(async () => {
 
   const inscrito: Inscrito | null = edicao ? await buscarInscrito(cliente, email, edicao.id) : null;
   if (!edicao || !inscrito) {
+    // Inscreveu-se e ainda não entrou (em análise, na espera…): acompanha a inscrição.
+    if ((await minhasInscricoes(cliente)).length) redirect("/minha-inscricao");
     await encerrarSessao(cliente);
     redirect("/login?erro=nao_inscrito");
   }

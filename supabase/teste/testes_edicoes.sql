@@ -21,7 +21,7 @@ exception when others then
     raise exception 'Falhou com a mensagem errada (%): %', p_trecho, sqlerrm;
   end if;
 end $$;
-grant execute on all functions in schema pg_temp to authenticated;
+grant execute on all functions in schema pg_temp to authenticated, anon;
 
 set role authenticated;
 
@@ -452,6 +452,93 @@ begin
   assert n = 0, 'aluno não muda inscrição (nem a própria)';
 end $$;
 
+-- ---------------------------------------------------------------- 020 · inscrição pública
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;   -- edição aberta, pergunta só "Cidade"
+begin
+  perform definir_acesso_edicao(v_ed, '{"acesso":"aberto","aprovacao":"automatica","vagas":"1"}'::jsonb, '{}');
+  assert definir_termo(v_ed, 'Os dados servem só para organizar o evento e não são repassados a ninguém.') = 1, 'termo versão 1';
+  assert definir_termo(v_ed, 'Os dados servem só para organizar o evento e não são repassados a ninguém.') = 1, 'mesmo texto, mesma versão';
+  -- quem já tinha inscrição (do bloco 018) sai, para começar a contagem de vagas do zero
+  update inscricoes set situacao = 'cancelada' where edicao_id = v_ed;
+  perform set_config('dh.slug1', (select slug from edicoes where numero = 1), false);
+end $$;
+
+-- sem login: vê a edição e se inscreve
+reset role;
+set role anon;
+select pg_temp.como('');
+do $$
+declare
+  j jsonb := edicao_publica('datahack-teste-acesso');
+  r jsonb;
+begin
+  assert j ->> 'situacao' = 'aberta', 'inscrições abertas';
+  assert jsonb_array_length(j -> 'campos') = 1 and (j -> 'termo' ->> 'versao')::int = 1, 'perguntas e termo na página pública';
+  assert edicao_publica(current_setting('dh.slug1')) is null, 'evento fechado não aparece';
+  r := inscrever_publico('datahack-teste-acesso', 'Maria Pública', 'Maria.Publica@Gmail.com', '{"cidade":"Sinop"}', 1);
+  assert r ->> 'situacao' = 'aprovada', 'primeira vaga: aprovada na hora';
+  r := inscrever_publico('datahack-teste-acesso', 'João Espera', 'joao.espera@teste.local', '{"cidade":"Cuiabá"}', 1);
+  assert r ->> 'situacao' = 'espera', 'lotou: lista de espera';
+  r := inscrever_publico('datahack-teste-acesso', 'Maria Pública', 'mariapublica@gmail.com', '{"cidade":"Sinop"}', 1);
+  assert (r ->> 'ja_inscrito')::boolean and r ->> 'email' = 'maria.publica@gmail.com', 'mesmo Gmail sem pontos: já inscrita';
+end $$;
+select pg_temp.falha($q$select inscrever_publico('datahack-teste-acesso', 'Sem Termo', 'semtermo@teste.local', '{"cidade":"X"}', null)$q$, 'aceite o termo');
+select pg_temp.falha($q$select inscrever_publico('datahack-teste-acesso', 'Sem Cidade', 'semcidade@teste.local', '{}', 1)$q$, 'Responda: Cidade');
+select pg_temp.falha($q$select inscrever_publico('datahack-teste-acesso', 'Fulano', 'x@teste.local', '{"cidade":"X"}', 1)$q$, 'nome completo');
+select pg_temp.falha($q$select inscrever_publico(current_setting('dh.slug1'), 'Ana Lista', 'ana@teste.local', '{}', null)$q$, 'não recebe inscrições');
+select pg_temp.falha($q$select decidir_inscricao((select id from inscricoes limit 1), 'aprovada')$q$, 'permission denied');
+select pg_temp.falha($q$select * from inscricoes$q$, 'permission denied');
+reset role;
+set role authenticated;
+select pg_temp.como('p56@teste.local');
+
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;
+begin
+  assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'maria.publica@gmail.com' and papel = 'aluno' and removido_em is null), 'aprovada = participa da edição';
+  assert not exists (select 1 from participacoes where edicao_id = v_ed and email = 'joao.espera@teste.local'), 'na espera ainda não participa';
+end $$;
+
+-- quem está na espera acompanha, mas não entra no sistema da edição
+select pg_temp.como('joao.espera@teste.local');
+do $$ begin
+  assert (minhas_inscricoes() -> 0 ->> 'situacao') = 'espera' and (minhas_inscricoes() -> 0 ->> 'posicao')::int = 1, 'primeiro da fila';
+  assert not participa_de(current_setting('dh.ed_form')::uuid), 'sem acesso à edição';
+end $$;
+
+-- a organização cancela a aprovada: a vaga vai para o primeiro da espera
+select pg_temp.como('p56@teste.local');
+do $$
+declare
+  v_ed uuid := current_setting('dh.ed_form')::uuid;
+  r jsonb;
+begin
+  r := decidir_inscricao((select id from inscricoes where edicao_id = v_ed and email = 'maria.publica@gmail.com'), 'cancelada');
+  assert (r ->> 'promovidas')::int = 1, 'um da espera entrou';
+  assert (select situacao from inscricoes where edicao_id = v_ed and email = 'joao.espera@teste.local') = 'aprovada', 'João aprovado';
+  assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'joao.espera@teste.local' and removido_em is null), 'João participa';
+  assert (select removido_em is not null from participacoes where edicao_id = v_ed and email = 'maria.publica@gmail.com'), 'Maria saiu da edição';
+  assert (select situacao from inscricoes where edicao_id = v_ed and email = 'maria.publica@gmail.com') = 'cancelada', 'e a decisão ficou';
+  -- aprovação manual: quem se inscreve espera a organização
+  perform definir_acesso_edicao(v_ed, '{"acesso":"aberto","aprovacao":"manual"}'::jsonb, '{}');
+end $$;
+reset role;
+set role anon;
+do $$ begin
+  assert inscrever_publico('datahack-teste-acesso', 'Pedro Manual', 'pedro@teste.local', '{"cidade":"Sorriso"}', 1) ->> 'situacao' = 'pendente', 'manual: pendente';
+end $$;
+reset role;
+set role authenticated;
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;
+begin
+  perform decidir_inscricao((select id from inscricoes where edicao_id = v_ed and email = 'pedro@teste.local'), 'aprovada');
+  assert exists (select 1 from participacoes where edicao_id = v_ed and email = 'pedro@teste.local' and removido_em is null), 'aprovado pela organização = participa';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 018 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 020 conferem.'

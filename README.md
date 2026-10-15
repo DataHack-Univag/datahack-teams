@@ -144,13 +144,17 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 19. `…19_logo_edicao` — correção para quem rodou a primeira versão da 017 (a produção, em
     16/10/2026): regra da logo/cor da edição, edição nova sem marca e a logo oficial na Edição 1.
     Onde a 017 final já rodou, não muda nada.
+20. `…20_inscricao_publica` — inscrição pública (eventos de instituições ou abertos): página
+    `/inscricao/<edição>` sem login (`edicao_publica`, `inscrever_publico`), aprovação automática
+    com vagas e lista de espera (`promover_da_espera`) ou pela organização (`decidir_inscricao`),
+    termo LGPD com versão (`termos`), `/minha-inscricao` para acompanhar e a `vitrine` do login.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 019 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se da 012 à 020 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
@@ -239,6 +243,7 @@ psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/202610
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000017_instituicoes_acesso.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000018_formulario_inscricao.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000019_logo_edicao.sql
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000020_inscricao_publica.sql
 psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
 PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
 ```

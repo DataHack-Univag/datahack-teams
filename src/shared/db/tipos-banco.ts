@@ -1765,6 +1765,38 @@ export type Database = {
           },
         ];
       };
+      termos: {
+        Row: {
+          edicao_id: string;
+          versao: number;
+          texto: string;
+          criado_em: string;
+          criado_por: string | null;
+        };
+        Insert: {
+          edicao_id: string;
+          versao: number;
+          texto: string;
+          criado_em?: string;
+          criado_por?: string | null;
+        };
+        Update: {
+          edicao_id?: string;
+          versao?: number;
+          texto?: string;
+          criado_em?: string;
+          criado_por?: string | null;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "termos_edicao_id_fkey";
+            columns: ["edicao_id"];
+            isOneToOne: false;
+            referencedRelation: "edicoes";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
       trocas: {
         Row: {
           id: string;
@@ -1860,6 +1892,7 @@ export type Database = {
       alocar_equipe: { Args: { p_equipe: string; p_elemento: string; p_lugar: number }; Returns: Json };
       analisar_equipe: { Args: { p_equipe: string; p_aprovar: boolean; p_motivo?: string }; Returns: undefined };
       aplicar_equipes: { Args: { p_equipes: Json; p_substituir?: boolean; p_edicao?: string }; Returns: number };
+      aprovadas_na_edicao: { Args: { p_edicao: string }; Returns: number };
       arquivar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       arquivar_ficha: { Args: { p_ficha: string }; Returns: undefined };
       atende_chamados: { Args: { p_edicao: string }; Returns: boolean };
@@ -1870,26 +1903,32 @@ export type Database = {
       convidar_integrante: { Args: { p_equipe: string; p_email: string; p_como?: string }; Returns: undefined };
       criar_edicao: { Args: { p_dados: Json; p_copiar_de?: string }; Returns: string };
       criar_equipe: { Args: { p_nome: string; p_repo: string; p_edicao?: string }; Returns: string };
+      decidir_inscricao: { Args: { p_inscricao: string; p_situacao: string }; Returns: Json };
       definir_acesso_edicao: { Args: { p_edicao: string; p_dados: Json; p_instituicoes: string[] }; Returns: undefined };
       definir_campos_inscricao: { Args: { p_edicao: string; p_campos: Json }; Returns: undefined };
       definir_edicao_atual: { Args: { p_edicao: string }; Returns: undefined };
       definir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
+      definir_termo: { Args: { p_edicao: string; p_texto: string }; Returns: number };
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
       edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
+      edicao_publica: { Args: { p_slug: string }; Returns: Json };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_organizador_de: { Args: { p_edicao: string }; Returns: boolean };
       email_atual: { Args: Record<PropertyKey, never>; Returns: string };
+      entrar_na_edicao: { Args: { p_edicao: string; p_email: string }; Returns: undefined };
       equipe_ativa_de: { Args: { p_email: string; p_edicao: string }; Returns: string };
       exportar_mapa: { Args: { p_edicao: string }; Returns: Json };
       exportar_regulamento: { Args: { p_edicao: string }; Returns: Json };
       fechar_chamado_da_equipe: { Args: { p_chamado: string; p_resolvido: boolean; p_como?: string }; Returns: undefined };
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
+      inscrever_publico: { Args: { p_slug: string; p_nome: string; p_email: string; p_respostas: Json; p_termo_versao?: number }; Returns: Json };
       minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
+      minhas_inscricoes: { Args: Record<PropertyKey, never>; Returns: Json };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
       papel_atual: { Args: Record<PropertyKey, never>; Returns: string };
@@ -1897,6 +1936,7 @@ export type Database = {
       participa_de: { Args: { p_edicao: string }; Returns: boolean };
       pedir_troca: { Args: { p_destino: string; p_mensagem?: string; p_como?: string }; Returns: string };
       pode_avaliar: { Args: { p_rubrica: string }; Returns: boolean };
+      promover_da_espera: { Args: { p_edicao: string }; Returns: number };
       propor_equipe: { Args: { p_nome: string; p_emails: string[]; p_repo?: string; p_como?: string }; Returns: string };
       quem_age: { Args: { p_como: string }; Returns: string };
       reabrir_chamado: { Args: { p_chamado: string }; Returns: undefined };
@@ -1905,8 +1945,10 @@ export type Database = {
       remover_integrante: { Args: { p_equipe: string; p_email: string }; Returns: undefined };
       responder_convite: { Args: { p_equipe: string; p_aceitar: boolean; p_como?: string }; Returns: undefined };
       salvar_ficha: { Args: { p_equipe: string; p_rubrica: string; p_notas: Json; p_comentario?: string }; Returns: string };
+      situacao_inscricao: { Args: { p_edicao: string }; Returns: string };
       substituir_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: Json };
       validar_respostas: { Args: { p_edicao: string; p_respostas: Json }; Returns: string[] };
+      vitrine: { Args: Record<PropertyKey, never>; Returns: Json };
     };
     Enums: { [_ in never]: never };
     CompositeTypes: { [_ in never]: never };
