@@ -37,6 +37,21 @@ export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; to
 ];
 
 /**
+ * Situação das inscrições pelo site — a mesma regra do banco (situacao_inscricao, migração 027):
+ * só abre na edição atual e dentro do prazo.
+ */
+export function situacaoDasInscricoes(
+  e: { acesso?: string | null; situacao: string; atual: boolean; inscricao_abre_em?: string | null; inscricao_fecha_em?: string | null },
+  agora = Date.now(),
+): SituacaoInscricoes {
+  if (!e.acesso || e.acesso === "lista") return "fechada";
+  if (e.situacao === "encerrada" || (e.inscricao_fecha_em && agora >= Date.parse(e.inscricao_fecha_em))) return "encerrada";
+  if (e.inscricao_abre_em && agora < Date.parse(e.inscricao_abre_em)) return "em_breve";
+  if (!e.atual) return "encerrada";
+  return "aberta";
+}
+
+/**
  * Pergunta pronta "Li e aceito o uso dos meus dados" (chave "termo"): quando a edição tem o
  * termo de uso cadastrado, ela some da tela e o aceite do termo vale por ela (um aceite só).
  */

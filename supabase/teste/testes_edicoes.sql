@@ -465,8 +465,10 @@ begin
   perform set_config('dh.slug1', (select slug from edicoes where numero = 1), false);
 end $$;
 
--- sem login: vê a edição e se inscreve
+-- sem login: vê a edição e se inscreve (027: só a edição atual recebe inscrição pelo site)
 reset role;
+update edicoes set atual = false where atual;
+update edicoes set atual = true where slug = 'datahack-teste-acesso';
 set role anon;
 select pg_temp.como('');
 do $$
@@ -614,6 +616,19 @@ begin
   assert validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}') = array['Curso: escolha uma das opções da lista.', 'Semestre: escolha um número inteiro.'], 'fora da lista e semestre quebrado: ' || array_to_string(validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}'), ' | ');
 end $$;
 
+-- ---------------------------------------------------------------- 027 · inscrição só na edição atual e no prazo
+reset role;
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;
+begin
+  update edicoes set acesso = 'aberto', situacao = 'planejada', inscricao_abre_em = null, inscricao_fecha_em = null where id = v_ed;
+  assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'encerrada' end, 'atual abre, outra não';
+  update edicoes set inscricao_abre_em = now() + interval '1 day' where id = v_ed;
+  assert situacao_inscricao(v_ed) = 'em_breve', 'prazo ainda vai abrir';
+  update edicoes set inscricao_abre_em = null, inscricao_fecha_em = now() - interval '1 hour' where id = v_ed;
+  assert situacao_inscricao(v_ed) = 'encerrada', 'prazo vencido fecha';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 024 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 027 conferem.'

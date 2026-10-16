@@ -89,7 +89,7 @@ export function FormAcessoEdicao({ edicao, instituicoes, escolhidas }: { edicao:
           <Campo rotulo="Abrem em" name="inscricao_abre_em" type="datetime-local" defaultValue={paraCampoDataHora(edicao.inscricao_abre_em ?? null)} dica="Horário de Mato Grosso." />
           <Campo rotulo="Fecham em" name="inscricao_fecha_em" type="datetime-local" defaultValue={paraCampoDataHora(edicao.inscricao_fecha_em ?? null)} />
           <p className="text-xs text-suave sm:col-span-2">
-            Mudar a aprovação vale para as próximas inscrições: as que já entraram continuam como estão (veja e decida em Participantes → Inscrições).
+            As inscrições pelo site só ficam abertas na <strong>edição atual</strong> e dentro deste prazo (em branco: sem limite). Mudar a aprovação vale para as próximas inscrições: as que já entraram continuam como estão (veja e decida em Participantes → Inscrições).
           </p>
         </fieldset>
       )}

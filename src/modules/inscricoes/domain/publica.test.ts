@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Campo } from "@/modules/inscricoes/domain/campos";
-import { comAceiteDoTermo, limparNome, perguntasNaTela, problemaNoNome } from "@/modules/inscricoes/domain/publica";
+import { comAceiteDoTermo, limparNome, perguntasNaTela, problemaNoNome, situacaoDasInscricoes } from "@/modules/inscricoes/domain/publica";
 
 describe("nome na inscrição pública", () => {
   it("pede nome e sobrenome, como o banco", () => {
@@ -29,5 +29,19 @@ describe("um aceite só quando há termo", () => {
     expect(comAceiteDoTermo(campos, { curso: "SI" }, true, true)).toEqual({ curso: "SI", termo: true });
     expect(comAceiteDoTermo(campos, { curso: "SI", termo: true }, true, false)).toEqual({ curso: "SI" });
     expect(comAceiteDoTermo(campos, { curso: "SI" }, false, true)).toEqual({ curso: "SI" });
+  });
+});
+
+describe("situacaoDasInscricoes (mesma regra do banco, migração 027)", () => {
+  const agora = Date.parse("2026-10-20T12:00:00Z");
+  const base = { acesso: "aberto", situacao: "planejada", atual: true, inscricao_abre_em: null, inscricao_fecha_em: null };
+  it("abre só na edição atual e dentro do prazo", () => {
+    expect(situacaoDasInscricoes(base, agora)).toBe("aberta");
+    expect(situacaoDasInscricoes({ ...base, atual: false }, agora)).toBe("encerrada");
+    expect(situacaoDasInscricoes({ ...base, atual: false, inscricao_abre_em: "2026-11-01T00:00:00Z" }, agora)).toBe("em_breve");
+    expect(situacaoDasInscricoes({ ...base, inscricao_abre_em: "2026-10-01T00:00:00Z", inscricao_fecha_em: "2026-10-30T00:00:00Z" }, agora)).toBe("aberta");
+    expect(situacaoDasInscricoes({ ...base, inscricao_fecha_em: "2026-10-19T00:00:00Z" }, agora)).toBe("encerrada");
+    expect(situacaoDasInscricoes({ ...base, situacao: "encerrada" }, agora)).toBe("encerrada");
+    expect(situacaoDasInscricoes({ ...base, acesso: "lista" }, agora)).toBe("fechada");
   });
 });

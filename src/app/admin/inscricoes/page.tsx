@@ -5,6 +5,7 @@ import { camposDaEdicao, listarInscricoes, termoAtual } from "@/modules/inscrico
 import { CopiarLink } from "@/modules/inscricoes/ui/CopiarLink";
 import { ListaInscricoes } from "@/modules/inscricoes/ui/ListaInscricoes";
 import { rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
+import { fraseInscricoes, situacaoDasInscricoes } from "@/modules/inscricoes/domain/publica";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -68,7 +69,13 @@ export default async function AdminInscricoes() {
               {acesso === "lista" ? (
                 <p className="text-xs text-suave">Em evento fechado não há página pública: as inscrições vêm do cadastro em Pessoas.</p>
               ) : (
-                <CopiarLink link={link} />
+                <>
+                  <CopiarLink link={link} />
+                  <p className="text-xs text-suave">
+                    {fraseInscricoes({ situacao: situacaoDasInscricoes(edicao), inscricao_abre_em: edicao.inscricao_abre_em ?? null, inscricao_fecha_em: edicao.inscricao_fecha_em ?? null })}
+                    {!edicao.atual && " Só a edição atual recebe inscrições pelo site."}
+                  </p>
+                </>
               )}
             </div>
             <div className="card text-center">
