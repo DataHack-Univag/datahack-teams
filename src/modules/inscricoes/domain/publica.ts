@@ -37,8 +37,8 @@ export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; to
 ];
 
 /**
- * Situação das inscrições pelo site — a mesma regra do banco (situacao_inscricao, migração 027):
- * só abre na edição atual e dentro do prazo.
+ * Situação das inscrições pelo site — a mesma regra do banco (situacao_inscricao, migração 028):
+ * só abre na edição atual e dentro do prazo. Planejada e ainda não atual: "ainda não abriram".
  */
 export function situacaoDasInscricoes(
   e: { acesso?: string | null; situacao: string; atual: boolean; inscricao_abre_em?: string | null; inscricao_fecha_em?: string | null },
@@ -47,7 +47,7 @@ export function situacaoDasInscricoes(
   if (!e.acesso || e.acesso === "lista") return "fechada";
   if (e.situacao === "encerrada" || (e.inscricao_fecha_em && agora >= Date.parse(e.inscricao_fecha_em))) return "encerrada";
   if (e.inscricao_abre_em && agora < Date.parse(e.inscricao_abre_em)) return "em_breve";
-  if (!e.atual) return "encerrada";
+  if (!e.atual) return e.situacao === "planejada" ? "em_breve" : "encerrada";
   return "aberta";
 }
 
@@ -92,7 +92,7 @@ const dataHora = (iso: string) =>
 
 /** Frase do estado das inscrições ("Inscrições abertas até 30/05/2027 18:00"). */
 export function fraseInscricoes(e: Pick<EdicaoPublica, "situacao" | "inscricao_abre_em" | "inscricao_fecha_em">): string {
-  if (e.situacao === "em_breve") return e.inscricao_abre_em ? `As inscrições abrem em ${dataHora(e.inscricao_abre_em)}.` : "As inscrições abrem em breve.";
+  if (e.situacao === "em_breve") return e.inscricao_abre_em ? `As inscrições abrem em ${dataHora(e.inscricao_abre_em)}.` : "As inscrições ainda não foram abertas.";
   if (e.situacao === "encerrada") return "As inscrições estão encerradas.";
   if (e.situacao === "fechada") return "Este evento é só para convidados da organização.";
   return e.inscricao_fecha_em ? `Inscrições abertas até ${dataHora(e.inscricao_fecha_em)}.` : "Inscrições abertas.";

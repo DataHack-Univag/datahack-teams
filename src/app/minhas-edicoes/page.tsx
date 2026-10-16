@@ -96,7 +96,7 @@ export default async function MinhasEdicoes() {
               </div>
             ) : chamada.tipo === "em_breve" ? (
               <div className="flex flex-wrap items-center gap-3">
-                <p className="flex-1 text-sm text-suave">As inscrições desta edição abrem em breve.</p>
+                <p className="flex-1 text-sm text-suave">As inscrições desta edição ainda não foram abertas.</p>
                 <Link href={`/inscricao/${chamada.slug}`} className="btn-secundario">
                   Ver a página da edição
                 </Link>

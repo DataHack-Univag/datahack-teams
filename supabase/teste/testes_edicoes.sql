@@ -616,13 +616,16 @@ begin
   assert validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}') = array['Curso: escolha uma das opções da lista.', 'Semestre: escolha um número inteiro.'], 'fora da lista e semestre quebrado: ' || array_to_string(validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}'), ' | ');
 end $$;
 
--- ---------------------------------------------------------------- 027 · inscrição só na edição atual e no prazo
+-- ---------------------------------------------------------------- 027/028 · inscrição só na edição atual e no prazo
 reset role;
 do $$
 declare v_ed uuid := current_setting('dh.ed_form')::uuid;
 begin
   update edicoes set acesso = 'aberto', situacao = 'planejada', inscricao_abre_em = null, inscricao_fecha_em = null where id = v_ed;
-  assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'encerrada' end, 'atual abre, outra não';
+  assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'em_breve' end, 'atual abre; planejada não atual: ainda não abriu';
+  update edicoes set situacao = 'em_andamento' where id = v_ed and not atual;
+  assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'encerrada' end, 'não atual que já passou: encerrada';
+  update edicoes set situacao = 'planejada' where id = v_ed;
   update edicoes set inscricao_abre_em = now() + interval '1 day' where id = v_ed;
   assert situacao_inscricao(v_ed) = 'em_breve', 'prazo ainda vai abrir';
   update edicoes set inscricao_abre_em = null, inscricao_fecha_em = now() - interval '1 hour' where id = v_ed;
@@ -631,4 +634,4 @@ end $$;
 
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 027 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 028 conferem.'
