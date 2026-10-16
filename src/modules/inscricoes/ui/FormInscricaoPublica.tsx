@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { inscrever } from "@/modules/inscricoes/application/actions";
 import { limparRespostas, validarRespostas, type Respostas } from "@/modules/inscricoes/domain/campos";
-import type { EdicaoPublica } from "@/modules/inscricoes/domain/publica";
+import { limparNome, problemaNoNome, type EdicaoPublica } from "@/modules/inscricoes/domain/publica";
 import { FormularioDinamico } from "@/modules/inscricoes/ui/FormularioDinamico";
 import { CampoSenha } from "@/shared/ui/CampoSenha";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
@@ -17,6 +17,10 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
   const [respostas, setRespostas] = useState<Respostas>({});
   const [tentou, setTentou] = useState(false);
   const [termo, setTermo] = useState(false);
+  // Campos controlados: depois de um erro do servidor, o que a pessoa digitou continua lá.
+  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
+  const erroNome = tentou ? problemaNoNome(nome) : null;
   const opcoes = { instituicoes: edicao.instituicoes.map((i) => i.id), aceitaOutra: edicao.acesso !== "instituicoes" };
   const erros = tentou ? validarRespostas(edicao.campos, respostas, opcoes) : {};
   const pacote = JSON.stringify(limparRespostas(edicao.campos, respostas));
@@ -31,7 +35,25 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
         <legend className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Seus dados</legend>
         <label className="block">
           <span className="rotulo">Nome completo</span>
-          <input name="nome" required minLength={3} maxLength={120} autoComplete="name" className="campo" placeholder="Nome e sobrenome" />
+          <input
+            name="nome"
+            required
+            minLength={3}
+            maxLength={120}
+            autoComplete="name"
+            className="campo"
+            placeholder="Nome e sobrenome"
+            value={nome}
+            onChange={(e) => setNome(e.target.value)}
+            onBlur={() => setNome((n) => limparNome(n))}
+            aria-invalid={!!erroNome || undefined}
+            aria-describedby={erroNome ? "erro-nome" : undefined}
+          />
+          {erroNome && (
+            <span id="erro-nome" role="alert" className="mt-1 block text-xs font-medium text-red-600 dark:text-red-400">
+              {erroNome}
+            </span>
+          )}
         </label>
         {logado ? (
           <>
@@ -44,7 +66,7 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
           <>
             <label className="block">
               <span className="rotulo">E-mail</span>
-              <input name="email" type="email" required autoComplete="email" className="campo" placeholder="nome@gmail.com" />
+              <input name="email" type="email" required autoComplete="email" className="campo" placeholder="nome@gmail.com" value={email} onChange={(e) => setEmail(e.target.value)} />
               <span className="mt-1 block text-xs text-suave">Pode ser o seu e-mail pessoal. É com ele que você entra no sistema.</span>
             </label>
             <div className="grid gap-3 sm:grid-cols-2">
@@ -93,7 +115,7 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
       <div
         onClickCapture={(ev) => {
           setTentou(true);
-          const problemas = Object.keys(validarRespostas(edicao.campos, respostas, opcoes)).length || (edicao.termo && !termo);
+          const problemas = problemaNoNome(nome) || Object.keys(validarRespostas(edicao.campos, respostas, opcoes)).length || (edicao.termo && !termo);
           if (problemas) {
             ev.preventDefault();
             ev.stopPropagation();

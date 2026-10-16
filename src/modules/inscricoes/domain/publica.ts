@@ -36,6 +36,18 @@ export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; to
   { valor: "cancelada", rotulo: "Cancelada", tom: "neutro", explicacao: "Esta inscrição foi cancelada." },
 ];
 
+/** Nome como o banco guarda: espaços repetidos (inclusive os "invisíveis") viram um só. */
+export const limparNome = (nome: string) => nome.replace(/\s+/g, " ").trim();
+
+/** A mesma regra do banco (inscrever_publico): nome e sobrenome, de 3 a 120 letras. */
+export function problemaNoNome(nome: string): string | null {
+  const n = limparNome(nome);
+  if (n.length < 3) return "Informe o seu nome completo.";
+  if (n.length > 120) return "O nome pode ter no máximo 120 caracteres.";
+  if (!n.includes(" ")) return "Informe o nome e o sobrenome (ex.: Maria Silva).";
+  return null;
+}
+
 export const situacaoInscricao = (s: string) => SITUACOES_INSCRICAO.find((x) => x.valor === s) ?? SITUACOES_INSCRICAO[0];
 
 /** Vagas que sobram (null = sem limite). */
