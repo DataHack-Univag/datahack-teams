@@ -79,7 +79,18 @@ export async function Area({
           )}
         </div>
       )}
-      {organiza && !edicao.atual && (
+      {/* Encerrada = congelada (migração 035): o banco recusa qualquer alteração. */}
+      {organiza && edicao.situacao === "encerrada" && (
+        <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
+          <strong>A Edição {edicao.numero} está encerrada: só consulta.</strong> Notas, fichas, presença, equipes e configurações não podem mais ser alterados.
+          Para corrigir algo, reabra em{" "}
+          <Link href="/admin/edicoes#situacao" className="font-semibold text-marca underline">
+            Edições → Situação
+          </Link>
+          .
+        </p>
+      )}
+      {organiza && !edicao.atual && edicao.situacao !== "encerrada" && (
         <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
           Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que não é a edição atual dos participantes e das bancas.
         </p>

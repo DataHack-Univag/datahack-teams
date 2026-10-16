@@ -755,6 +755,32 @@ begin
   assert exists (select 1 from pg_constraint where conname = 'edicoes_atual_acontecendo'), 'o banco não aceita atual + planejada';
 end $$;
 
+-- ---------------------------------------------------------------- 035 · edição encerrada congelada
+reset role;
+do $$
+declare v_ed1 uuid := (select id from edicoes where numero = 1);
+begin
+  update edicoes set situacao = 'encerrada' where id = v_ed1;
+  perform set_config('dh.ed1', v_ed1::text, false);
+  perform set_config('dh.aluno1', (select email from participacoes where edicao_id = v_ed1 and papel = 'aluno' and removido_em is null limit 1), false);
+end $$;
+select pg_temp.falha($q$update participacoes set presenca = 'presente' where edicao_id = current_setting('dh.ed1')::uuid and email = current_setting('dh.aluno1')$q$, 'está encerrada');
+select pg_temp.falha($q$update fichas set comentario = 'mudou' where edicao_id = current_setting('dh.ed1')::uuid$q$, 'está encerrada');
+select pg_temp.falha($q$update notas_criterio set nivel_id = nivel_id where ficha_id in (select id from fichas where edicao_id = current_setting('dh.ed1')::uuid)$q$, 'está encerrada');
+select pg_temp.falha($q$insert into materiais (edicao_id, titulo, url, categoria) values (current_setting('dh.ed1')::uuid, 'Novo', 'https://x.org', 'outro')$q$, 'está encerrada');
+select pg_temp.falha($q$update edicoes set nome = 'Outro nome' where id = current_setting('dh.ed1')::uuid$q$, 'está encerrada');
+do $$
+declare v_ed1 uuid := current_setting('dh.ed1')::uuid;
+begin
+  -- a situação muda (reabrir); com a edição reaberta, volta a poder alterar
+  update edicoes set situacao = 'em_andamento' where id = v_ed1;
+  update participacoes set presenca = presenca where edicao_id = v_ed1 and email = current_setting('dh.aluno1');
+  update edicoes set situacao = 'encerrada' where id = v_ed1;
+  -- manutenção liberada de propósito
+  set local dh.permitir_encerrada = 'sim';
+  update participacoes set presenca = presenca where edicao_id = v_ed1 and email = current_setting('dh.aluno1');
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 034 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 035 conferem.'

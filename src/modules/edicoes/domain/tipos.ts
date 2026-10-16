@@ -53,7 +53,7 @@ export const MODOS_FORMACAO: { valor: ModoFormacao; rotulo: string; descricao: s
 export const SITUACOES_EDICAO: { valor: SituacaoEdicao; rotulo: string; descricao: string; tom: "neutro" | "alerta" | "sucesso" | "marca" | "erro" }[] = [
   { valor: "planejada", rotulo: "Em planejamento", descricao: "Em preparação. Na página de inscrição: “as inscrições ainda não foram abertas”.", tom: "alerta" },
   { valor: "em_andamento", rotulo: "Em andamento", descricao: "Está acontecendo (tornar a edição atual já põe aqui). Inscrições abertas no prazo.", tom: "sucesso" },
-  { valor: "encerrada", rotulo: "Encerrada", descricao: "Já foi concluída. Só consulta para participantes e bancas; a página de inscrição diz que acabou.", tom: "neutro" },
+  { valor: "encerrada", rotulo: "Encerrada", descricao: "Já foi concluída e fica congelada: ninguém altera mais nada (nem a organização). A página de inscrição diz que acabou.", tom: "neutro" },
   { valor: "cancelada", rotulo: "Cancelada", descricao: "Não vai acontecer. Pede o motivo; o link de inscrição deixa de existir.", tom: "erro" },
 ];
 const ANTIGAS: Record<string, string> = { inscricoes: "Inscrições" };

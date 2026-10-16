@@ -347,6 +347,13 @@ export const TOPICOS: Topico[] = [
   },
   {
     modulo: "Edições e configuração",
+    pergunta: "O que acontece quando a edição é encerrada?",
+    resposta:
+      "Ela fica congelada: notas, fichas, presença, equipes, links, inscrições, regulamento, mapa e materiais não podem mais ser alterados, nem pela organização. Tudo continua visível para consulta. Para corrigir algo, a organização reabre a edição em Configurar → Edições → Situação (volta para “Em andamento”), corrige e encerra de novo.",
+    publicos: ["organizacao"],
+  },
+  {
+    modulo: "Edições e configuração",
     pergunta: "Como cadastro as fases e as rubricas de uma edição?",
     resposta:
       "Em Configurar → Regulamento. Toque em “Copiar instruções para a IA”, mande para uma IA dizendo como serão as fases, as bancas e o que avaliar (ou escolha “Começar de um modelo”) e cole o JSON que ela devolver. O sistema confere a estrutura e os pesos antes de gravar. Enquanto não houver fichas, dá para trocar o regulamento quantas vezes precisar; o anterior fica no histórico.",
