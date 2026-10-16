@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
+import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { iniciarSimulacao } from "@/modules/pessoas/application/simulacao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { PAPEIS } from "@/modules/pessoas/domain/papeis";
@@ -20,6 +22,8 @@ export default async function VerComo({ searchParams }: PageProps<"/ver-como">) 
 
   return (
     <main className="flex flex-1 items-center justify-center px-4 py-10">
+      {/* Esta tela fica fora da estrutura das áreas: o tema da edição entra aqui também. */}
+      <TemaDaEdicao cor={edicao.marca ? resolverMarca(edicao).cor : null} />
       <div className="card w-full max-w-md space-y-4">
         <span className="flex size-11 items-center justify-center rounded-full bg-amber-400 text-amber-950">
           <Icone nome="olho" />
