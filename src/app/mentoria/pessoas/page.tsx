@@ -1,7 +1,6 @@
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 import { AjudaPresenca, ChamadaPresenca } from "@/modules/pessoas/ui/ChamadaPresenca";
-import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
 // Mentoria → Pessoas: os alunos da edição e a chamada.
@@ -11,7 +10,6 @@ export default async function MentoriaPessoas() {
 
   return (
     <Pagina>
-      <AutoAtualizar segundos={30} />
       <CabecalhoPagina
         titulo="Alunos e presença"
         destaque="presença"

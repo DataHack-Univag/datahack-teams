@@ -9,7 +9,6 @@ import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { primeiroNome } from "@/shared/lib/texto";
 import { BoasVindas, BotaoAjuda } from "@/shared/ui/Ajuda";
-import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
@@ -32,7 +31,6 @@ export default async function PainelOrganizacao() {
 
   return (
     <Pagina>
-      <AutoAtualizar segundos={45} />
       <CabecalhoPagina
         trilha={[{ rotulo: "Organização" }, { rotulo: "Painel" }]}
         titulo={`Olá, ${primeiroNome(usuario.nome)}`}

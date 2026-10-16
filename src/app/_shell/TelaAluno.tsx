@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Area } from "@/app/_shell/Area";
+import { aoVivoAluno } from "@/app/_shell/aoVivo";
 import { comandosDasAbas, navAluno } from "@/app/_shell/menus";
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { configuracaoDa } from "@/modules/equipes/domain/tipos";
@@ -21,10 +22,10 @@ import { PedidosRecebidos, PedirTroca } from "@/modules/trocas/ui/Trocas";
 import type { Cliente } from "@/shared/db/servidor";
 import { primeiroNome } from "@/shared/lib/texto";
 import { BoasVindas } from "@/shared/ui/Ajuda";
-import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
+import { TempoReal } from "@/shared/ui/TempoReal";
 
 export type AbaAluno = "equipe" | "trocas" | "materiais";
 export const abaDoAluno = (v: unknown): AbaAluno => (v === "trocas" || v === "materiais" ? v : "equipe");
@@ -79,8 +80,8 @@ export async function TelaAluno({
 
   return (
     <Area nome={aluno.nome} papel={aluno.papel} avatar={avatar} itens={itens} comandos={comandosDasAbas(itens)}>
-      {/* Convites, trocas e decisões da organização chegam sem recarregar. */}
-      <AutoAtualizar segundos={30} />
+      {/* Convites, trocas, decisões da organização e o mentor a caminho chegam na hora, com aviso. */}
+      <TempoReal {...aoVivoAluno(edicao.id, aluno.email, equipe?.id ?? null, edicao.permite_trocas)} />
       <Pagina estreita>
         {aba === "equipe" && (
           <>

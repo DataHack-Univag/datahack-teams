@@ -10,7 +10,6 @@ import type { Elemento, Sala } from "@/modules/mapa/domain/tipos";
 import { carregarAlocacoes, carregarMapa } from "@/modules/mapa/infra/repositorio";
 import { DesenhoSala, type Alerta } from "@/modules/mapa/ui/DesenhoSala";
 import type { Cliente } from "@/shared/db/servidor";
-import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
@@ -97,7 +96,6 @@ export function PainelChamados({
   const abertos = chamados.filter((c) => c.situacao === "aberto").length;
   return (
     <>
-      <AutoAtualizar segundos={15} />
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
         <p className="text-sm" aria-live="polite">
           <span className="font-mono text-2xl font-semibold tabular-nums">{abertos}</span>{" "}

@@ -4,7 +4,6 @@ import { locaisDaEdicao } from "@/modules/mapa/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 import { Aviso } from "@/shared/ui/Aviso";
-import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { BotaoLink } from "@/shared/ui/Botao";
 import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 
@@ -18,7 +17,6 @@ export default async function MentoriaEquipes() {
 
   return (
     <Pagina>
-      <AutoAtualizar segundos={30} />
       <CabecalhoPagina
         titulo="Equipes"
         destaque="Equipes"

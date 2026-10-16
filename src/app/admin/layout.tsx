@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { Area } from "@/app/_shell/Area";
+import { aoVivoOrganizacao } from "@/app/_shell/aoVivo";
 import { comandosDasAbas, comandosExtrasOrganizacao, navOrganizacao } from "@/app/_shell/menus";
 import { contarChamadosAbertos } from "@/modules/chamados/infra/repositorio";
 import { listarResumo } from "@/modules/equipes/infra/repositorio";
@@ -9,6 +10,7 @@ import { rotuloPapel } from "@/modules/pessoas/domain/papeis";
 import { listarPessoasResumo } from "@/modules/pessoas/infra/repositorio";
 import { trocasPendentes } from "@/modules/trocas/infra/repositorio";
 import type { Comando } from "@/shared/ui/PaletaComandos";
+import { TempoReal } from "@/shared/ui/TempoReal";
 
 // Área da organização (só organizadores). Cada aba é uma rota em /admin/*.
 export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
@@ -35,6 +37,8 @@ export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
 
   return (
     <Area nome={usuario.nome} papel={usuario.papel} avatar={avatar} itens={nav.itens} mais={nav.mais} comandos={comandos}>
+      {/* Tudo da edição ao vivo: inscrição, pedido de ajuda, proposta e troca chegam com aviso. */}
+      <TempoReal {...aoVivoOrganizacao(edicao.id)} />
       {children}
     </Area>
   );
