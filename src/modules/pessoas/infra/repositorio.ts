@@ -110,7 +110,7 @@ export async function listarSemEquipe(cliente: Cliente, edicaoId: string): Promi
     cliente.from("membros").select("email").eq("edicao_id", edicaoId).is("saiu_em", null),
   ]);
   const ocupados = new Set((exigir(rMembros, "as equipes") ?? []).map((m) => m.email));
-  return (exigir(rPart, "os alunos sem equipe") ?? [])
+  return (exigir(rPart, "os participantes sem equipe") ?? [])
     .filter((p) => !ocupados.has(p.email))
     .map(paraInscrito)
     .sort((a, b) => a.nome.localeCompare(b.nome, "pt-BR"));
@@ -134,7 +134,7 @@ export async function contarAlunos(cliente: Cliente, edicaoId: string): Promise<
     .eq("edicao_id", edicaoId)
     .eq("papel", "aluno")
     .is("removido_em", null);
-  exigir(r, "a contagem de alunos");
+  exigir(r, "a contagem de participantes");
   return r.count ?? 0;
 }
 
@@ -218,7 +218,7 @@ export async function presencaDaEdicao(cliente: Cliente, edicaoId: string): Prom
     .eq("papel", "aluno")
     .is("removido_em", null)
     .overrideTypes<{ email: string; presenca: Presenca | null }[], { merge: false }>();
-  return Object.fromEntries((exigir(r, "a presença dos alunos") ?? []).map((p) => [p.email, p.presenca]));
+  return Object.fromEntries((exigir(r, "a presença dos participantes") ?? []).map((p) => [p.email, p.presenca]));
 }
 
 /** Presença de um aluno no evento (organização ou mentoria; null limpa o registro). */

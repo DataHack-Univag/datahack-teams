@@ -33,7 +33,7 @@ export function PainelEquipe({
     <div className="space-y-4 sm:space-y-6">
       {config.edicao_bloqueada && (
         <Aviso tom="alerta" titulo={config.motivo_bloqueio ?? "Edição bloqueada pela organização"}>
-          {organizador ? "Os alunos só visualizam; você, como organização, ainda pode editar." : "Você ainda pode ver tudo, mas não alterar."}
+          {organizador ? "Os participantes só visualizam; você, como organização, ainda pode editar." : "Você ainda pode ver tudo, mas não alterar."}
         </Aviso>
       )}
       <DadosEquipe equipe={equipe} p={p} rotulo={rotulo} local={local} />

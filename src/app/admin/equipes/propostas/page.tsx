@@ -23,14 +23,14 @@ export default async function AdminPropostas() {
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Equipes", href: "/admin/equipes" }, { rotulo: "Propostas" }]}
         titulo="Propostas de equipe"
         destaque="Propostas"
-        descricao="Equipes formadas pelos próprios alunos. Com todos os convidados confirmados, a organização aprova ou recusa com um motivo."
+        descricao="Equipes formadas pelos próprios participantes. Com todos os convidados confirmados, a organização aprova ou recusa com um motivo."
         acoes={
           <BotaoAjuda titulo="Propostas de equipe">
             <ol>
-              <li>Um aluno propõe a equipe e convida os colegas (ele começa como líder).</li>
+              <li>Um participante propõe a equipe e convida os colegas (ele começa como líder).</li>
               <li>Cada colega confirma ou recusa o convite no sistema.</li>
               <li>Com todos confirmados e o mínimo de integrantes, a proposta fica “Aguardando aprovação”.</li>
-              <li>A organização aprova (a equipe passa a valer) ou recusa com um motivo (os alunos ficam livres).</li>
+              <li>A organização aprova (a equipe passa a valer) ou recusa com um motivo (os participantes ficam livres).</li>
             </ol>
           </BotaoAjuda>
         }
@@ -39,14 +39,14 @@ export default async function AdminPropostas() {
       {edicao.modo_formacao !== "alunos_propoem" && (
         <Aviso
           tom="info"
-          titulo="Nesta edição os alunos não propõem equipes"
+          titulo="Nesta edição os participantes não propõem equipes"
           acao={
             <BotaoLink href="/admin/equipes#regras" tamanho="pequeno">
               Mudar as regras
             </BotaoLink>
           }
         >
-          Para os alunos formarem as próprias equipes, escolha “Alunos propõem” nas regras das equipes.
+          Para os participantes formarem as próprias equipes, escolha “Participantes propõem” nas regras das equipes.
         </Aviso>
       )}
       <ListaPropostas propostas={propostas} />

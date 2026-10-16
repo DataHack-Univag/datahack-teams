@@ -35,8 +35,8 @@ export function ListaEntradas({ entradas }: { entradas: Entrada[] }) {
 
   if (!entradas.length)
     return (
-      <EstadoVazio icone="pessoas" titulo="Nenhum aluno nesta edição">
-        Os alunos aparecem aqui assim que forem cadastrados ou aprovados.
+      <EstadoVazio icone="pessoas" titulo="Nenhum participante nesta edição">
+        Os participantes aparecem aqui assim que forem cadastrados ou aprovados.
       </EstadoVazio>
     );
 
@@ -46,11 +46,11 @@ export function ListaEntradas({ entradas }: { entradas: Entrada[] }) {
       <div className="space-y-2">
         <p className="text-sm" aria-live="polite">
           <span className="font-[family-name:var(--font-display)] text-2xl font-bold tabular-nums">{presentes.length}</span>
-          <span className="text-suave"> de {entradas.length} alunos já entraram ({pct}%)</span>
+          <span className="text-suave"> de {entradas.length} participantes já entraram ({pct}%)</span>
           {faltando.length > 0 && <span className="text-suave"> · {faltando.length} faltando</span>}
           {ausentes.length > 0 && <span className="text-suave"> · {ausentes.length} marcado(s) ausente(s)</span>}
         </p>
-        <div className="h-2 overflow-hidden rounded-full bg-marca-fundo" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Alunos que já entraram">
+        <div className="h-2 overflow-hidden rounded-full bg-marca-fundo" role="progressbar" aria-valuenow={pct} aria-valuemin={0} aria-valuemax={100} aria-label="Participantes que já entraram">
           <div className="h-full rounded-full [background:var(--grad)]" style={{ width: `${pct}%` }} />
         </div>
       </div>
@@ -71,7 +71,7 @@ export function ListaEntradas({ entradas }: { entradas: Entrada[] }) {
           value={busca}
           onChange={(e) => setBusca(e.target.value)}
           placeholder="Buscar nome, e-mail ou equipe"
-          aria-label="Buscar aluno"
+          aria-label="Buscar participante"
           className="campo min-h-9 w-full py-1 text-sm sm:ml-auto sm:w-64"
         />
       </div>

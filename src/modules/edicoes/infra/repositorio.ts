@@ -60,7 +60,7 @@ export async function resumoEdicoes(cliente: Cliente): Promise<Map<string, { alu
     atual[k]++;
     mapa.set(id, atual);
   };
-  for (const x of exigir(p, "os alunos") ?? []) soma(x.edicao_id, "alunos");
+  for (const x of exigir(p, "os participantes") ?? []) soma(x.edicao_id, "alunos");
   for (const x of exigir(e, "as equipes") ?? []) soma(x.edicao_id, "equipes");
   for (const x of exigir(f, "as fichas") ?? []) soma(x.edicao_id, "fichas");
   return mapa;

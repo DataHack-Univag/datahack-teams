@@ -36,7 +36,7 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
             <BotaoAjuda titulo="Edições">
               <ul>
                 <li>
-                  A <strong>edição atual</strong> é a que alunos e bancas veem ao entrar. A organização escolhe qual edição está vendo no menu de edições do topo.
+                  A <strong>edição atual</strong> é a que participantes e bancas veem ao entrar. A organização escolhe qual edição está vendo no menu de edições do topo.
                 </li>
                 <li>As configurações embaixo são sempre da edição que você está vendo (com a logo e a cor dela).</li>
                 <li>Para preparar a próxima edição, use “Nova edição” e copie o regulamento de uma anterior.</li>
@@ -52,7 +52,7 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
 
       {criada && (
         <Aviso tom="sucesso" titulo="Edição criada">
-          Você já está vendo a edição nova: as configurações abaixo são dela. Cadastre os alunos e as bancas em Pessoas e confira o regulamento.
+          Você já está vendo a edição nova: as configurações abaixo são dela. Cadastre os participantes e as bancas em Pessoas e confira o regulamento.
         </Aviso>
       )}
 
@@ -81,7 +81,7 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
             </h2>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Selo tom="marca">Você está vendo</Selo>
-              {edicao.atual ? <Selo tom="sucesso">Atual dos alunos e bancas</Selo> : <Selo tom="alerta">Não é a atual</Selo>}
+              {edicao.atual ? <Selo tom="sucesso">Atual dos participantes e bancas</Selo> : <Selo tom="alerta">Não é a atual</Selo>}
             </div>
           </div>
           <div className="flex flex-wrap gap-2">

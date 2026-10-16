@@ -24,7 +24,7 @@ import { Selo } from "@/shared/ui/Selo";
 const paraOpcoes = (colegas: Inscrito[]): OpcaoPessoa[] =>
   colegas.map((i) => ({ email: i.email, nome: i.nome, detalhe: cursoSemestre(i) }));
 
-const SEM_COLEGAS = "Todos os alunos desta edição já estão numa equipe ou têm convite aguardando.";
+const SEM_COLEGAS = "Todos os participantes desta edição já estão numa equipe ou têm convite aguardando.";
 
 /** Integrantes de uma proposta com a situação de cada um. */
 function MembrosDaProposta({ equipe, meuEmail }: { equipe: Equipe; meuEmail?: string }) {
@@ -59,7 +59,7 @@ export function ProporEquipe({ colegas, config, meuEmail }: { colegas: Inscrito[
       <div>
         <h2 className="text-lg font-semibold">Monte a sua equipe</h2>
         <p className="text-sm text-suave">
-          Nesta edição, os próprios alunos formam as equipes: escolha um nome, convide de {Math.max(0, config.min_membros - 1)} a {vagas} colega(s) e
+          Nesta edição, os próprios participantes formam as equipes: escolha um nome, convide de {Math.max(0, config.min_membros - 1)} a {vagas} colega(s) e
           envie. Cada colega confirma no sistema e, com todos confirmados, a organização aprova. Você começa como líder.
         </p>
       </div>
@@ -75,7 +75,7 @@ export function ProporEquipe({ colegas, config, meuEmail }: { colegas: Inscrito[
           opcoes={paraOpcoes(outros)}
           maximo={vagas}
           vazio={SEM_COLEGAS}
-          dica="Só aparecem alunos que ainda não estão numa equipe nem foram convidados por outra."
+          dica="Só aparecem participantes que ainda não estão numa equipe nem foram convidados por outra."
         />
         <BotaoEnviar icone="equipe">Propor equipe</BotaoEnviar>
       </Formulario>
@@ -216,7 +216,7 @@ export function AnalisarProposta({ equipe }: { equipe: Equipe }) {
           perigo
         >
           <Ocultos valores={{ equipe_id: equipe.id, aprovar: "0" }} />
-          <AreaTexto rotulo="Motivo (aparece para os alunos)" name="motivo" rows={1} maxLength={500} className="sm:flex-1" placeholder="Ex.: equipe acima do limite de veteranos" />
+          <AreaTexto rotulo="Motivo (aparece para os participantes)" name="motivo" rows={1} maxLength={500} className="sm:flex-1" placeholder="Ex.: equipe acima do limite de veteranos" />
           <BotaoEnviar variante="perigo" className="sm:mb-5">
             Recusar
           </BotaoEnviar>
@@ -231,7 +231,7 @@ export function ListaPropostas({ propostas }: { propostas: Equipe[] }) {
   if (!propostas.length)
     return (
       <EstadoVazio icone="equipe" titulo="Nenhuma proposta aguardando">
-        Quando os alunos propuserem equipes, elas aparecem aqui para a organização aprovar.
+        Quando os participantes propuserem equipes, elas aparecem aqui para a organização aprovar.
       </EstadoVazio>
     );
   const ordem = (e: Equipe) => (e.situacao === "aguardando_aprovacao" ? 0 : 1);

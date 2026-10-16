@@ -26,8 +26,8 @@ function filtrosDa(bancas: BancaResumo[], formacao?: FormacaoPessoas): Filtro[] 
   return [
     { id: "todos", rotulo: "Todos", teste: () => true },
     ...opcoesFuncao(bancas).map((x) => ({ id: x.valor, rotulo: x.rotulo, teste: (p: Participante) => funcaoDe(p.papel, p.banca) === x.valor })),
-    { id: "sem_equipe", rotulo: "Alunos sem equipe", teste: (p) => p.papel === "aluno" && !p.equipe_id },
-    { id: "sem_nota", rotulo: "Alunos sem nota", teste: (p) => p.papel === "aluno" && p.nota == null },
+    { id: "sem_equipe", rotulo: "Participantes sem equipe", teste: (p) => p.papel === "aluno" && !p.equipe_id },
+    { id: "sem_nota", rotulo: "Participantes sem nota", teste: (p) => p.papel === "aluno" && p.nota == null },
     { id: "ausentes", rotulo: "Ausentes no evento", teste: (p) => p.presenca === "ausente" },
     // Formação das equipes (só quando os alunos propõem): os números do painel abrem estes filtros.
     ...(formacao

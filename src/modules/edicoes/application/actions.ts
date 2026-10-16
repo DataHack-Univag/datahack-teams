@@ -83,7 +83,7 @@ export const salvarRegrasEquipes = criarAcao(
     if (error) return falha(traduzirErro(error));
     if (!alterou) return SEM_PERMISSAO;
     atualizarTelas();
-    return sucesso(d.equipes_travadas ? "Regras salvas. Os alunos só visualizam as equipes." : "Regras das equipes salvas.");
+    return sucesso(d.equipes_travadas ? "Regras salvas. Os participantes só visualizam as equipes." : "Regras das equipes salvas.");
   },
 );
 
@@ -138,7 +138,7 @@ export const tornarAtual = criarAcao(z.object({ id }), async (d) => {
   const { error } = await repo.definirEdicaoAtual(cliente, d.id);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
-  return sucesso("Pronto: esta é a edição atual. Alunos e bancas veem esta edição ao entrar.");
+  return sucesso("Pronto: esta é a edição atual. Participantes e bancas veem esta edição ao entrar.");
 });
 
 /** Importa o regulamento (JSON no formato canônico) numa edição que ainda não tem um. */

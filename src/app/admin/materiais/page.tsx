@@ -14,7 +14,7 @@ export default async function AdminMateriais() {
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Materiais" }]}
         titulo="Materiais do evento"
         destaque="Materiais"
-        descricao="Desafios, documentação, fontes e dicionários de dados. Tudo publicado aqui aparece para todos os alunos."
+        descricao="Desafios, documentação, fontes e dicionários de dados. Tudo publicado aqui aparece para todos os participantes."
       />
       <div className="grid gap-6 lg:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]">
         <section className="card h-fit space-y-3">

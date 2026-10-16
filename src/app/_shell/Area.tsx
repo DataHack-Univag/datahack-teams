@@ -81,7 +81,7 @@ export async function Area({
       )}
       {organiza && !edicao.atual && (
         <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
-          Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que não é a edição atual dos alunos e das bancas.
+          Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que não é a edição atual dos participantes e das bancas.
         </p>
       )}
       <Suspense>

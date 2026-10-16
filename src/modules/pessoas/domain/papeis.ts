@@ -5,10 +5,10 @@ export type Papel = "aluno" | "organizador" | "avaliador" | "mentor";
 
 /** Papéis com o nome e a explicação que a tela mostra (heurística 2: sem os códigos internos). */
 export const PAPEIS: { valor: Papel; rotulo: string; descricao: string }[] = [
-  { valor: "aluno", rotulo: "Aluno", descricao: "Participa de uma equipe e faz as entregas." },
+  { valor: "aluno", rotulo: "Participante", descricao: "Participa de uma equipe e faz as entregas." },
   { valor: "organizador", rotulo: "Organização", descricao: "Vê e edita tudo da edição e avalia pela banca da organização." },
   { valor: "avaliador", rotulo: "Avaliador", descricao: "Avalia as rubricas da banca dele." },
-  { valor: "mentor", rotulo: "Mentoria", descricao: "Acompanha as equipes no evento e registra a presença dos alunos. Não avalia." },
+  { valor: "mentor", rotulo: "Mentoria", descricao: "Acompanha as equipes no evento e registra a presença dos participantes. Não avalia." },
 ];
 
 export const VALORES_PAPEL = PAPEIS.map((p) => p.valor);
@@ -42,7 +42,7 @@ export function lerFuncao(valor: string): { papel: Papel; banca: string | null }
 
 export function opcoesFuncao(bancas: BancaResumo[]): { valor: string; rotulo: string; descricao: string }[] {
   return [
-    { valor: "aluno", rotulo: "Aluno", descricao: PAPEIS[0].descricao },
+    { valor: "aluno", rotulo: "Participante", descricao: PAPEIS[0].descricao },
     { valor: "organizador", rotulo: "Organização", descricao: PAPEIS[1].descricao },
     ...bancas.filter((b) => !b.daOrganizacao).map((b) => ({ valor: `avaliador:${b.codigo}`, rotulo: b.nome, descricao: "Avalia as rubricas desta banca." })),
     { valor: "mentor", rotulo: "Mentoria", descricao: PAPEIS[3].descricao },

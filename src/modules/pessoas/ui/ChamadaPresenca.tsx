@@ -54,7 +54,7 @@ export function ChamadaPresenca({ alunos }: { alunos: AlunoChamada[] }) {
       </div>
 
       <label className="relative block">
-        <span className="sr-only">Buscar aluno</span>
+        <span className="sr-only">Buscar participante</span>
         <Icone nome="busca" className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-suave" />
         <input
           id="busca-chamada"
@@ -69,8 +69,8 @@ export function ChamadaPresenca({ alunos }: { alunos: AlunoChamada[] }) {
       <FiltrosChips opcoes={FILTROS.map((f) => ({ id: f.id, rotulo: f.rotulo, n: alunos.filter(f.teste).length }))} ativo={filtro} aoEscolher={setFiltro} />
 
       {lista.length === 0 ? (
-        <EstadoVazio icone="busca" titulo={alunos.length ? "Ninguém encontrado" : "Nenhum aluno nesta edição"}>
-          {alunos.length ? "Tente outro nome ou limpe o filtro." : "Os alunos aparecem aqui assim que a organização cadastrar em Pessoas."}
+        <EstadoVazio icone="busca" titulo={alunos.length ? "Ninguém encontrado" : "Nenhum participante nesta edição"}>
+          {alunos.length ? "Tente outro nome ou limpe o filtro." : "Os participantes aparecem aqui assim que a organização cadastrar em Pessoas."}
         </EstadoVazio>
       ) : (
         <ul className="divide-y divide-borda">
@@ -97,7 +97,7 @@ export function AjudaPresenca() {
   return (
     <BotaoAjuda titulo="Presença">
       <ul>
-        <li>Marque cada aluno como presente ou ausente. Errou? Use “Desfazer” no aviso ou marque de novo.</li>
+        <li>Marque cada participante como presente ou ausente. Errou? Use “Desfazer” no aviso ou marque de novo.</li>
         <li>Ausente não sai da edição nem da equipe: continua inscrito e no histórico.</li>
         <li>Quem marcou e quando fica registrado. A lista se atualiza sozinha a cada 30 segundos.</li>
       </ul>

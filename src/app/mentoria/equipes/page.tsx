@@ -28,7 +28,7 @@ export default async function MentoriaEquipes() {
         }
       />
       {semEquipe > 0 && (
-        <Aviso tom="info" titulo={`${semEquipe} aluno(s) ainda sem equipe`}>
+        <Aviso tom="info" titulo={`${semEquipe} participante(s) ainda sem equipe`}>
           Eles aparecem em Pessoas, com o curso e a presença.
         </Aviso>
       )}

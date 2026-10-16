@@ -41,16 +41,16 @@ export const MODOS_FORMACAO: { valor: ModoFormacao; rotulo: string; descricao: s
   { valor: "organizacao", rotulo: "Organização monta à mão", descricao: "A organização cria cada equipe e escolhe os integrantes." },
   {
     valor: "alunos_propoem",
-    rotulo: "Alunos propõem",
-    descricao: "Um aluno propõe a equipe e convida os colegas; com todos confirmados, a organização aprova.",
+    rotulo: "Participantes propõem",
+    descricao: "Um participante propõe a equipe e convida os colegas; com todos confirmados, a organização aprova.",
   },
 ];
 
 export const SITUACOES_EDICAO: { valor: SituacaoEdicao; rotulo: string; descricao: string }[] = [
-  { valor: "planejada", rotulo: "Planejada", descricao: "Em preparação; ainda não aberta aos alunos." },
+  { valor: "planejada", rotulo: "Planejada", descricao: "Em preparação; ainda não aberta aos participantes." },
   { valor: "inscricoes", rotulo: "Inscrições", descricao: "Recebendo inscrições e formando equipes." },
   { valor: "em_andamento", rotulo: "Em andamento", descricao: "O evento está acontecendo." },
-  { valor: "encerrada", rotulo: "Encerrada", descricao: "Só consulta para alunos e bancas; a organização ainda edita." },
+  { valor: "encerrada", rotulo: "Encerrada", descricao: "Só consulta para participantes e bancas; a organização ainda edita." },
 ];
 
 export const rotuloModo = (m: string) => MODOS_FORMACAO.find((x) => x.valor === m)?.rotulo ?? m;

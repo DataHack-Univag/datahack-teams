@@ -29,7 +29,7 @@ export default async function AdminTrocas({ searchParams }: PageProps<"/admin/eq
         acoes={
           <BotaoAjuda titulo="Trocas de equipe">
             <ol>
-              <li>O aluno pede para ir para outra equipe.</li>
+              <li>O participante pede para ir para outra equipe.</li>
               <li>Qualquer integrante da equipe de destino pode aceitar: os dois trocam de lugar.</li>
               <li>Quem pediu pode cancelar; a equipe pode recusar; a organização pode cancelar qualquer pedido.</li>
             </ol>

@@ -81,7 +81,7 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
             ? edicoes.some((e) => e.atual)
               ? "As edições anteriores ficam só para consulta. Ao entrar, você sempre começa na atual."
               : "As edições anteriores ficam só para consulta. Você ainda não participa da edição atual."
-            : "Trocar aqui muda só o que você vê. Alunos e bancas continuam na edição atual."}
+            : "Trocar aqui muda só o que você vê. Participantes e bancas continuam na edição atual."}
         </p>
         {participante && (
           <Link href="/minhas-edicoes" onClick={fechar} className="mt-2 flex items-center gap-2 rounded-xl border-t border-borda p-2 pt-3 text-sm font-semibold hover:bg-superficie">
@@ -119,7 +119,7 @@ function CartaoMenu({ edicao, marcada = false, enviando = false, participante }:
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Edição {edicao.numero}</span>
           {edicao.atual && (
-            <Selo tom="sucesso" title="A edição que alunos e bancas veem ao entrar">
+            <Selo tom="sucesso" title="A edição que participantes e bancas veem ao entrar">
               Atual
             </Selo>
           )}

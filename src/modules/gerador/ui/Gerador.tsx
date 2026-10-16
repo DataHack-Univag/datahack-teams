@@ -162,7 +162,7 @@ export function Gerador({
       setStatus({
         texto:
           `Equipes geradas ${usarNota ? `com peso ${peso}% semestre / ${100 - peso}% nota` : "só por semestre"} · semente "${semente}"${novaVariacao ? ` · variação ${novaVariacao}` : ""}.` +
-          (usarNota && semN ? ` ${semN} aluno(s) sem nota entraram com nota estimada só para o cálculo.` : ""),
+          (usarNota && semN ? ` ${semN} participante(s) sem nota entraram com nota estimada só para o cálculo.` : ""),
       });
       if (window.matchMedia?.("(max-width:900px)").matches) setMenu(false);
       requestAnimationFrame(() =>
@@ -240,7 +240,7 @@ export function Gerador({
 
   const titulo = resultado ? (
     <>
-      <span className="grad-text">{resultado.equipes.length} equipes</span> <small>{turma.length} alunos</small>
+      <span className="grad-text">{resultado.equipes.length} equipes</span> <small>{turma.length} participantes</small>
     </>
   ) : (
     <>
@@ -323,7 +323,7 @@ export function Gerador({
                   </div>
                   <div className="field">
                     <label htmlFor="imp">
-                      Aluno sem nota <span className="hint">ex.: calouro sem prova</span>
+                      Participante sem nota <span className="hint">ex.: calouro sem prova</span>
                     </label>
                     <select id="imp" value={imputacao} onChange={(e) => mudar(setImputacao)(e.target.value as Imputacao)}>
                       <option value="med">Nota neutra (mediana da turma)</option>
@@ -456,7 +456,7 @@ export function Gerador({
                 <p>
                   Até a formação das equipes é decidida por dados. Cada inscrito recebe um score ponderado por semestre e
                   nota, e o algoritmo monta equipes com força parecida e mistura de semestres e cursos. A nota de cada
-                  aluno nunca aparece na tela: só médias de turma e de equipe, e só quando alguém pede para mostrar.
+                  participante nunca aparece na tela: só médias de turma e de equipe, e só quando alguém pede para mostrar.
                 </p>
                 <ol className="steps">
                   {[
@@ -476,7 +476,7 @@ export function Gerador({
             {semSemestre.length > 0 && (
               <div className="avisos">
                 <div className="aviso">
-                  {semSemestre.length} aluno(s) sem semestre cadastrado ficaram de fora: {semSemestre.join(", ")}.{" "}
+                  {semSemestre.length} participante(s) sem semestre cadastrado ficaram de fora: {semSemestre.join(", ")}.{" "}
                   <Link href="/admin/pessoas?filtro=aluno" style={{ textDecoration: "underline" }}>
                     Corrigir em Participantes
                   </Link>
@@ -604,7 +604,7 @@ export function Gerador({
                           </h3>
                           <p>
                             {resultado.equipes.length} equipes ({nomeEquipe(1)} a {nomeEquipe(resultado.equipes.length)})
-                            com {turma.length} alunos. Cada aluno passa a ver a própria equipe ao entrar e cadastra o
+                            com {turma.length} participantes. Cada participante passa a ver a própria equipe ao entrar e cadastra o
                             repositório GitHub. Não gostou? Use <b>Nova combinação</b> no menu.
                           </p>
                         </div>
@@ -656,14 +656,14 @@ export function Gerador({
                     <ol>
                       <li>Semestre e nota são normalizados para 0–1 dentro da turma.</li>
                       <li>
-                        Cada aluno ganha <code>score = peso_sem × semestre + peso_nota × nota</code>. Quem ainda não tem
+                        Cada participante ganha <code>score = peso_sem × semestre + peso_nota × nota</code>. Quem ainda não tem
                         nota recebe uma nota estimada só para o cálculo (por padrão a mediana da turma), que nunca aparece
                         na tela.
                       </li>
                       <li>Uma distribuição em serpentina (1→N, N→1) espalha os maiores scores.</li>
                       <li>
                         Um otimizador testa 40.000 trocas e mantém as que aproximam o score, o semestre e a nota de cada
-                        equipe da média geral, penalizando alunos do mesmo semestre, do mesmo curso ou sem nota na mesma
+                        equipe da média geral, penalizando participantes do mesmo semestre, do mesmo curso ou sem nota na mesma
                         equipe.
                       </li>
                       <li>O resultado é comparado com 200 sorteios aleatórios para mostrar o ganho.</li>

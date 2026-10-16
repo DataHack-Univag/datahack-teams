@@ -35,8 +35,8 @@ export async function entradasDaEdicao(cliente: Cliente, edicaoId: string): Prom
       .is("removido_em", null),
     cliente.from("membros").select("email, equipes(nome)").eq("edicao_id", edicaoId).is("saiu_em", null).eq("situacao", "confirmado"),
   ]);
-  const equipeDe = new Map((exigir(rm, "as equipes dos alunos") ?? []).map((m) => [m.email, m.equipes?.nome ?? null]));
-  return (exigir(rp, "a presença dos alunos") ?? []).map((p) => ({
+  const equipeDe = new Map((exigir(rm, "as equipes dos participantes") ?? []).map((m) => [m.email, m.equipes?.nome ?? null]));
+  return (exigir(rp, "a presença dos participantes") ?? []).map((p) => ({
     email: p.email,
     nome: p.pessoa?.nome ?? p.email,
     equipe: equipeDe.get(p.email) ?? null,

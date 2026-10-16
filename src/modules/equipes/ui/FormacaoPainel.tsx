@@ -30,7 +30,7 @@ export function FormacaoPainel({ r }: { r: ResumoFormacao }) {
           Formação das equipes
         </h2>
         <p className="text-xs text-suave">
-          {r.pessoas.total - r.pessoas.livre} de {r.pessoas.total} alunos já estão numa equipe ou proposta
+          {r.pessoas.total - r.pessoas.livre} de {r.pessoas.total} participantes já estão numa equipe ou proposta
         </p>
       </div>
       <div className="grid gap-3 lg:grid-cols-[3fr_5fr]">
@@ -43,7 +43,7 @@ export function FormacaoPainel({ r }: { r: ResumoFormacao }) {
           </div>
         </div>
         <div className="space-y-1.5">
-          <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Alunos</p>
+          <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Participantes</p>
           <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
             {pessoas.map((i) => (
               <Numero key={i.rotulo} i={i} />

@@ -73,7 +73,7 @@ export function Integrantes({
                 </p>
                 {organizador && (
                   <Link href={`/ver-como?email=${encodeURIComponent(m.email)}`} className="inline-flex items-center gap-1 text-xs text-marca hover:underline">
-                    <Icone nome="olho" className="size-3.5" /> Ver como este aluno
+                    <Icone nome="olho" className="size-3.5" /> Ver como este participante
                   </Link>
                 )}
               </div>
@@ -136,7 +136,7 @@ export function Integrantes({
         (p.lotada ? (
           <Aviso tom="neutro">A equipe chegou ao limite de {config.max_membros} integrantes (ajuste em Equipes → Regras das equipes).</Aviso>
         ) : disponiveis.length === 0 ? (
-          <Aviso tom="neutro">Todos os alunos já têm equipe.</Aviso>
+          <Aviso tom="neutro">Todos os participantes já têm equipe.</Aviso>
         ) : (
           <Formulario action={adicionarMembro} className="flex flex-col gap-2 sm:flex-row sm:items-start">
             <Ocultos valores={{ equipe_id: equipe.id }} />
@@ -150,7 +150,7 @@ export function Integrantes({
                 detalhe: cursoSemestre(i),
               }))}
               maximo={1}
-              dica={`${disponiveis.length} aluno(s) sem equipe.`}
+              dica={`${disponiveis.length} participante(s) sem equipe.`}
               className="sm:flex-1"
             />
             <BotaoEnviar icone="mais_novo" className="sm:mt-6">

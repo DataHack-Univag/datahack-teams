@@ -7,7 +7,7 @@ import { Icone } from "@/shared/ui/Icone";
 export function NumerosEvento({ r }: { r: ResumoEvento }) {
   const itens = [
     { rotulo: "Equipes", valor: String(r.equipes), href: "/admin/equipes" },
-    { rotulo: "Alunos com equipe", valor: `${r.alunosComEquipe}/${r.totalAlunos}`, href: "/admin/pessoas?filtro=sem_equipe", alerta: r.alunosComEquipe < r.totalAlunos },
+    { rotulo: "Participantes com equipe", valor: `${r.alunosComEquipe}/${r.totalAlunos}`, href: "/admin/pessoas?filtro=sem_equipe", alerta: r.alunosComEquipe < r.totalAlunos },
     { rotulo: "Repositórios públicos", valor: `${r.reposPublicos}/${r.equipes}`, href: "/admin/equipes?filtro=pendentes", alerta: r.reposPublicos < r.equipes },
     { rotulo: "Trocas aguardando", valor: String(r.trocasPendentes), href: "/admin/equipes/trocas?status=pendente", alerta: r.trocasPendentes > 0 },
     { rotulo: "Fichas completas", valor: `${r.fichasCompletas}/${r.fichasEsperadas}`, href: "/admin/avaliacao?aba=andamento" },

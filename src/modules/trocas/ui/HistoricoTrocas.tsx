@@ -12,7 +12,7 @@ export function HistoricoTrocas({ lista, nomeEquipe, filtrado }: { lista: Troca[
   if (!lista.length)
     return (
       <EstadoVazio icone="trocas" titulo={filtrado ? "Nenhum pedido nessa situação" : "Nenhum pedido de troca ainda"}>
-        {filtrado ? "Escolha outra situação acima." : "Quando um aluno pedir para trocar de equipe, o pedido aparece aqui."}
+        {filtrado ? "Escolha outra situação acima." : "Quando um participante pedir para trocar de equipe, o pedido aparece aqui."}
       </EstadoVazio>
     );
   return (

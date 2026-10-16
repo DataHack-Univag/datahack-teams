@@ -130,7 +130,7 @@ export const registrarPresenca = criarAcao(
     const { error } = await repo.registrarPresenca(cliente, edicao.id, d.email, d.presenca);
     if (error) return falha(traduzirErro(error));
     atualizarTelas();
-    const quem = d.nome || "Aluno";
+    const quem = d.nome || "Participante";
     const texto = d.presenca === "presente" ? `${quem}: presente.` : d.presenca === "ausente" ? `${quem}: ausente.` : `Presença de ${quem} sem registro.`;
     return sucesso(texto, { email: d.email, presenca: d.anterior ?? "", anterior: d.presenca ?? "", nome: quem });
   },

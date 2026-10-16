@@ -17,7 +17,7 @@ export default async function AdminPresenca() {
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Pessoas", href: "/admin/pessoas" }, { rotulo: "Presença" }]}
         titulo="Presença no evento"
         destaque="Presença"
-        descricao={`Chamada dos alunos da ${edicao.nome}. Organização e mentores podem marcar.`}
+        descricao={`Chamada dos participantes da ${edicao.nome}. Organização e mentores podem marcar.`}
         acoes={<AjudaPresenca />}
       />
       <SubAbasPessoas ativa="presenca" pessoas={pessoas.length} alunos={alunos.length} />

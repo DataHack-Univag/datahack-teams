@@ -71,14 +71,14 @@ export function listarPendencias({
   if (equipes.length === 0 && !propostas.length)
     p.push(
       config.modo_formacao === "alunos_propoem"
-        ? { id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe proposta ainda", detalhe: "Nesta edição os alunos propõem as equipes pelo sistema.", href: "/admin/equipes/propostas", acao: "Ver propostas" }
+        ? { id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe proposta ainda", detalhe: "Nesta edição os participantes propõem as equipes pelo sistema.", href: "/admin/equipes/propostas", acao: "Ver propostas" }
         : { id: "sem-equipes", tom: "info", titulo: "Nenhuma equipe criada", detalhe: "Monte as equipes com o gerador ou crie à mão.", href: "/admin/equipes/gerador", acao: "Abrir o gerador" },
     );
   if (semEquipe.length)
     p.push({
       id: "sem-equipe",
       tom: "alerta",
-      titulo: `${semEquipe.length} aluno(s) sem equipe`,
+      titulo: `${semEquipe.length} participante(s) sem equipe`,
       detalhe: nomes(semEquipe),
       href: "/admin/pessoas?filtro=sem_equipe",
       acao: "Ver quem são",
@@ -123,6 +123,6 @@ export function listarPendencias({
       });
   }
   if (config.edicao_bloqueada)
-    p.push({ id: "bloqueada", tom: "info", titulo: "Edição pelos alunos bloqueada", detalhe: "Os alunos só visualizam a equipe.", href: "/admin/equipes#regras", acao: "Mudar" });
+    p.push({ id: "bloqueada", tom: "info", titulo: "Edição pelos participantes bloqueada", detalhe: "Os participantes só visualizam a equipe.", href: "/admin/equipes#regras", acao: "Mudar" });
   return p;
 }

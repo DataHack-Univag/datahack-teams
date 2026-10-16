@@ -34,7 +34,7 @@ export function CamposExtras({
         instituicoes={instituicoes}
         aceitaOutra={aceitaOutra}
       />
-      <p className="text-xs text-suave">Para alunos. Em branco = a pessoa ainda não respondeu.</p>
+      <p className="text-xs text-suave">Para participantes. Em branco = a pessoa ainda não respondeu.</p>
     </fieldset>
   );
 }

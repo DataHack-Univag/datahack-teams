@@ -76,7 +76,7 @@ export function CartaoEdicao({
         <Formulario
           action={tornarAtual}
           tituloConfirmar={`Tornar a ${edicao.nome} a edição atual?`}
-          confirmar="Alunos e bancas passam a ver esta edição ao entrar. A edição atual de hoje continua guardada e consultável pela organização."
+          confirmar="Participantes e bancas passam a ver esta edição ao entrar. A edição atual de hoje continua guardada e consultável pela organização."
           rotuloConfirmar="Tornar atual"
           perigo={false}
         >
@@ -155,7 +155,7 @@ export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edi
       />
       <Campo rotulo="Mínimo de integrantes" name="min_membros" type="number" min={1} max={20} required defaultValue={base.min_membros} />
       <Campo rotulo="Máximo de integrantes" name="max_membros" type="number" min={1} max={20} required defaultValue={base.max_membros} />
-      <CaixaMarcar name="permite_trocas" rotulo="Alunos podem pedir troca de equipe" className="sm:col-span-2" />
+      <CaixaMarcar name="permite_trocas" rotulo="Participantes podem pedir troca de equipe" className="sm:col-span-2" />
       <Selecao
         rotulo="Copiar regulamento e organização de"
         name="copiar_de"
@@ -167,7 +167,7 @@ export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edi
         ]}
       />
       <p className="text-xs text-suave sm:col-span-2">
-        Copiar traz fases, rubricas, critérios, níveis, penalidades, desempate, os organizadores, as instituições e a logo. Alunos e bancas são cadastrados
+        Copiar traz fases, rubricas, critérios, níveis, penalidades, desempate, os organizadores, as instituições e a logo. Participantes e bancas são cadastrados
         de novo em Pessoas (com a edição nova escolhida no topo). A edição nova nasce como <strong>planejada</strong> e não muda a
         edição atual até você escolher “Tornar a edição atual”.
       </p>

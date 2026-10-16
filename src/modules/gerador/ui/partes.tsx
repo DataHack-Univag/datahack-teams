@@ -139,7 +139,7 @@ export function Matriz({ r, usarNota, nf }: { r: ResultadoGerador; usarNota: boo
     <section className="card">
       <div className="card-h">
         <h3>Mapa equipe × semestre{cursos.length ? " × curso" : ""}</h3>
-        <span className="hint">quantos alunos de cada grupo caíram em cada equipe</span>
+        <span className="hint">quantos participantes de cada grupo caíram em cada equipe</span>
       </div>
       <div className="matrix-wrap">
         <table className="matrix">

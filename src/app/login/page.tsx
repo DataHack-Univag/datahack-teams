@@ -68,7 +68,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
       <div className="card destaque-grad w-full max-w-md justify-self-center space-y-5 lg:justify-self-end">
         <div>
           <h2 className="text-xl font-bold">Entrar</h2>
-          <p className="text-sm text-suave">Para quem participa do evento: alunos, bancas, mentoria e organização.</p>
+          <p className="text-sm text-suave">Para quem participa do evento: participantes, bancas, mentoria e organização.</p>
         </div>
 
         {mensagem && (

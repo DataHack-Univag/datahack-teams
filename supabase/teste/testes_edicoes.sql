@@ -204,7 +204,7 @@ begin
   assert (select curso from participacoes where edicao_id = v_ed and email = 'p2@teste.local') is distinct from 'X',
     'mentor não altera a participação por fora da função';
 end $$;
-select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p56@teste.local', 'presente')$q$, 'não é aluna');
+select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p56@teste.local', 'presente')$q$, 'não é participante');
 select pg_temp.falha($q$select registrar_presenca((select id from edicoes where numero = 1), 'p2@teste.local', 'talvez')$q$, 'Presença inválida');
 
 select pg_temp.como('p1@teste.local');
@@ -634,4 +634,4 @@ end $$;
 
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 028 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 029 conferem.'

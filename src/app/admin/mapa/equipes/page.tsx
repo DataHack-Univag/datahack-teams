@@ -17,7 +17,7 @@ export default async function DistribuirPagina() {
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Mapa", href: "/admin/mapa" }, { rotulo: "Equipes" }]}
         titulo="Equipes no mapa"
         destaque="mapa"
-        descricao="Onde cada equipe fica no evento. Alunos, bancas e mentores veem o lugar da equipe."
+        descricao="Onde cada equipe fica no evento. Participantes, bancas e mentores veem o lugar da equipe."
         acoes={
           <>
             <BotaoAjuda titulo="Distribuir as equipes">

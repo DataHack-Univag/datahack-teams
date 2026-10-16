@@ -28,7 +28,7 @@ export const salvarMaterial = criarAcao(esquema, async ({ id: idMaterial, ...dad
   const { error } = await repo.salvarMaterial(cliente, edicao.id, dados, idMaterial || null, await emailNormalizado(cliente));
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
-  return sucesso(idMaterial ? "Material atualizado." : "Material publicado. Os alunos já podem ver.");
+  return sucesso(idMaterial ? "Material atualizado." : "Material publicado. Os participantes já podem ver.");
 });
 
 export const removerMaterial = criarAcao(z.object({ id }), async (d) => {

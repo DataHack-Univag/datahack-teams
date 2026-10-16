@@ -57,9 +57,9 @@ async function resolverColegas(entradas: string[]): Promise<{ emails: string[] }
       emails.push(porNome[0].email);
       continue;
     }
-    if (porNome.length > 1) return { erro: `Há mais de um aluno chamado “${entrada}”. Escolha o colega certo na lista de sugestões.` };
+    if (porNome.length > 1) return { erro: `Há mais de um participante chamado “${entrada}”. Escolha o colega certo na lista de sugestões.` };
     return {
-      erro: `Não encontramos “${entrada}” entre os alunos desta edição sem equipe. Escolha o colega na lista de sugestões (quem já está numa equipe ou tem convite aguardando não aparece).`,
+      erro: `Não encontramos “${entrada}” entre os participantes desta edição sem equipe. Escolha o colega na lista de sugestões (quem já está numa equipe ou tem convite aguardando não aparece).`,
     };
   }
   return { emails: [...new Set(emails)] };
@@ -207,7 +207,7 @@ export async function aplicarEquipesGeradas(equipes: { nome: string; emails: str
   const { data, error } = await repo.aplicarEquipes(cliente, edicao.id, equipes, substituir);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
-  return sucesso(`${data} equipe(s) salvas. Os alunos já veem a equipe ao entrar e devem cadastrar o repositório.`);
+  return sucesso(`${data} equipe(s) salvas. Os participantes já veem a equipe ao entrar e devem cadastrar o repositório.`);
 }
 
 // ---------------------------------------------------------------- proposta de equipe (alunos)

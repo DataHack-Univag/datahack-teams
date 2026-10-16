@@ -45,15 +45,15 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
       <CabecalhoPagina
         trilha={[{ rotulo: "Organização", href: "/admin" }, { rotulo: "Pessoas" }]}
         titulo="Pessoas"
-        descricao={`Quem participa da ${edicao.nome}: só quem está nesta lista entra no sistema. ${alunos.length} alunos · ${alunos.filter((p) => !p.equipe_id).length} sem equipe · ${pessoas.length - alunos.length} da organização, bancas e mentoria.`}
+        descricao={`Quem participa da ${edicao.nome}: só quem está nesta lista entra no sistema. ${alunos.length} participantes · ${alunos.filter((p) => !p.equipe_id).length} sem equipe · ${pessoas.length - alunos.length} da organização, bancas e mentoria.`}
         acoes={
           <BotaoAjuda titulo="Pessoas">
             <ul>
-              <li>A lista é desta edição. Uma pessoa pode ser aluno numa edição e banca em outra.</li>
-              <li>Use os filtros para ver só alunos, a organização ou cada banca.</li>
+              <li>A lista é desta edição. Uma pessoa pode ser participante numa edição e banca em outra.</li>
+              <li>Use os filtros para ver só participantes, a organização ou cada banca.</li>
               <li>Toque numa pessoa para editar, ver a equipe, trocar de banca ou “ver como” ela vê o sistema.</li>
               <li>
-                Para mudar a função de alguém (ex.: aluno → banca), abra a pessoa e troque a <strong>Função nesta edição</strong>.
+                Para mudar a função de alguém (ex.: participante → banca), abra a pessoa e troque a <strong>Função nesta edição</strong>.
               </li>
               <li>O cadastro mostra as perguntas do formulário da edição (Edições → Formulário de inscrição). O CR só aparece para a organização e serve para o gerador equilibrar as equipes.</li>
               <li>Mentores entram com o e-mail deles e fazem a chamada na aba Presença (a organização também pode).</li>

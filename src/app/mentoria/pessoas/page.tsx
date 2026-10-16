@@ -11,9 +11,9 @@ export default async function MentoriaPessoas() {
   return (
     <Pagina>
       <CabecalhoPagina
-        titulo="Alunos e presença"
+        titulo="Participantes e presença"
         destaque="presença"
-        descricao={`Os alunos da ${edicao.nome}. Marque quem está no evento: a organização vê na hora.`}
+        descricao={`Os participantes da ${edicao.nome}. Marque quem está no evento: a organização vê na hora.`}
         acoes={<AjudaPresenca />}
       />
       <ChamadaPresenca alunos={alunos} />

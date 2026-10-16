@@ -38,14 +38,14 @@ export function FormRegrasEquipes({ edicao }: { edicao: Edicao }) {
       <CaixaMarcar
         name="permite_trocas"
         defaultChecked={edicao.permite_trocas}
-        rotulo="Alunos podem pedir troca de equipe"
+        rotulo="Participantes podem pedir troca de equipe"
         dica="Um integrante da equipe de destino aceita e os dois trocam de lugar."
       />
       <CaixaMarcar
         name="equipes_travadas"
         defaultChecked={edicao.equipes_travadas}
-        rotulo="Bloquear a edição pelos alunos"
-        dica="Use no fim do prazo de entrega: os alunos só visualizam; a organização continua editando."
+        rotulo="Bloquear a edição pelos participantes"
+        dica="Use no fim do prazo de entrega: os participantes só visualizam; a organização continua editando."
       />
       <BotaoEnviar icone="ok">Salvar regras</BotaoEnviar>
     </Formulario>

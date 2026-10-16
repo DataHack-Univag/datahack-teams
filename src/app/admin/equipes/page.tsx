@@ -49,13 +49,13 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
               <ul>
                 <li>
                   O jeito de formar as equipes é escolhido por edição em <strong>Regras das equipes</strong> (gerador, à mão ou
-                  proposta pelos alunos).
+                  proposta pelos participantes).
                 </li>
                 <li>Abra uma equipe para adicionar ou remover integrantes, trocar o líder ou editar o repositório.</li>
                 <li>
                   Nada é apagado: arquivar uma equipe tira ela das listas, mas o histórico continua guardado.
                 </li>
-                <li>No fim do prazo, marque “Bloquear a edição pelos alunos”.</li>
+                <li>No fim do prazo, marque “Bloquear a edição pelos participantes”.</li>
               </ul>
             </BotaoAjuda>
             <Menu
@@ -106,7 +106,7 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
           {soPendentes
             ? "Todas têm líder e repositório público."
             : porProposta
-              ? "Nesta edição os alunos propõem as equipes; aprove as propostas para elas aparecerem aqui."
+              ? "Nesta edição os participantes propõem as equipes; aprove as propostas para elas aparecerem aqui."
               : "Monte as equipes com o gerador ou crie uma à mão logo abaixo."}
         </EstadoVazio>
       ) : (
@@ -119,9 +119,9 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
 
       <div className="grid gap-6 lg:grid-cols-2">
         <section className="card space-y-3">
-          <h2 className="text-lg font-semibold">Alunos sem equipe ({semEquipe.length})</h2>
+          <h2 className="text-lg font-semibold">Participantes sem equipe ({semEquipe.length})</h2>
           {semEquipe.length === 0 ? (
-            <p className="text-sm text-suave">Todos os alunos têm equipe. 🎉</p>
+            <p className="text-sm text-suave">Todos os participantes têm equipe. 🎉</p>
           ) : (
             <>
               <ul className="max-h-96 divide-y divide-borda overflow-y-auto">
