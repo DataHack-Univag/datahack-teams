@@ -8,8 +8,8 @@ import { ProvedorToast } from "@/shared/ui/Toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "DATAHack Univag 2026 — Equipes",
-  description: "Equipes, entregas e materiais do DATAHack Univag 2026",
+  title: "DATAHack — Equipes",
+  description: "Equipes, entregas, materiais e avaliação do DATAHack",
 };
 
 export const viewport: Viewport = {

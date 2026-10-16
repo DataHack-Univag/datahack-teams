@@ -39,12 +39,22 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
 
       {/* ------------------------------------------------ hero */}
       <section className="grid justify-items-start gap-5" style={{ animation: "dh-sobe .7s both" }}>
-        {marca?.logo ? <LogoEdicao marca={marca} className="h-20 w-60 sm:h-24 sm:w-72 lg:h-32 lg:w-96" /> : <Logo className="w-52 sm:w-72 lg:w-96" />}
+        {/* A imagem da edição atual: a logo dela ou, sem logo, a placa "DATAHack" na cor dela.
+            A logo de sempre só aparece se o banco ainda não tiver a edição atual (vitrine vazia). */}
+        {marca ? (
+          <LogoEdicao
+            marca={marca}
+            className={marca.logo ? "h-20 w-60 sm:h-24 sm:w-72 lg:h-32 lg:w-96" : "h-16 w-56 sm:h-20 sm:w-72 lg:h-24 lg:w-80"}
+            texto="text-2xl sm:text-3xl lg:text-4xl"
+          />
+        ) : (
+          <Logo className="w-52 sm:w-72 lg:w-96" />
+        )}
         <span className="chip">
           <i className="size-1.5 rounded-full bg-[var(--verde)]" style={{ animation: "dh-pulso 2s infinite" }} />
           {atual
             ? `${marca!.nome} · ${periodo(atual)}${atual.local ? ` · ${atual.local}` : ""}`
-            : "DATAHack Univag 2026 · 09–10 out · Várzea Grande – MT"}
+            : "DATAHack · equipes, entregas e avaliação"}
         </span>
         <h1 className="max-w-[13ch] text-4xl leading-[0.98] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl lg:text-7xl">
           Transforme dados em <span className="grad-text">decisão</span>
