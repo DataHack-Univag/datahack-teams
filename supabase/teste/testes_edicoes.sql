@@ -632,6 +632,29 @@ begin
   assert situacao_inscricao(v_ed) = 'encerrada', 'prazo vencido fecha';
 end $$;
 
+-- ---------------------------------------------------------------- 030 · inscrição aprovada preenche o cadastro
+reset role;
+do $$
+declare
+  v_ed uuid := current_setting('dh.ed_form')::uuid;
+  pa participacoes%rowtype;
+  v_curso text;
+begin
+  insert into pessoas (email, nome) values ('cadastro.inscricao@teste.local', 'Cadastro Da Inscrição') on conflict do nothing;
+  v_curso := 'Biomedicina';
+  insert into inscricoes (edicao_id, email, respostas, situacao, origem)
+  values (v_ed, 'cadastro.inscricao@teste.local', '{"curso":"Outro","curso_outro":"Biomedicina","semestre":3}', 'aprovada', 'formulario');
+  perform entrar_na_edicao(v_ed, 'cadastro.inscricao@teste.local');
+  select * into pa from participacoes where edicao_id = v_ed and email = 'cadastro.inscricao@teste.local';
+  assert pa.curso = v_curso and pa.semestre = 3, 'curso ("Outro" usa o texto) e semestre vêm da inscrição: ' || coalesce(pa.curso, '-') || ' ' || coalesce(pa.semestre::text, '-');
+  -- quem já tem curso não perde: entrar de novo não troca
+  update participacoes set curso = 'BIOMEDICINA' where edicao_id = v_ed and email = 'cadastro.inscricao@teste.local';
+  perform entrar_na_edicao(v_ed, 'cadastro.inscricao@teste.local');
+  assert (select curso from participacoes where edicao_id = v_ed and email = 'cadastro.inscricao@teste.local') = 'BIOMEDICINA', 'não sobrescreve o cadastro';
+  assert (select respostas ->> 'curso' from inscricoes where edicao_id = v_ed and email = 'cadastro.inscricao@teste.local') = 'Outro', 'a resposta "Outro" continua como está';
+  assert (select c.semestre from cadastro_da_inscricao(v_ed, 'ninguem@teste.local') c) is null, 'sem inscrição: nada';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 029 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 030 conferem.'
