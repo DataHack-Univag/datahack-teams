@@ -141,11 +141,17 @@ export function temaDaCor(cor: string | null | undefined): Tema | null {
   return { claro, escuro };
 }
 
-/** As regras CSS do tema (mesmos seletores do globals.css, para valer por cima dele). */
+/**
+ * As regras CSS do tema, com os seletores do globals.css precedidos de "html" (um pouco mais
+ * fortes): valem por cima dele em qualquer ordem que as folhas de estilo carreguem.
+ */
 export function cssDoTema(tema: Tema): string {
   const bloco = (vars: Record<string, string>) =>
     Object.entries(vars)
       .map(([k, v]) => `${k}:${v}`)
       .join(";");
-  return `:root,:root[data-theme="dark"]{${bloco(tema.escuro)}}:root[data-theme="light"]{${bloco(tema.claro)}}`;
+  return `html:root,html:root[data-theme="dark"]{${bloco(tema.escuro)}}html:root[data-theme="light"]{${bloco(tema.claro)}}`;
 }
+
+/** Cookie com a cor da edição que a pessoa está vendo: o layout raiz pinta tudo antes de carregar. */
+export const COOKIE_COR = "dh_cor";

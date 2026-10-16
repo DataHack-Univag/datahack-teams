@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from "next";
+import { cookies } from "next/headers";
 import Script from "next/script";
+import { COOKIE_COR, cssDoTema, temaDaCor } from "@/modules/instituicoes/domain/tema";
 import { AvisoOffline } from "@/shared/ui/AvisoOffline";
 import { RedeDados } from "@/shared/ui/RedeDados";
 import { ProvedorToast } from "@/shared/ui/Toast";
@@ -20,13 +22,18 @@ export const viewport: Viewport = {
 // Aplica o tema salvo (ou o do sistema) antes da primeira pintura, sem "piscar".
 const SCRIPT_TEMA = `try{var t=localStorage.getItem("dh-theme");if(t!=="dark"&&t!=="light")t=matchMedia("(prefers-color-scheme: light)").matches?"light":"dark";document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme="dark"}`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default async function RootLayout({ children }: LayoutProps<"/">) {
+  // A cor da última edição vista: carregamentos, erros e qualquer tela já saem com ela.
+  const cor = decodeURIComponent((await cookies()).get(COOKIE_COR)?.value ?? "");
+  const tema = temaDaCor(cor);
   return (
     <html lang="pt-BR" className="h-full antialiased" data-theme="dark" suppressHydrationWarning>
       <head>
         <Script id="tema" strategy="beforeInteractive">
           {SCRIPT_TEMA}
         </Script>
+        {/* Só cores geradas por temaDaCor (o cookie é conferido antes); LembrarTema atualiza. */}
+        <style id="tema-edicao-base" dangerouslySetInnerHTML={{ __html: tema ? cssDoTema(tema) : "" }} />
         {/* Fontes do DATAHack. Se não carregarem, cai na fonte do sistema. */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />

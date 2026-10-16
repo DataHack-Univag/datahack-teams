@@ -1,4 +1,5 @@
 import { cssDoTema, temaDaCor } from "@/modules/instituicoes/domain/tema";
+import { LembrarTema } from "@/modules/instituicoes/ui/LembrarTema";
 
 /**
  * Pinta o sistema inteiro com a cor da edição (botões, links, abas, fundo, telão), nos temas
@@ -7,6 +8,11 @@ import { cssDoTema, temaDaCor } from "@/modules/instituicoes/domain/tema";
  */
 export function TemaDaEdicao({ cor }: { cor: string | null | undefined }) {
   const tema = temaDaCor(cor);
-  // A cor já foi conferida (#RRGGBB) no banco e em temaDaCor: o CSS só tem cores geradas aqui.
-  return tema ? <style dangerouslySetInnerHTML={{ __html: cssDoTema(tema) }} /> : null;
+  return (
+    <>
+      {/* A cor já foi conferida (#RRGGBB) no banco e em temaDaCor: o CSS só tem cores geradas aqui. */}
+      {tema && <style dangerouslySetInnerHTML={{ __html: cssDoTema(tema) }} />}
+      <LembrarTema cor={tema ? cor! : null} />
+    </>
+  );
 }

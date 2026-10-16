@@ -33,7 +33,7 @@ describe("tema da edição", () => {
     expect(g).toBeGreaterThan(r);
     expect(g).toBeGreaterThan(b);
     const css = cssDoTema(t);
-    expect(css).toContain(':root[data-theme="light"]{');
-    expect(css).toContain(":root,:root[data-theme=\"dark\"]{");
+    expect(css).toContain('html:root[data-theme="light"]{');
+    expect(css).toContain('html:root,html:root[data-theme="dark"]{');
   });
 });
