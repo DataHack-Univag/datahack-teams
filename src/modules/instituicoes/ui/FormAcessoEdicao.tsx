@@ -88,7 +88,9 @@ export function FormAcessoEdicao({ edicao, instituicoes, escolhidas }: { edicao:
           <div className="hidden sm:block" />
           <Campo rotulo="Abrem em" name="inscricao_abre_em" type="datetime-local" defaultValue={paraCampoDataHora(edicao.inscricao_abre_em ?? null)} dica="Horário de Mato Grosso." />
           <Campo rotulo="Fecham em" name="inscricao_fecha_em" type="datetime-local" defaultValue={paraCampoDataHora(edicao.inscricao_fecha_em ?? null)} />
-          <p className="text-xs text-suave sm:col-span-2">A página pública de inscrição e o formulário com as perguntas da edição chegam na próxima etapa.</p>
+          <p className="text-xs text-suave sm:col-span-2">
+            Mudar a aprovação vale para as próximas inscrições: as que já entraram continuam como estão (veja e decida em Participantes → Inscrições).
+          </p>
         </fieldset>
       )}
       {!inscricaoPublica && <input type="hidden" name="aprovacao" value={edicao.aprovacao ?? "automatica"} />}
