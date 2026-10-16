@@ -72,7 +72,7 @@ export async function TelaAluno({
   const troca = aprovada && equipe && edicao.permite_trocas ? separarTrocas(trocas, aluno.email, equipe.id) : null;
   const souLider = !!equipe && equipe.lider_email === aluno.email;
 
-  const itens = navAluno("/", { trocas: troca?.recebidos.length }).filter((i) => i.aba !== "trocas" || edicao.permite_trocas);
+  const itens = navAluno("/", { trocas: troca?.recebidos.length }, true, edicao.permite_trocas);
   const aba: AbaAluno = abaPedida === "trocas" && !edicao.permite_trocas ? "equipe" : abaPedida;
   const destaques = materiais.filter((m) => m.destaque);
   const podeFormar = porProposta && !config.edicao_bloqueada;

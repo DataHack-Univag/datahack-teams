@@ -1,7 +1,8 @@
 // Perguntas da ajuda por público (heurística 10). Texto simples, sem jargão.
 
 export type Publico = "aluno" | "banca" | "mentoria" | "organizacao";
-export type Topico = { pergunta: string; resposta: string; publicos: Publico[] };
+/** `so`: o tópico só aparece se a edição tiver o recurso (ex.: trocas de equipe). */
+export type Topico = { pergunta: string; resposta: string; publicos: Publico[]; so?: "trocas" };
 
 export const TOPICOS: Topico[] = [
   // ------------------------------------------------ aluno
@@ -36,8 +37,9 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Quero mudar de equipe. Como faço?",
     resposta:
-      "Na aba “Trocas” (quando a edição permite), escolha a equipe e envie o pedido. Qualquer integrante da equipe de destino pode aceitar; quem aceitar troca de lugar com você. Você pode cancelar enquanto estiver pendente.",
+      "Na aba “Trocas”, escolha a equipe e envie o pedido. Qualquer integrante da equipe de destino pode aceitar; quem aceitar troca de lugar com você. Você pode cancelar enquanto estiver pendente.",
     publicos: ["aluno"],
+    so: "trocas",
   },
   {
     pergunta: "Por que não consigo editar nada?",

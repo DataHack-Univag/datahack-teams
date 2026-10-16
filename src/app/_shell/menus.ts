@@ -52,11 +52,12 @@ export function navMentoria(contagens: { chamados?: number } = {}): ItemNav[] {
 }
 
 /** Aluno: abas por parâmetro (?aba=). `base` muda no modo "ver como". */
-export function navAluno(base: string, contagens: { trocas?: number } = {}, comAjuda = true): ItemNav[] {
+export function navAluno(base: string, contagens: { trocas?: number } = {}, comAjuda = true, permiteTrocas = true): ItemNav[] {
   const sep = base.includes("?") ? "&" : "?";
   const itens: ItemNav[] = [
     { href: `${base}${sep}aba=equipe`, rotulo: "Minha equipe", icone: "equipe", aba: "equipe", padrao: true },
-    { href: `${base}${sep}aba=trocas`, rotulo: "Trocas", icone: "trocas", aba: "trocas", contagem: contagens.trocas },
+    // Trocas só existem na edição que permite (o menu é o mesmo em todas as telas do aluno).
+    ...(permiteTrocas ? [{ href: `${base}${sep}aba=trocas`, rotulo: "Trocas", icone: "trocas" as const, aba: "trocas", contagem: contagens.trocas }] : []),
     { href: `${base}${sep}aba=materiais`, rotulo: "Materiais", icone: "materiais", aba: "materiais" },
   ];
   if (comAjuda) itens.push({ href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] });
