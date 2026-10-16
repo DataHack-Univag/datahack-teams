@@ -29,7 +29,7 @@ export function AjudaCalculo({ reg, className = "btn-secundario" }: { reg: Regul
       <dialog
         ref={modal}
         onClick={(e) => e.target === e.currentTarget && e.currentTarget.close()}
-        className="m-auto max-h-[92dvh] w-[min(96vw,56rem)] overflow-y-auto bg-transparent p-0 text-foreground backdrop:bg-[#000b38]/70 backdrop:backdrop-blur-sm open:animate-[dh-sobe_.25s_both]"
+        className="m-auto max-h-[92dvh] w-[min(96vw,56rem)] overflow-y-auto bg-transparent p-0 text-foreground backdrop:bg-[var(--veu)] backdrop:backdrop-blur-sm open:animate-[dh-sobe_.25s_both]"
       >
         <div className="destaque-grad faixa-topo space-y-5 rounded-2xl p-4 text-sm sm:p-6">
           <div className="flex items-start gap-3">

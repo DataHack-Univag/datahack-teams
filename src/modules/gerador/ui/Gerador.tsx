@@ -1,5 +1,6 @@
 "use client";
 
+import { COR_PADRAO, type MarcaResolvida } from "@/modules/instituicoes/domain/tipos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
@@ -53,11 +54,28 @@ export function Gerador({
   alunos,
   totalEquipes,
   semSemestre,
+  marca,
 }: {
   alunos: AlunoComEquipe[];
   totalEquipes: number;
   semSemestre: string[];
+  /** Logo e cor da edição (o telão mostra a marca da edição, não a de sempre). */
+  marca?: MarcaResolvida;
 }) {
+  const placa = { backgroundColor: marca?.cor ?? COR_PADRAO };
+  const logo = marca ? (
+    marca.logo ? (
+      // eslint-disable-next-line @next/next/no-img-element -- logo da edição (data URL ou arquivo do sistema)
+      <img src={marca.logo} alt={marca.nome} />
+    ) : (
+      <strong className="font-mono text-2xl font-bold text-white">
+        DATA<span className="text-cyan-300">Hack</span>
+      </strong>
+    )
+  ) : (
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/logo-datahack.png" alt="DATAHack" />
+  );
   const router = useRouter();
   const nSemEquipe = alunos.filter((a) => !a.temEquipe).length;
 
@@ -238,9 +256,8 @@ export function Gerador({
         <aside className={`side${menu ? " open" : ""}`} aria-label="Controles">
           <div className="side-head">
             <div className="logo">
-              <span className="logo-plate">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src="/logo-datahack.png" alt="DATAHack Univag" />
+              <span className="logo-plate" style={placa}>
+                {logo}
               </span>
               <small>Formação de equipes</small>
             </div>
@@ -426,9 +443,8 @@ export function Gerador({
           <div className="content">
             {!resultado && (
               <section className="hero">
-                <span className="hero-logo">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src="/logo-datahack.png" alt="DATAHack Univag" />
+                <span className="hero-logo" style={placa}>
+                  {logo}
                 </span>
                 <span className="chip">
                   <i />

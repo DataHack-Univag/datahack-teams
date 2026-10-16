@@ -218,7 +218,7 @@ export function Navegacao({ itens, mais = [] }: { itens: ItemNav[]; mais?: ItemN
       {/* "Mais": folha que sobe de baixo, com os grupos */}
       {abertoMais && (
         <div className="fixed inset-0 z-20 lg:hidden" onClick={() => setAbertoMais(false)}>
-          <div className="absolute inset-0 bg-[#000b38]/50 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-[var(--veu)] backdrop-blur-sm" />
           <div
             id="nav-mais"
             onClick={(e) => e.stopPropagation()}

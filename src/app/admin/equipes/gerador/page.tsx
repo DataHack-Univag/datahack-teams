@@ -1,6 +1,7 @@
 import { SubAbasEquipes } from "@/app/admin/equipes/SubAbasEquipes";
 import { contarEquipes } from "@/modules/equipes/infra/repositorio";
 import { Gerador, type AlunoComEquipe } from "@/modules/gerador/ui/Gerador";
+import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 
@@ -28,7 +29,12 @@ export default async function AdminGerador() {
         <SubAbasEquipes ativa="gerador" equipes={totalEquipes} />
       </div>
       {/* O gerador usa a largura toda (modo telão). */}
-      <Gerador alunos={alunos} totalEquipes={totalEquipes} semSemestre={alunosTodos.filter((p) => !p.semestre).map((p) => p.nome)} />
+      <Gerador
+        alunos={alunos}
+        totalEquipes={totalEquipes}
+        semSemestre={alunosTodos.filter((p) => !p.semestre).map((p) => p.nome)}
+        marca={edicao.marca ? resolverMarca(edicao) : undefined}
+      />
     </>
   );
 }

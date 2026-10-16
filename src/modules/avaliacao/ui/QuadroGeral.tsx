@@ -119,7 +119,7 @@ export function QuadroGeral({ equipes }: { equipes: EquipeResumoNota[] }) {
         ref={modal}
         onClick={(ev) => ev.target === ev.currentTarget && ev.currentTarget.close()}
         onClose={() => setAberta(null)}
-        className="m-auto max-h-[92dvh] w-[min(96vw,68rem)] overflow-y-auto bg-transparent p-0 text-foreground backdrop:bg-[#000b38]/70 backdrop:backdrop-blur-sm open:animate-[dh-sobe_.25s_both]"
+        className="m-auto max-h-[92dvh] w-[min(96vw,68rem)] overflow-y-auto bg-transparent p-0 text-foreground backdrop:bg-[var(--veu)] backdrop:backdrop-blur-sm open:animate-[dh-sobe_.25s_both]"
       >
         {aberta && <Dashboard e={aberta} fechar={() => modal.current?.close()} />}
       </dialog>

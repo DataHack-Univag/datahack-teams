@@ -32,6 +32,7 @@
   --botao-1: #005bc9;
   --botao-3: #5a2bff;
   --botao-sombra: rgb(47 91 255 / 0.8);
+  --veu: rgb(0 11 56 / 0.7);
   color-scheme: dark;
 }
 
@@ -60,6 +61,7 @@
   --botao-1: #005bc9;
   --botao-3: #5a2bff;
   --botao-sombra: rgb(47 91 255 / 0.8);
+  --veu: rgb(0 11 56 / 0.55);
   color-scheme: light;
 }
 

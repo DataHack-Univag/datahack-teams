@@ -79,7 +79,7 @@
 .arena .seg{position:relative;display:flex;border:1px solid var(--line-strong);border-radius:11px;padding:3px;background:var(--surface-solid)}
 .arena .seg input{position:absolute;opacity:0;pointer-events:none}
 .arena .seg label{position:relative;z-index:1;flex:1;margin:0;text-align:center;padding:7px 6px;font-weight:600;font-size:13px;cursor:pointer;color:var(--muted);border-radius:8px;transition:color .25s,background .25s}
-.arena .seg input:checked+label{background:var(--grad);color:#fff;box-shadow:0 4px 14px -6px rgb(47 91 255 / .7)}
+.arena .seg input:checked+label{background:var(--grad);color:#fff;box-shadow:0 4px 14px -6px color-mix(in srgb,var(--azul) 70%,transparent)}
 .arena .seg input:focus-visible+label{outline:2px solid var(--cy);outline-offset:1px}
 .arena .mapping{display:grid;gap:10px;border:1px solid var(--line);background:var(--surface);border-radius:14px;padding:12px;animation:dh-rise .4s both}
 .arena .preview-wrap{overflow-x:auto;border-top:1px solid var(--line);padding-top:8px}
@@ -93,7 +93,7 @@
 .arena button:active{transform:translateY(1px) scale(.99)}
 .arena button:disabled{opacity:.4;cursor:not-allowed}
 .arena button svg{width:16px;height:16px;flex:none}
-.arena button.primary{position:relative;background:linear-gradient(110deg,var(--brand-blue),var(--vi) 60%,#5a2bff);background-size:160% 100%;border:0;color:#fff;padding:12px 16px;font-size:15px;box-shadow:0 10px 30px -12px rgb(47 91 255 / .8);transition:background-position .5s,box-shadow .2s,transform .12s;overflow:hidden}
+.arena button.primary{position:relative;background:linear-gradient(110deg,var(--brand-blue),var(--vi) 60%,var(--botao-3));background-size:160% 100%;border:0;color:#fff;padding:12px 16px;font-size:15px;box-shadow:0 10px 30px -12px color-mix(in srgb,var(--azul) 80%,transparent);transition:background-position .5s,box-shadow .2s,transform .12s;overflow:hidden}
 .arena button.primary:hover{background-position:100% 0;box-shadow:0 14px 36px -10px rgb(255 43 214 / .7)}
 .arena button.primary::after{content:"";position:absolute;inset:0;background:linear-gradient(100deg,transparent 30%,rgb(255 255 255 / .35) 50%,transparent 70%);transform:translateX(-120%);animation:dh-shine 3.5s ease-in-out infinite}
 .arena button.ghost{background:transparent;border-color:transparent}
@@ -158,7 +158,7 @@
 .arena .hb:nth-child(6) .hb-t i{animation-delay:250ms}
 .arena .hb:nth-child(7) .hb-t i{animation-delay:300ms}
 .arena .hb:nth-child(8) .hb-t i{animation-delay:350ms}
-.arena .hb.top .hb-t i{background:var(--grad);box-shadow:0 0 18px -2px rgb(47 91 255 / .6)}
+.arena .hb.top .hb-t i{background:var(--grad);box-shadow:0 0 18px -2px color-mix(in srgb,var(--azul) 60%,transparent)}
 .arena .hb.top .hb-k{color:var(--fg)}
 .arena .hb-v{text-align:right;font-weight:600;white-space:nowrap}
 .arena .hb-v em{font-style:normal;font-weight:400;color:var(--muted);margin-left:8px;font-size:12px}
@@ -200,22 +200,22 @@
 .arena details.method ol{margin:12px 0 0;padding-left:20px;display:grid;gap:6px;max-width:80ch}
 .arena details.method code{font-family:var(--f-mono);color:var(--fg);background:var(--accent-soft);padding:1px 5px;border-radius:5px;font-size:13px}
 .arena .promo{position:relative;overflow:hidden;border-radius:calc(var(--r) + 4px);padding:clamp(20px,3vw,32px);display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;background:linear-gradient(var(--surface-solid),var(--surface-solid)) padding-box,var(--grad) border-box;border:1px solid transparent;box-shadow:var(--glow)}
-.arena .promo::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent,rgb(47 91 255 / .14),transparent 30%,rgb(0 229 255 / .12),transparent 60%);animation:dh-spin 18s linear infinite;pointer-events:none}
+.arena .promo::before{content:"";position:absolute;inset:-40%;background:conic-gradient(from 0deg,transparent,color-mix(in srgb,var(--azul) 14%,transparent),transparent 30%,rgb(0 229 255 / .12),transparent 60%);animation:dh-spin 18s linear infinite;pointer-events:none}
 .arena .promo>*{position:relative}
 .arena .promo h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2.6vw,30px);letter-spacing:-.02em;line-height:1.1;max-width:22ch}
 .arena .promo p{margin:6px 0 0;color:var(--muted);max-width:52ch}
-.arena .promo a{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;text-decoration:none;box-shadow:0 10px 30px -12px rgb(47 91 255 / .8);transition:transform .2s}
+.arena .promo a{display:inline-flex;align-items:center;gap:8px;padding:12px 18px;border-radius:12px;background:var(--grad);color:#fff;font-weight:700;text-decoration:none;box-shadow:0 10px 30px -12px color-mix(in srgb,var(--azul) 80%,transparent);transition:transform .2s}
 .arena .promo a:hover{transform:translateY(-2px)}
 .arena .teams-wrap{display:grid;gap:clamp(18px,2.2vw,28px);scroll-margin-top:80px}
 .arena .ready{position:relative;overflow:hidden;border-radius:calc(var(--r) + 4px);padding:clamp(20px,3vw,32px);display:flex;flex-wrap:wrap;gap:16px 28px;align-items:center;justify-content:space-between;background:linear-gradient(var(--surface-solid),var(--surface-solid)) padding-box,var(--grad) border-box;border:1px solid transparent;box-shadow:var(--glow);animation:dh-rise .6s .2s both}
-.arena .ready::before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent,rgb(47 91 255 / .14),transparent 30%,rgb(0 229 255 / .12),transparent 60%);animation:dh-spin 18s linear infinite;pointer-events:none}
+.arena .ready::before{content:"";position:absolute;inset:-60%;background:conic-gradient(from 0deg,transparent,color-mix(in srgb,var(--azul) 14%,transparent),transparent 30%,rgb(0 229 255 / .12),transparent 60%);animation:dh-spin 18s linear infinite;pointer-events:none}
 .arena .ready>*{position:relative}
 .arena .ready h3{margin:0;font-family:var(--f-display);font-weight:800;font-size:clamp(20px,2.6vw,30px);letter-spacing:-.02em;line-height:1.12;max-width:24ch;text-wrap:balance}
 .arena .ready p{margin:6px 0 0;color:var(--muted);max-width:56ch}
 .arena .ready button.primary{padding:14px 24px;font-size:16px}
 .arena .overlay{position:fixed;inset:0;z-index:40;display:grid;place-items:center;background:color-mix(in srgb,var(--bg) 70%,transparent);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);animation:dh-fade .2s both}
 .arena .ov-box{display:grid;justify-items:center;gap:18px;text-align:center;padding:24px}
-.arena .ring{width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--cy),var(--vi),var(--mg),var(--cy));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 0);mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 0);animation:dh-spin 1s linear infinite;filter:drop-shadow(0 0 12px rgb(47 91 255 / .6))}
+.arena .ring{width:92px;height:92px;border-radius:50%;background:conic-gradient(var(--cy),var(--vi),var(--mg),var(--cy));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 0);mask:radial-gradient(farthest-side,transparent calc(100% - 6px),#000 0);animation:dh-spin 1s linear infinite;filter:drop-shadow(0 0 12px color-mix(in srgb,var(--azul) 60%,transparent))}
 .arena .ov-step{font-family:var(--f-mono);font-size:13px;letter-spacing:.06em;color:var(--fg);min-height:1.4em}
 .arena .ov-title{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,3vw,32px);letter-spacing:-.02em}
 .arena .backdrop{display:none}

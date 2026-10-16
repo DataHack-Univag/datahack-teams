@@ -111,6 +111,8 @@ export function temaDaCor(cor: string | null | undefined): Tema | null {
     "--brilho-1": `rgb(${rgbTexto(marcaClaro)} / 0.14)`,
     "--brilho-2": `rgb(${rgbTexto(hslParaHex({ h: vizinho(-14), s, l: 50 }))} / 0.1)`,
     ...botao(h, s, vizinho),
+    "--veu": `rgb(${rgbTexto(hslParaHex({ h, s: Math.min(s, 70), l: 10 }))} / 0.55)`,
+    "--sombra": `0 1px 2px rgb(${rgbTexto(hslParaHex({ h, s: Math.min(s, 70), l: 12 }))} / 0.05), 0 14px 30px -20px rgb(${rgbTexto(hslParaHex({ h, s: Math.min(s, 70), l: 12 }))} / 0.25)`,
   };
 
   // ------------------------------------------------ tema escuro: fundo escuro, cor clareada
@@ -137,6 +139,7 @@ export function temaDaCor(cor: string | null | undefined): Tema | null {
     "--brilho-1": `rgb(${rgbTexto(hslParaHex({ h, s, l: 45 }))} / 0.2)`,
     "--brilho-2": `rgb(${rgbTexto(marcaEscuro)} / 0.12)`,
     ...botao(h, s, vizinho),
+    "--veu": `rgb(${rgbTexto(hslParaHex({ h, s: Math.min(s, 75), l: 5 }))} / 0.72)`,
   };
   return { claro, escuro };
 }
