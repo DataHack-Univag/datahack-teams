@@ -102,31 +102,31 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como cadastro as fases e as rubricas de uma edição?",
     resposta:
-      "Em Mais → Edições → “Regulamento desta edição”. Toque em “Copiar instruções para a IA”, mande para uma IA dizendo como serão as fases, as bancas e o que avaliar (ou escolha “Começar de um modelo” para partir de outra edição) e cole o JSON que ela devolver. O sistema confere a estrutura e os pesos antes de gravar. Enquanto não houver fichas, dá para trocar o regulamento quantas vezes precisar; o anterior fica no histórico.",
+      "Em Configurar → Regulamento (no celular, Mais → Regulamento). Toque em “Copiar instruções para a IA”, mande para uma IA dizendo como serão as fases, as bancas e o que avaliar (ou escolha “Começar de um modelo” para partir de outra edição) e cole o JSON que ela devolver. O sistema confere a estrutura e os pesos antes de gravar. Enquanto não houver fichas, dá para trocar o regulamento quantas vezes precisar; o anterior fica no histórico.",
     publicos: ["organizacao"],
   },
   {
     pergunta: "Como preparo a próxima edição do evento?",
     resposta:
-      "Em Mais → Edições, crie a edição copiando o regulamento e a organização da anterior. Ajuste datas, formato e regras das equipes, cadastre alunos e bancas em Pessoas (com a edição nova escolhida no topo) e, quando o evento começar, use “Tornar a edição atual”.",
+      "Em Configurar → Edições (no celular, Mais → Edições), crie a edição copiando o regulamento e a organização da anterior. Ajuste datas, formato e regras das equipes, cadastre alunos e bancas em Pessoas (com a edição nova escolhida no topo) e, quando o evento começar, use “Tornar a edição atual”.",
     publicos: ["organizacao"],
   },
   {
     pergunta: "Como faço um evento de outra instituição, de várias ou aberto a todos?",
     resposta:
-      "Em Mais → Edições → “Acesso e marca da edição”, escolha quem pode participar: fechado (lista da organização, como o DATAHack Univag), instituições escolhidas ou aberto a todos. Marque as instituições (cadastradas em Edições → Instituições) e dê à edição um nome público, uma cor e uma logo (PNG, JPG ou SVG). A logo aparece no canto de cima das telas e no menu de edições; sem logo, aparece só “DATAHack”.",
+      "Em Configurar → Edições → “Acesso e marca da edição”, escolha quem pode participar: fechado (lista da organização, como o DATAHack Univag), instituições escolhidas ou aberto a todos. Marque as instituições (cadastradas em Edições → Instituições) e dê à edição um nome público, uma cor e uma logo (PNG, JPG ou SVG). A logo aparece no canto de cima das telas e no menu de edições; sem logo, aparece só “DATAHack”.",
     publicos: ["organizacao"],
   },
   {
     pergunta: "Como escolho o que perguntar na inscrição?",
     resposta:
-      "Em Mais → Edições → “Formulário de inscrição”. Comece de um modelo (Universidade ou Evento aberto) ou adicione perguntas prontas (curso, semestre, cargo, camiseta, restrição alimentar…) e crie as suas. Para cada uma, escolha se é obrigatória ou opcional e a ordem. A prévia ao lado mostra o formulário como o candidato vê, e dá para testar o envio. Cada edição tem o seu formulário.",
+      "Em Configurar → Formulário de inscrição. Comece de um modelo (Universidade ou Evento aberto) ou adicione perguntas prontas (curso, semestre, cargo, camiseta, restrição alimentar…) e crie as suas. Para cada uma, escolha se é obrigatória ou opcional e a ordem. A prévia ao lado mostra o formulário como o candidato vê, e dá para testar o envio. Cada edição tem o seu formulário.",
     publicos: ["organizacao"],
   },
   {
     pergunta: "Como funciona a inscrição pública (evento aberto ou de várias instituições)?",
     resposta:
-      "Em Mais → Inscrições fica o link da página de inscrição da edição, para divulgar. A pessoa preenche nome, e-mail, uma senha e as perguntas do formulário, e já fica logada para acompanhar. Com aprovação automática, quem tem vaga entra na hora e o resto vai para a lista de espera (quando alguém cancela, o primeiro da fila entra). Com aprovação pela organização, cada inscrição espera em Inscrições até alguém aprovar, recusar ou pôr na espera. O termo de uso dos dados fica na mesma tela.",
+      "Em Participantes → Inscrições fica o link da página de inscrição da edição, para divulgar. A pessoa preenche nome, e-mail, uma senha e as perguntas do formulário, e já fica logada para acompanhar. Com aprovação automática, quem tem vaga entra na hora e o resto vai para a lista de espera (quando alguém cancela, o primeiro da fila entra). Com aprovação pela organização, cada inscrição espera em Inscrições até alguém aprovar, recusar ou pôr na espera. O termo de uso dos dados fica na mesma tela.",
     publicos: ["organizacao"],
   },
   {
@@ -156,7 +156,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como monto o mapa do evento (croqui)?",
     resposta:
-      "Em Mais → Mapa, crie cada sala com as medidas aproximadas e toque em “Desenhar” (o editor ocupa a tela toda). Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…), arraste para o lugar e puxe as alças para o tamanho que quiser. Para mexer em vários de uma vez: Shift ou Ctrl + clique, um retângulo no vazio ou “Selecionar vários”. Zoom: roda do mouse, pinça com dois dedos ou os botões no canto (0 ajusta à tela); para mover a vista, segure Espaço e arraste, use a “Mão” ou dois dedos. Salas iguais (3 labs iguais)? Desenhe uma e use “Duplicar sala”. O croqui sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
+      "Em Durante o evento → Mapa (no celular, Mais → Mapa), crie cada sala com as medidas aproximadas e toque em “Desenhar” (o editor ocupa a tela toda). Escolha um modelo pronto (bancada de laboratório para 2 equipes, mesa, porta, telão…), arraste para o lugar e puxe as alças para o tamanho que quiser. Para mexer em vários de uma vez: Shift ou Ctrl + clique, um retângulo no vazio ou “Selecionar vários”. Zoom: roda do mouse, pinça com dois dedos ou os botões no canto (0 ajusta à tela); para mover a vista, segure Espaço e arraste, use a “Mão” ou dois dedos. Salas iguais (3 labs iguais)? Desenhe uma e use “Duplicar sala”. O croqui sai em “Croqui”, pronto para imprimir ou salvar em PDF.",
     publicos: ["organizacao"],
   },
   {

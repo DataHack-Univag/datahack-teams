@@ -3,7 +3,10 @@
 import type { Comando } from "@/shared/ui/PaletaComandos";
 import type { ItemNav } from "@/shared/ui/Navegacao";
 
-/** Organização: 6 abas na ordem do evento. No celular: 4 na barra + "Mais". */
+/**
+ * Organização: 4 abas do dia a dia (também a barra do celular) e o resto em grupos por tarefa,
+ * que no computador viram menus ("Participantes ▾"…) e no celular, seções do "Mais".
+ */
 export function navOrganizacao(contagens: { trocas?: number; chamados?: number; inscricoes?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
   return {
     itens: [
@@ -13,13 +16,17 @@ export function navOrganizacao(contagens: { trocas?: number; chamados?: number; 
       { href: "/admin/ranking", rotulo: "Ranking", icone: "ranking", prefixos: ["/admin/ranking"] },
     ],
     mais: [
-      { href: "/admin/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/admin/chamados"], contagem: contagens.chamados },
-      { href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
-      { href: "/admin/inscricoes", rotulo: "Inscrições", icone: "editar", prefixos: ["/admin/inscricoes"], contagem: contagens.inscricoes },
-      { href: "/admin/checkin", rotulo: "Check-in", icone: "qr", prefixos: ["/admin/checkin"] },
-      { href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
-      { href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
-      { href: "/admin/edicoes", rotulo: "Edições", icone: "relogio", prefixos: ["/admin/edicoes", "/admin/instituicoes"] },
+      { grupo: "Participantes", href: "/admin/pessoas", rotulo: "Pessoas", icone: "pessoas", prefixos: ["/admin/pessoas"] },
+      { grupo: "Participantes", href: "/admin/inscricoes", rotulo: "Inscrições", icone: "editar", prefixos: ["/admin/inscricoes"], contagem: contagens.inscricoes },
+      { grupo: "Participantes", href: "/admin/checkin", rotulo: "Check-in", icone: "qr", prefixos: ["/admin/checkin"] },
+      { grupo: "Durante o evento", href: "/admin/chamados", rotulo: "Chamados", icone: "sino", prefixos: ["/admin/chamados"], contagem: contagens.chamados },
+      { grupo: "Durante o evento", href: "/admin/mapa", rotulo: "Mapa", icone: "mapa", prefixos: ["/admin/mapa"] },
+      { grupo: "Durante o evento", href: "/admin/materiais", rotulo: "Materiais", icone: "materiais", prefixos: ["/admin/materiais"] },
+      // Edições sem prefixo: as subpáginas (formulário, regulamento) têm item próprio.
+      { grupo: "Configurar", href: "/admin/edicoes", rotulo: "Edições", icone: "relogio" },
+      { grupo: "Configurar", href: "/admin/edicoes/inscricao", rotulo: "Formulário de inscrição", icone: "editar", prefixos: ["/admin/edicoes/inscricao"] },
+      { grupo: "Configurar", href: "/admin/edicoes/regulamento", rotulo: "Regulamento", icone: "avaliacao", prefixos: ["/admin/edicoes/regulamento"] },
+      { grupo: "Configurar", href: "/admin/instituicoes", rotulo: "Instituições", icone: "instituicao", prefixos: ["/admin/instituicoes"] },
       { href: "/ajuda", rotulo: "Ajuda", icone: "ajuda", prefixos: ["/ajuda"] },
     ],
   };
@@ -65,10 +72,7 @@ export const comandosExtrasOrganizacao: Comando[] = [
   { grupo: "Telas", rotulo: "Histórico de trocas", href: "/admin/equipes/trocas", icone: "trocas" },
   { grupo: "Telas", rotulo: "Propostas de equipe", href: "/admin/equipes/propostas", icone: "equipe" },
   { grupo: "Telas", rotulo: "Nova edição", href: "/admin/edicoes#nova", icone: "mais_novo" },
-  { grupo: "Telas", rotulo: "Regulamento da edição", href: "/admin/edicoes/regulamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Acesso e marca da edição", href: "/admin/edicoes#acesso", icone: "instituicao" },
-  { grupo: "Telas", rotulo: "Instituições", href: "/admin/instituicoes", icone: "instituicao" },
-  { grupo: "Telas", rotulo: "Formulário de inscrição", href: "/admin/edicoes/inscricao", icone: "editar" },
   { grupo: "Telas", rotulo: "Andamento das fichas", href: "/admin/avaliacao?aba=andamento", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Fichas e penalidades", href: "/admin/avaliacao?aba=fichas", icone: "avaliacao" },
   { grupo: "Telas", rotulo: "Lançar notas (fichas)", href: "/avaliar", icone: "editar" },

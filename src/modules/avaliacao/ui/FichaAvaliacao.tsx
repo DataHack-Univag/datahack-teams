@@ -273,7 +273,7 @@ export function FichaAvaliacao({
       </fieldset>
 
       {/* ------------------------------------------------ barra fixa: nota, estado e ações */}
-      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+4.25rem)] z-10 sm:bottom-3">
+      <div className="sticky bottom-[calc(env(safe-area-inset-bottom)+4.25rem)] z-10 lg:bottom-3">
         <div className="destaque-grad flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl p-3 sm:p-4">
           <div className="mr-auto min-w-0">
             <p className="truncate text-xs text-suave">

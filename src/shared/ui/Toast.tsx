@@ -38,7 +38,7 @@ export function ProvedorToast({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-50 mx-auto flex max-w-md flex-col gap-2 sm:inset-x-auto sm:right-4 sm:bottom-4"
+        className="pointer-events-none fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+5.5rem)] z-50 mx-auto flex max-w-md flex-col gap-2 sm:inset-x-auto sm:right-4 lg:bottom-4"
       >
         {itens.map((t) => (
           <div

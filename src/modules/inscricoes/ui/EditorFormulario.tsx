@@ -231,7 +231,7 @@ export function EditorFormulario({
         {/* ------------------------------------------------ salvar */}
         <Formulario
           action={salvarFormulario}
-          className="sticky bottom-20 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-borda bg-[var(--background)] p-3 shadow-lg sm:bottom-3"
+          className="sticky bottom-20 z-10 flex flex-wrap items-center gap-3 rounded-2xl border border-borda bg-[var(--background)] p-3 shadow-lg lg:bottom-3"
           aoSucesso={() => setSalvo(json)}
           confirmar={
             inscricoes > 0

@@ -80,7 +80,7 @@ export async function Area({
         <Navegacao itens={itens} mais={mais} />
       </Suspense>
       {/* pb: espaço para a barra de navegação fixa no celular */}
-      <main id="conteudo" className="flex flex-1 flex-col pb-[calc(env(safe-area-inset-bottom)+4.5rem)] sm:pb-0">
+      <main id="conteudo" className="flex flex-1 flex-col pb-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:pb-0">
         {children}
       </main>
       <PaletaComandos comandos={comandos} />
