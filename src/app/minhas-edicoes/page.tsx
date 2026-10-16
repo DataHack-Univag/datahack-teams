@@ -27,7 +27,14 @@ export default async function MinhasEdicoes() {
   const marcaAtual = atual ? resolverMarca(atual) : null;
   const participaDaAtual = edicoesDoUsuario.find((e) => e.atual);
   const minha = atual?.numero ? inscricoes.find((i) => i.numero === atual.numero) : undefined;
-  const chamada = chamadaDaAtual({ participa: !!participaDaAtual, minhaInscricao: minha?.situacao, slug: atual?.slug, inscricoes: atual?.inscricao });
+  // Banco sem a migração 025: o link vem da lista de inscrições abertas da vitrine (mesmo nome público).
+  const aberta = atual && atual.slug === undefined ? vit.inscricoes.find((i) => i.nome === marcaAtual?.nome) : undefined;
+  const chamada = chamadaDaAtual({
+    participa: !!participaDaAtual,
+    minhaInscricao: (minha ?? (aberta ? inscricoes.find((i) => i.slug === aberta.slug) : undefined))?.situacao,
+    slug: atual?.slug ?? aberta?.slug,
+    inscricoes: atual?.inscricao ?? aberta?.situacao,
+  });
   const ordenadas = [...edicoesDoUsuario].sort((a, b) => b.numero - a.numero);
 
   return (
