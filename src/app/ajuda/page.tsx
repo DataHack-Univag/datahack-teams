@@ -8,7 +8,7 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 // Ajuda: perguntas frequentes de quem está logado (aluno, banca, mentoria ou organização), com busca.
 export default async function Ajuda() {
   const { usuario, avatar, organizador, avaliador, mentor, edicao } = await sessaoAtual();
-  const publico: Publico = organizador ? "organizacao" : avaliador ? "banca" : mentor ? "mentoria" : "aluno";
+  const publico: Publico = organizador ? "organizacao" : avaliador ? "banca" : mentor ? "mentoria" : "participante";
   const nav = organizador ? navOrganizacao() : { itens: avaliador ? navBancas() : mentor ? navMentoria() : navAluno("/", {}, true, edicao.permite_trocas), mais: undefined };
   const todas = [...nav.itens, ...(nav.mais ?? [])];
 
@@ -25,9 +25,13 @@ export default async function Ajuda() {
         <CabecalhoPagina
           titulo="Como podemos ajudar?"
           destaque="ajudar"
-          descricao="Respostas rápidas sobre o sistema do DATAHack. Não achou? Fale com a organização no evento."
+          descricao={organizador ? "A ajuda de todos os perfis (participantes, bancas, mentoria e organização), por módulo." : "Respostas rápidas sobre o sistema do DATAHack, por módulo. Não achou? Fale com a organização no evento."}
         />
-        <BuscaAjuda topicos={TOPICOS.filter((t) => t.publicos.includes(publico) && (t.so !== "trocas" || edicao.permite_trocas || organizador))} />
+        {/* A organização vê a ajuda de todos os perfis, para orientar quem perguntar. */}
+        <BuscaAjuda
+          topicos={TOPICOS.filter((t) => (organizador || t.publicos.includes(publico)) && (t.so !== "trocas" || edicao.permite_trocas || organizador))}
+          mostrarPublicos={organizador}
+        />
       </Pagina>
     </Area>
   );
