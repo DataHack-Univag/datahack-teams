@@ -1,5 +1,7 @@
 import { SubAbasPessoas } from "@/app/admin/pessoas/SubAbasPessoas";
 import { carregarRegulamento } from "@/modules/avaliacao/infra/repositorio";
+import { estadosFormacao } from "@/modules/equipes/domain/formacao";
+import { listarEquipes } from "@/modules/equipes/infra/repositorio";
 import { instituicoesDaEdicao, listarInstituicoes } from "@/modules/instituicoes/infra/repositorio";
 import { camposDaEdicao, respostasDaEdicao } from "@/modules/inscricoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -14,7 +16,8 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
   const { filtro, busca } = await searchParams;
   const { cliente, usuario, edicao } = await sessaoAtual();
   const acesso = edicao.acesso ?? "lista";
-  const [pessoas, reg, formulario] = await Promise.all([
+  const porProposta = edicao.modo_formacao === "alunos_propoem";
+  const [pessoas, reg, formulario, equipes] = await Promise.all([
     listarParticipantes(cliente, edicao.id),
     carregarRegulamento(cliente, edicao.id),
     // O cadastro segue as perguntas da edição; sem as migrações 018/022, fica o de sempre.
@@ -30,9 +33,12 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
         aceitaOutra: acesso !== "instituicoes",
       }))
       .catch(() => undefined),
+    porProposta ? listarEquipes(cliente, edicao.id, { incluirPropostas: true }) : Promise.resolve(null),
   ]);
   const bancas = reg.bancas;
   const alunos = pessoas.filter((p) => p.papel === "aluno");
+  // Quem propôs, quem foi convidado, quem aceitou, quem está livre (só quando os alunos propõem).
+  const formacao = equipes ? estadosFormacao(equipes, alunos.map((a) => a.email)) : undefined;
 
   return (
     <Pagina>
@@ -71,6 +77,7 @@ export default async function AdminPessoas({ searchParams }: PageProps<"/admin/p
         pessoas={pessoas}
         bancas={bancas}
         formulario={formulario}
+        formacao={formacao}
         meuEmail={usuario.email}
         filtroInicial={typeof filtro === "string" ? filtro : undefined}
         buscaInicial={typeof busca === "string" ? busca : undefined}

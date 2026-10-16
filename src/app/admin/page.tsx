@@ -2,6 +2,10 @@ import Link from "next/link";
 import { carregarPainel } from "@/modules/painel/application/consultas";
 import { ListaPendencias, NumerosEvento } from "@/modules/painel/ui/Painel";
 import { Andamento } from "@/modules/avaliacao/ui/Andamento";
+import { resumoFormacao } from "@/modules/equipes/domain/formacao";
+import { listarEquipes } from "@/modules/equipes/infra/repositorio";
+import { FormacaoPainel } from "@/modules/equipes/ui/FormacaoPainel";
+import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { primeiroNome } from "@/shared/lib/texto";
 import { BoasVindas, BotaoAjuda } from "@/shared/ui/Ajuda";
@@ -12,7 +16,19 @@ import { CabecalhoPagina, Pagina } from "@/shared/ui/Pagina";
 // Painel da organização: o estado do evento e o que precisa de atenção agora.
 export default async function PainelOrganizacao() {
   const { cliente, usuario, edicao } = await sessaoAtual();
-  const { resumo, pendencias, andamento, encerrada } = await carregarPainel(cliente, edicao);
+  // Formação das equipes: só na edição em que os alunos propõem as equipes.
+  const porProposta = edicao.modo_formacao === "alunos_propoem";
+  const [{ resumo, pendencias, andamento, encerrada }, formacao] = await Promise.all([
+    carregarPainel(cliente, edicao),
+    porProposta
+      ? Promise.all([listarEquipes(cliente, edicao.id, { incluirPropostas: true }), listarParticipantes(cliente, edicao.id)]).then(([equipes, pessoas]) =>
+          resumoFormacao(
+            equipes,
+            pessoas.filter((p) => p.papel === "aluno").map((p) => p.email),
+          ),
+        )
+      : Promise.resolve(null),
+  ]);
 
   return (
     <Pagina>
@@ -48,6 +64,8 @@ export default async function PainelOrganizacao() {
       </BoasVindas>
 
       <NumerosEvento r={resumo} />
+
+      {formacao && <FormacaoPainel r={formacao} />}
 
       <section className="space-y-3">
         <div className="flex items-baseline justify-between gap-2">

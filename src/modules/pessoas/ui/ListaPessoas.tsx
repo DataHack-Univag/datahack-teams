@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { ESTADOS_FORMACAO, type EstadoFormacao } from "@/modules/equipes/domain/formacao";
 import { alterarFuncao, removerParticipante, restaurarParticipante } from "@/modules/pessoas/application/actions";
 import { funcaoDe, opcoesFuncao, rotuloFuncao, type BancaResumo } from "@/modules/pessoas/domain/papeis";
 import { cursoSemestre, type Participante } from "@/modules/pessoas/domain/tipos";
@@ -15,15 +16,23 @@ import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
 
 type Filtro = { id: string; rotulo: string; teste: (p: Participante) => boolean };
+/** Em que pé está cada aluno na formação das equipes (edição em que os alunos propõem). */
+export type FormacaoPessoas = Record<string, { estado: EstadoFormacao; equipe: string | null }>;
+
+const FILTROS_FORMACAO: EstadoFormacao[] = ["propos", "convidado", "aceitou", "livre"];
 
 /** Filtros: todos, cada função da edição (aluno, organização, cada banca) e pendências dos alunos. */
-function filtrosDa(bancas: BancaResumo[]): Filtro[] {
+function filtrosDa(bancas: BancaResumo[], formacao?: FormacaoPessoas): Filtro[] {
   return [
     { id: "todos", rotulo: "Todos", teste: () => true },
     ...opcoesFuncao(bancas).map((x) => ({ id: x.valor, rotulo: x.rotulo, teste: (p: Participante) => funcaoDe(p.papel, p.banca) === x.valor })),
     { id: "sem_equipe", rotulo: "Alunos sem equipe", teste: (p) => p.papel === "aluno" && !p.equipe_id },
     { id: "sem_nota", rotulo: "Alunos sem nota", teste: (p) => p.papel === "aluno" && p.nota == null },
     { id: "ausentes", rotulo: "Ausentes no evento", teste: (p) => p.presenca === "ausente" },
+    // Formação das equipes (só quando os alunos propõem): os números do painel abrem estes filtros.
+    ...(formacao
+      ? FILTROS_FORMACAO.map((e) => ({ id: e, rotulo: ESTADOS_FORMACAO[e].rotulo, teste: (p: Participante) => p.papel === "aluno" && formacao[p.email]?.estado === e }))
+      : []),
   ];
 }
 
@@ -37,6 +46,7 @@ export function ListaPessoas({
   pessoas,
   bancas,
   formulario,
+  formacao,
   meuEmail,
   filtroInicial,
   buscaInicial,
@@ -45,11 +55,12 @@ export function ListaPessoas({
   bancas: BancaResumo[];
   /** Perguntas da edição para o cadastro (sem a migração 018/022: curso, semestre e nota). */
   formulario?: FormularioCadastro;
+  formacao?: FormacaoPessoas;
   meuEmail: string;
   filtroInicial?: string;
   buscaInicial?: string;
 }) {
-  const FILTROS = filtrosDa(bancas);
+  const FILTROS = filtrosDa(bancas, formacao);
   const [busca, setBusca] = useState(buscaInicial ?? "");
   // Links antigos (?filtro=avaliador) caem no primeiro filtro equivalente.
   const [filtro, setFiltro] = useState<string>(FILTROS.find((f) => f.id === filtroInicial || f.id.startsWith(`${filtroInicial}:`))?.id ?? "todos");
@@ -60,9 +71,9 @@ export function ListaPessoas({
     try {
       const salvo = localStorage.getItem(CHAVE);
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      if (salvo && filtrosDa(bancas).some((f) => f.id === salvo)) setFiltro(salvo);
+      if (salvo && filtrosDa(bancas, formacao).some((f) => f.id === salvo)) setFiltro(salvo);
     } catch {}
-  }, [filtroInicial, buscaInicial, bancas]);
+  }, [filtroInicial, buscaInicial, bancas, formacao]);
 
   function escolher(f: string) {
     setFiltro(f);
@@ -122,6 +133,12 @@ export function ListaPessoas({
                       <span className="truncate">{p.nome}</span>
                       {p.email === meuEmail && <span className="text-xs text-suave">(você)</span>}
                       {p.papel !== "aluno" && <Selo tom="marca">{rotuloFuncao(p.papel, p.banca, bancas)}</Selo>}
+                      {p.papel === "aluno" && formacao?.[p.email] && formacao[p.email].estado !== "em_equipe" && (
+                        // Indicador pequeno da formação: quem propôs, quem foi convidado, quem aceitou, quem está livre.
+                        <Selo tom={ESTADOS_FORMACAO[formacao[p.email].estado].tom} title={`${ESTADOS_FORMACAO[formacao[p.email].estado].explicacao}${formacao[p.email].equipe ? ` (${formacao[p.email].equipe})` : ""}`}>
+                          {ESTADOS_FORMACAO[formacao[p.email].estado].rotulo}
+                        </Selo>
+                      )}
                       {p.presenca === "ausente" && (
                         <Selo tom="alerta" title="Registrada como ausente no evento (continua inscrita na edição)">
                           Ausente
