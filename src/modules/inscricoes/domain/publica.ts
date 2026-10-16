@@ -22,6 +22,8 @@ export type EdicaoPublica = {
   inscricao_abre_em: string | null;
   inscricao_fecha_em: string | null;
   situacao: SituacaoInscricoes;
+  /** Situação da própria edição (migração 031): "encerrada" = já foi concluída. */
+  situacao_edicao?: string;
   aprovadas: number;
   campos: Campo[];
   instituicoes: { id: string; nome: string }[];
@@ -37,14 +39,14 @@ export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; to
 ];
 
 /**
- * Situação das inscrições pelo site — a mesma regra do banco (situacao_inscricao, migração 028):
+ * Situação das inscrições pelo site — a mesma regra do banco (situacao_inscricao, migração 031):
  * só abre na edição atual e dentro do prazo. Planejada e ainda não atual: "ainda não abriram".
  */
 export function situacaoDasInscricoes(
   e: { acesso?: string | null; situacao: string; atual: boolean; inscricao_abre_em?: string | null; inscricao_fecha_em?: string | null },
   agora = Date.now(),
 ): SituacaoInscricoes {
-  if (!e.acesso || e.acesso === "lista") return "fechada";
+  if (!e.acesso || e.acesso === "lista" || e.situacao === "cancelada") return "fechada";
   if (e.situacao === "encerrada" || (e.inscricao_fecha_em && agora >= Date.parse(e.inscricao_fecha_em))) return "encerrada";
   if (e.inscricao_abre_em && agora < Date.parse(e.inscricao_abre_em)) return "em_breve";
   if (!e.atual) return e.situacao === "planejada" ? "em_breve" : "encerrada";
@@ -91,7 +93,9 @@ const dataHora = (iso: string) =>
   new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Cuiaba", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
 /** Frase do estado das inscrições ("Inscrições abertas até 30/05/2027 18:00"). */
-export function fraseInscricoes(e: Pick<EdicaoPublica, "situacao" | "inscricao_abre_em" | "inscricao_fecha_em">): string {
+export function fraseInscricoes(e: Pick<EdicaoPublica, "situacao" | "inscricao_abre_em" | "inscricao_fecha_em" | "situacao_edicao">): string {
+  if (e.situacao_edicao === "encerrada") return "Esta edição já foi concluída. As inscrições estão encerradas.";
+  if (e.situacao_edicao === "cancelada") return "Esta edição foi cancelada.";
   if (e.situacao === "em_breve") return e.inscricao_abre_em ? `As inscrições abrem em ${dataHora(e.inscricao_abre_em)}.` : "As inscrições ainda não foram abertas.";
   if (e.situacao === "encerrada") return "As inscrições estão encerradas.";
   if (e.situacao === "fechada") return "Este evento é só para convidados da organização.";

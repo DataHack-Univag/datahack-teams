@@ -4,6 +4,8 @@ import { instituicoesDaEdicao, listarInstituicoes } from "@/modules/instituicoes
 import { FormAcessoEdicao } from "@/modules/instituicoes/ui/FormAcessoEdicao";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { CartaoEdicao, FormDadosEdicao } from "@/modules/edicoes/ui/Edicoes";
+import { FormSituacaoEdicao } from "@/modules/edicoes/ui/FormSituacaoEdicao";
+import { rotuloSituacaoEdicao, tomSituacaoEdicao } from "@/modules/edicoes/domain/tipos";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -40,7 +42,11 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
                 </li>
                 <li>As configurações embaixo são sempre da edição que você está vendo (com a logo e a cor dela).</li>
                 <li>Para preparar a próxima edição, use “Nova edição” e copie o regulamento de uma anterior.</li>
-                <li>Quando a nova edição começar, use “Tornar a edição atual”. A anterior continua guardada para consulta.</li>
+                <li>Quando a nova edição começar, use “Tornar a edição atual”: ela fica “em andamento”. A anterior continua guardada para consulta.</li>
+                <li>
+                  Em <strong>Situação da edição</strong>: em planejamento, em andamento, encerrada ou cancelada (com o motivo). Cancelada perde o link de inscrição e não
+                  pode ser a atual.
+                </li>
               </ul>
             </BotaoAjuda>
             <BotaoLink href="/admin/edicoes/nova" icone="mais_novo" variante="primario">
@@ -82,6 +88,7 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Selo tom="marca">Você está vendo</Selo>
               {edicao.atual ? <Selo tom="sucesso">Atual dos participantes e bancas</Selo> : <Selo tom="alerta">Não é a atual</Selo>}
+              <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
             </div>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -96,6 +103,14 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
         <p className="text-sm text-suave">
           O que você muda aqui vale só para a Edição {edicao.numero}. Para mexer em outra, use “Administrar esta edição” no cartão dela ou o menu de edições do topo.
         </p>
+
+        <section id="situacao" className="card scroll-mt-24 space-y-3">
+          <div>
+            <h3 className="text-lg font-semibold">Situação da edição</h3>
+            <p className="text-sm text-suave">Em que ponto ela está. A página de inscrição avisa conforme a situação.</p>
+          </div>
+          <FormSituacaoEdicao key={edicao.id} edicao={edicao} />
+        </section>
 
         <section className="card space-y-3">
           <h3 className="text-lg font-semibold">Dados da edição</h3>

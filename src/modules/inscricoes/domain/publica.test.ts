@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { Campo } from "@/modules/inscricoes/domain/campos";
-import { comAceiteDoTermo, limparNome, perguntasNaTela, problemaNoNome, situacaoDasInscricoes } from "@/modules/inscricoes/domain/publica";
+import { comAceiteDoTermo, fraseInscricoes, limparNome, perguntasNaTela, problemaNoNome, situacaoDasInscricoes } from "@/modules/inscricoes/domain/publica";
 
 describe("nome na inscrição pública", () => {
   it("pede nome e sobrenome, como o banco", () => {
@@ -44,5 +44,13 @@ describe("situacaoDasInscricoes (mesma regra do banco, migração 028)", () => {
     expect(situacaoDasInscricoes({ ...base, inscricao_fecha_em: "2026-10-19T00:00:00Z" }, agora)).toBe("encerrada");
     expect(situacaoDasInscricoes({ ...base, situacao: "encerrada" }, agora)).toBe("encerrada");
     expect(situacaoDasInscricoes({ ...base, acesso: "lista" }, agora)).toBe("fechada");
+  });
+});
+
+describe("situação da edição na página de inscrição (migração 031)", () => {
+  it("concluída e cancelada", () => {
+    expect(fraseInscricoes({ situacao: "encerrada", situacao_edicao: "encerrada", inscricao_abre_em: null, inscricao_fecha_em: null })).toMatch(/concluída/);
+    expect(fraseInscricoes({ situacao: "em_breve", situacao_edicao: "planejada", inscricao_abre_em: null, inscricao_fecha_em: null })).toMatch(/ainda não foram abertas/);
+    expect(situacaoDasInscricoes({ acesso: "aberto", situacao: "cancelada", atual: false })).toBe("fechada");
   });
 });

@@ -655,6 +655,43 @@ begin
   assert (select c.semestre from cadastro_da_inscricao(v_ed, 'ninguem@teste.local') c) is null, 'sem inscrição: nada';
 end $$;
 
+-- ---------------------------------------------------------------- 031 · situação da edição e cancelamento
+reset role;
+do $$
+declare
+  v_ed uuid := current_setting('dh.ed_form')::uuid;
+  v_slug text := (select slug from edicoes where id = current_setting('dh.ed_form')::uuid);
+  v_atual uuid := (select id from edicoes where atual);
+begin
+  update edicoes set atual = false where atual;
+  update edicoes set atual = true where numero = 1;
+  update edicoes set situacao = 'planejada', acesso = 'aberto' where id = v_ed;
+  begin
+    update edicoes set situacao = 'cancelada' where id = v_ed;
+    raise exception 'cancelou sem motivo';
+  exception when check_violation then null;
+  end;
+  update edicoes set situacao = 'cancelada', motivo_cancelamento = '  Faltou patrocínio  ' where id = v_ed;
+  assert (select motivo_cancelamento = 'Faltou patrocínio' and cancelada_em is not null from edicoes where id = v_ed), 'motivo e data do cancelamento';
+  assert edicao_publica(v_slug) is null, 'cancelada: a página de inscrição não existe';
+  assert situacao_inscricao(v_ed) = 'fechada', 'cancelada: inscrição fechada';
+  begin
+    update edicoes set atual = true where id = v_ed;
+    raise exception 'cancelada virou atual';
+  exception when raise_exception then
+    if sqlerrm = 'cancelada virou atual' then raise; end if;
+  end;
+  update edicoes set situacao = 'planejada' where id = v_ed;
+  assert (select motivo_cancelamento is null and cancelada_em is null from edicoes where id = v_ed), 'sair de cancelada limpa o motivo';
+  assert edicao_publica(v_slug) ->> 'situacao_edicao' = 'planejada', 'página diz a situação da edição';
+  update edicoes set atual = false where atual;
+  update edicoes set atual = true where id = v_ed;
+  update edicoes set situacao = 'encerrada' where id = v_ed;
+  assert situacao_inscricao(v_ed) = 'encerrada' and edicao_publica(v_slug) ->> 'situacao_edicao' = 'encerrada', 'encerrada: concluída';
+  update edicoes set atual = false where atual;
+  update edicoes set atual = true where id = v_atual;
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 030 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 031 conferem.'

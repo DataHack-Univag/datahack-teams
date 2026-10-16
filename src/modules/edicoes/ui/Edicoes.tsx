@@ -1,5 +1,6 @@
 import { criarEdicao, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
-import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, SITUACOES_EDICAO, type Edicao } from "@/modules/edicoes/domain/tipos";
+import { tomSituacaoEdicao } from "@/modules/edicoes/domain/tipos";
+import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { ACESSOS, COR_PADRAO, resolverMarca, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
@@ -29,9 +30,14 @@ export function CartaoEdicao({
         <div className="flex flex-wrap justify-end gap-1.5">
           {edicao.atual && <Selo tom="sucesso">Atual</Selo>}
           {vendo && <Selo tom="marca">Você está vendo</Selo>}
-          <Selo tom="neutro">{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
+          <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
         </div>
       </div>
+      {edicao.situacao === "cancelada" && edicao.motivo_cancelamento && (
+        <p className="rounded-xl border border-red-500/30 bg-red-500/5 p-2 text-xs">
+          <strong>Motivo do cancelamento:</strong> {edicao.motivo_cancelamento}
+        </p>
+      )}
       <div className="min-w-0">
         <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Edição {edicao.numero}</p>
         <h2 className="text-lg font-bold break-words">{edicao.nome}</h2>
@@ -72,11 +78,11 @@ export function CartaoEdicao({
           </BotaoEnviar>
         </form>
       )}
-      {!edicao.atual && (
+      {!edicao.atual && edicao.situacao !== "cancelada" && (
         <Formulario
           action={tornarAtual}
           tituloConfirmar={`Tornar a ${edicao.nome} a edição atual?`}
-          confirmar="Participantes e bancas passam a ver esta edição ao entrar. A edição atual de hoje continua guardada e consultável pela organização."
+          confirmar="Participantes e bancas passam a ver esta edição ao entrar, e ela fica “em andamento”. A edição atual de hoje continua guardada e consultável pela organização."
           rotuloConfirmar="Tornar atual"
           perigo={false}
         >
@@ -99,12 +105,6 @@ export function FormDadosEdicao({ edicao }: { edicao: Edicao }) {
       <Campo rotulo="Início" name="data_inicio" type="date" defaultValue={edicao.data_inicio ?? ""} />
       <Campo rotulo="Fim" name="data_fim" type="date" defaultValue={edicao.data_fim ?? ""} dica="Igual ao início se for um dia só." />
       <Campo rotulo="Local" name="local" maxLength={200} defaultValue={edicao.local ?? ""} />
-      <Selecao
-        rotulo="Situação"
-        name="situacao"
-        defaultValue={edicao.situacao}
-        opcoes={SITUACOES_EDICAO.map((s) => ({ valor: s.valor, rotulo: `${s.rotulo} — ${s.descricao}` }))}
-      />
       <AreaTexto rotulo="Descrição" name="descricao" rows={2} maxLength={4000} defaultValue={edicao.descricao ?? ""} className="sm:col-span-2" />
       <AreaTexto
         rotulo="Formato do evento"

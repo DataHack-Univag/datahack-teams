@@ -27,6 +27,7 @@ export type DadosEdicao = Partial<
     | "max_membros"
     | "equipes_travadas"
     | "avaliacao_encerrada"
+    | "motivo_cancelamento"
   >
 >;
 

@@ -512,6 +512,8 @@ export type Database = {
           inscricao_abre_em: string | null;
           inscricao_fecha_em: string | null;
           marca: Json;
+          motivo_cancelamento: string | null;
+          cancelada_em: string | null;
         };
         Insert: {
           id?: string;
@@ -543,6 +545,8 @@ export type Database = {
           inscricao_abre_em?: string | null;
           inscricao_fecha_em?: string | null;
           marca?: Json;
+          motivo_cancelamento?: string | null;
+          cancelada_em?: string | null;
         };
         Update: {
           id?: string;
@@ -574,6 +578,8 @@ export type Database = {
           inscricao_abre_em?: string | null;
           inscricao_fecha_em?: string | null;
           marca?: Json;
+          motivo_cancelamento?: string | null;
+          cancelada_em?: string | null;
         };
         Relationships: [];
       };
@@ -1934,6 +1940,7 @@ export type Database = {
       atende_chamados: { Args: { p_edicao: string }; Returns: boolean };
       atender_chamado: { Args: { p_chamado: string; p_resolver?: boolean }; Returns: undefined };
       atualizar_situacao_proposta: { Args: { p_equipe: string }; Returns: undefined };
+      cadastro_da_inscricao: { Args: { p_edicao: string; p_email: string }; Returns: unknown };
       cancelar_proposta: { Args: { p_equipe: string; p_como?: string }; Returns: undefined };
       cancelar_troca: { Args: { p_pedido: string; p_como?: string }; Returns: undefined };
       convidar_integrante: { Args: { p_equipe: string; p_email: string; p_como?: string }; Returns: undefined };
@@ -1948,7 +1955,7 @@ export type Database = {
       desalocar_equipe: { Args: { p_equipe: string }; Returns: undefined };
       edicao_atual: { Args: Record<PropertyKey, never>; Returns: string };
       edicao_da_equipe: { Args: { p_equipe: string }; Returns: string };
-      edicao_liberada: { Args: Record<PropertyKey, never>; Returns: boolean } | { Args: { p_edicao: string }; Returns: boolean };
+      edicao_liberada: { Args: { p_edicao: string }; Returns: boolean } | { Args: Record<PropertyKey, never>; Returns: boolean };
       edicao_publica: { Args: { p_slug: string }; Returns: Json };
       eh_avaliador: { Args: Record<PropertyKey, never>; Returns: boolean };
       eh_inscrito: { Args: Record<PropertyKey, never>; Returns: boolean };

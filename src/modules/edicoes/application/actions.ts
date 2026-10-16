@@ -51,7 +51,6 @@ export const salvarDadosEdicao = criarAcao(
     local: textoOpcional(200),
     descricao: textoOpcional(4000),
     formato: textoOpcional(8000),
-    situacao,
   }),
   async (d) => {
     if (d.data_inicio && d.data_fim && d.data_fim < d.data_inicio) return falha("A data de fim precisa ser depois da data de início.");
@@ -64,6 +63,24 @@ export const salvarDadosEdicao = criarAcao(
     return sucesso("Dados da edição salvos.");
   },
 );
+
+/** Situação da edição (planejada, em andamento, encerrada ou cancelada, com o motivo). */
+export const salvarSituacaoEdicao = criarAcao(z.object({ id, situacao, motivo: textoOpcional(500) }), async (d) => {
+  if (d.situacao === "cancelada" && (d.motivo ?? "").length < 5) return falha("Escreva o motivo do cancelamento (pelo menos 5 letras).");
+  const { cliente } = await sessaoAtual();
+  const { alterou, error } = await repo.atualizarEdicao(cliente, d.id, {
+    situacao: d.situacao,
+    motivo_cancelamento: d.situacao === "cancelada" ? d.motivo : null,
+  });
+  if (error) return falha(traduzirErro(error));
+  if (!alterou) return SEM_PERMISSAO;
+  atualizarTelas();
+  return sucesso(
+    d.situacao === "cancelada"
+      ? "Edição cancelada. O link de inscrição dela deixou de funcionar."
+      : `Situação salva: ${SITUACOES_EDICAO.find((s) => s.valor === d.situacao)?.rotulo.toLowerCase()}.`,
+  );
+});
 
 /** Regras das equipes na edição. */
 export const salvarRegrasEquipes = criarAcao(
@@ -138,7 +155,7 @@ export const tornarAtual = criarAcao(z.object({ id }), async (d) => {
   const { error } = await repo.definirEdicaoAtual(cliente, d.id);
   if (error) return falha(traduzirErro(error));
   atualizarTelas();
-  return sucesso("Pronto: esta é a edição atual. Participantes e bancas veem esta edição ao entrar.");
+  return sucesso("Pronto: esta é a edição atual, agora em andamento. Participantes e bancas veem esta edição ao entrar.");
 });
 
 /** Importa o regulamento (JSON no formato canônico) numa edição que ainda não tem um. */

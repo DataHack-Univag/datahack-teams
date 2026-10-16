@@ -3,7 +3,7 @@
 import type { Acesso, Aprovacao, MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
 
 export type ModoFormacao = "organizacao" | "gerador" | "alunos_propoem";
-export type SituacaoEdicao = "planejada" | "inscricoes" | "em_andamento" | "encerrada";
+export type SituacaoEdicao = "planejada" | "inscricoes" | "em_andamento" | "encerrada" | "cancelada";
 
 export type Edicao = {
   id: string;
@@ -33,6 +33,9 @@ export type Edicao = {
   vagas?: number | null;
   inscricao_abre_em?: string | null;
   inscricao_fecha_em?: string | null;
+  /** Migração 031: por que a edição foi cancelada e quando. */
+  motivo_cancelamento?: string | null;
+  cancelada_em?: string | null;
   marca?: MarcaEdicao;
 };
 
@@ -46,15 +49,18 @@ export const MODOS_FORMACAO: { valor: ModoFormacao; rotulo: string; descricao: s
   },
 ];
 
-export const SITUACOES_EDICAO: { valor: SituacaoEdicao; rotulo: string; descricao: string }[] = [
-  { valor: "planejada", rotulo: "Planejada", descricao: "Em preparação; ainda não aberta aos participantes." },
-  { valor: "inscricoes", rotulo: "Inscrições", descricao: "Recebendo inscrições e formando equipes." },
-  { valor: "em_andamento", rotulo: "Em andamento", descricao: "O evento está acontecendo." },
-  { valor: "encerrada", rotulo: "Encerrada", descricao: "Só consulta para participantes e bancas; a organização ainda edita." },
+/** Situações que a organização escolhe (o ciclo da edição). "inscricoes" é de antes e não é mais oferecida. */
+export const SITUACOES_EDICAO: { valor: SituacaoEdicao; rotulo: string; descricao: string; tom: "neutro" | "alerta" | "sucesso" | "marca" | "erro" }[] = [
+  { valor: "planejada", rotulo: "Em planejamento", descricao: "Em preparação. Na página de inscrição: “as inscrições ainda não foram abertas”.", tom: "alerta" },
+  { valor: "em_andamento", rotulo: "Em andamento", descricao: "Está acontecendo (tornar a edição atual já põe aqui). Inscrições abertas no prazo.", tom: "sucesso" },
+  { valor: "encerrada", rotulo: "Encerrada", descricao: "Já foi concluída. Só consulta para participantes e bancas; a página de inscrição diz que acabou.", tom: "neutro" },
+  { valor: "cancelada", rotulo: "Cancelada", descricao: "Não vai acontecer. Pede o motivo; o link de inscrição deixa de existir.", tom: "erro" },
 ];
+const ANTIGAS: Record<string, string> = { inscricoes: "Inscrições" };
 
 export const rotuloModo = (m: string) => MODOS_FORMACAO.find((x) => x.valor === m)?.rotulo ?? m;
-export const rotuloSituacaoEdicao = (s: string) => SITUACOES_EDICAO.find((x) => x.valor === s)?.rotulo ?? s;
+export const rotuloSituacaoEdicao = (s: string) => SITUACOES_EDICAO.find((x) => x.valor === s)?.rotulo ?? ANTIGAS[s] ?? s;
+export const tomSituacaoEdicao = (s: string) => SITUACOES_EDICAO.find((x) => x.valor === s)?.tom ?? "neutro";
 
 /** "09 a 10/10/2026", "08/10/2027" ou "sem data". */
 export function periodo(e: Pick<Edicao, "data_inicio" | "data_fim">): string {
