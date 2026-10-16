@@ -1,5 +1,5 @@
 import { SubAbasEquipes } from "@/app/admin/equipes/SubAbasEquipes";
-import { listarResumo } from "@/modules/equipes/infra/repositorio";
+import { contarParaAprovar, listarResumo } from "@/modules/equipes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { STATUS_TROCA } from "@/modules/trocas/domain/tipos";
 import { historicoTrocas } from "@/modules/trocas/infra/repositorio";
@@ -12,7 +12,7 @@ export default async function AdminTrocas({ searchParams }: PageProps<"/admin/eq
   const { status } = await searchParams;
   const filtro = STATUS_TROCA.find((s) => s.valor === status)?.valor ?? null;
   const { cliente, edicao } = await sessaoAtual();
-  const [historico, equipes] = await Promise.all([historicoTrocas(cliente, edicao.id), listarResumo(cliente, edicao.id)]);
+  const [historico, equipes, paraAprovar] = await Promise.all([historicoTrocas(cliente, edicao.id), listarResumo(cliente, edicao.id), contarParaAprovar(cliente, edicao.id)]);
   // Nome atual da equipe; se ela foi arquivada, usa a cópia guardada no pedido.
   const nomeEquipe = (id: string | null, copia?: string | null) =>
     equipes.find((e) => e.id === id)?.nome ?? (copia ? `${copia} (arquivada)` : "(equipe arquivada)");
@@ -36,7 +36,7 @@ export default async function AdminTrocas({ searchParams }: PageProps<"/admin/eq
           </BotaoAjuda>
         }
       />
-      <SubAbasEquipes ativa="trocas" trocas={conta("pendente")} equipes={equipes.length} />
+      <SubAbasEquipes ativa="trocas" trocas={conta("pendente")} equipes={equipes.length} paraAprovar={paraAprovar} />
       <SubAbas
         ativa={filtro ?? "todas"}
         abas={[

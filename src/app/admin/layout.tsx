@@ -3,7 +3,7 @@ import { Area } from "@/app/_shell/Area";
 import { aoVivoOrganizacao } from "@/app/_shell/aoVivo";
 import { comandosDasAbas, comandosExtrasOrganizacao, navOrganizacao } from "@/app/_shell/menus";
 import { contarChamadosAbertos } from "@/modules/chamados/infra/repositorio";
-import { listarResumo } from "@/modules/equipes/infra/repositorio";
+import { contarParaAprovar, listarResumo } from "@/modules/equipes/infra/repositorio";
 import { contarPendentes } from "@/modules/inscricoes/infra/repositorio";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { rotuloPapel } from "@/modules/pessoas/domain/papeis";
@@ -17,14 +17,15 @@ export default async function LayoutAdmin({ children }: LayoutProps<"/admin">) {
   const { cliente, usuario, avatar, organizador, edicao } = await sessaoAtual();
   if (!organizador) redirect("/");
 
-  const [equipes, pessoas, trocas, chamados, inscricoes] = await Promise.all([
+  const [equipes, pessoas, trocas, chamados, inscricoes, paraAprovar] = await Promise.all([
     listarResumo(cliente, edicao.id),
     listarPessoasResumo(cliente, edicao.id),
     trocasPendentes(cliente, edicao.id),
     contarChamadosAbertos(cliente, edicao.id),
     contarPendentes(cliente, edicao.id),
+    contarParaAprovar(cliente, edicao.id),
   ]);
-  const nav = navOrganizacao({ trocas: trocas.length, chamados, inscricoes });
+  const nav = navOrganizacao({ trocas: trocas.length, chamados, inscricoes, paraAprovar });
   const comandos: Comando[] = [
     ...comandosDasAbas([...nav.itens, ...nav.mais]),
     ...comandosExtrasOrganizacao,

@@ -76,7 +76,13 @@ export default async function AdminEquipes({ searchParams }: PageProps<"/admin/e
           </>
         }
       />
-      <SubAbasEquipes ativa="lista" trocas={trocas.length} equipes={equipes.length} propostas={propostas.length} />
+      <SubAbasEquipes
+        ativa="lista"
+        trocas={trocas.length}
+        equipes={equipes.length}
+        propostas={propostas.length}
+        paraAprovar={propostas.filter((p) => p.situacao === "aguardando_aprovacao").length}
+      />
 
       {arquivada && <Aviso tom="sucesso">Equipe arquivada. Ela continua no histórico.</Aviso>}
 

@@ -107,6 +107,18 @@ export async function contarEquipes(cliente: Cliente, edicaoId: string): Promise
   return r.count ?? 0;
 }
 
+/** Propostas com todos os convidados confirmados, esperando a organização aprovar. */
+export async function contarParaAprovar(cliente: Cliente, edicaoId: string): Promise<number> {
+  const r = await cliente
+    .from("equipes")
+    .select("*", { count: "exact", head: true })
+    .eq("edicao_id", edicaoId)
+    .eq("situacao", "aguardando_aprovacao")
+    .is("removido_em", null);
+  exigir(r, "as propostas para aprovar");
+  return r.count ?? 0;
+}
+
 // ---------------------------------------------------------------- gravação
 
 export const criarEquipe = (cliente: Cliente, edicaoId: string, nome: string, repo: string) =>

@@ -35,7 +35,13 @@ export default async function AdminPropostas() {
           </BotaoAjuda>
         }
       />
-      <SubAbasEquipes ativa="propostas" trocas={trocas.length} equipes={totalEquipes} propostas={propostas.length} />
+      <SubAbasEquipes
+        ativa="propostas"
+        trocas={trocas.length}
+        equipes={totalEquipes}
+        propostas={propostas.length}
+        paraAprovar={propostas.filter((p) => p.situacao === "aguardando_aprovacao").length}
+      />
       {edicao.modo_formacao !== "alunos_propoem" && (
         <Aviso
           tom="info"

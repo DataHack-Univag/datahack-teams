@@ -7,11 +7,12 @@ import type { ItemNav } from "@/shared/ui/Navegacao";
  * Organização: 4 abas do dia a dia (também a barra do celular) e o resto em grupos por tarefa,
  * que no computador viram menus ("Participantes ▾"…) e no celular, seções do "Mais".
  */
-export function navOrganizacao(contagens: { trocas?: number; chamados?: number; inscricoes?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
+export function navOrganizacao(contagens: { trocas?: number; chamados?: number; inscricoes?: number; paraAprovar?: number } = {}): { itens: ItemNav[]; mais: ItemNav[] } {
   return {
     itens: [
       { href: "/admin", rotulo: "Painel", icone: "painel" },
-      { href: "/admin/equipes", rotulo: "Equipes", icone: "equipe", prefixos: ["/admin/equipes"], contagem: contagens.trocas },
+      // Pendências de Equipes: trocas pedidas + propostas prontas para a organização aprovar.
+      { href: "/admin/equipes", rotulo: "Equipes", icone: "equipe", prefixos: ["/admin/equipes"], contagem: (contagens.trocas ?? 0) + (contagens.paraAprovar ?? 0) || undefined },
       { href: "/admin/avaliacao", rotulo: "Avaliação", icone: "avaliacao", prefixos: ["/admin/avaliacao", "/avaliar"] },
       { href: "/admin/ranking", rotulo: "Ranking", icone: "ranking", prefixos: ["/admin/ranking"] },
     ],

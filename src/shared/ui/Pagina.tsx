@@ -68,7 +68,7 @@ export function CabecalhoPagina({
 }
 
 /** Sub-abas dentro de uma tela (ex.: Equipes · Trocas · Gerador). */
-export function SubAbas({ abas, ativa }: { abas: { id: string; rotulo: string; href: string; contagem?: number }[]; ativa: string }) {
+export function SubAbas({ abas, ativa }: { abas: { id: string; rotulo: string; href: string; contagem?: number; pendentes?: number }[]; ativa: string }) {
   return (
     <nav aria-label="Seções" className="flex gap-1 overflow-x-auto rounded-xl border border-borda-forte bg-superficie-solida p-1 [scrollbar-width:none]">
       {abas.map((a) => {
@@ -85,6 +85,12 @@ export function SubAbas({ abas, ativa }: { abas: { id: string; rotulo: string; h
             {a.rotulo}
             {a.contagem !== undefined && (
               <span className={`rounded-full px-1.5 text-xs tabular-nums ${atual ? "bg-white/20" : "bg-marca-fundo"}`}>{a.contagem}</span>
+            )}
+            {/* Pendência (algo esperando a pessoa agir): a mesma bolinha do menu. */}
+            {!!a.pendentes && (
+              <span className="min-w-5 rounded-full bg-[var(--magenta)] px-1.5 text-center text-[11px] leading-5 font-bold text-white tabular-nums" aria-label={`${a.pendentes} pendente(s)`}>
+                {a.pendentes > 9 ? "9+" : a.pendentes}
+              </span>
             )}
           </Link>
         );

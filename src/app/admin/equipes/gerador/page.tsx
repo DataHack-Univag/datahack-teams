@@ -1,5 +1,5 @@
 import { SubAbasEquipes } from "@/app/admin/equipes/SubAbasEquipes";
-import { contarEquipes } from "@/modules/equipes/infra/repositorio";
+import { contarEquipes, contarParaAprovar } from "@/modules/equipes/infra/repositorio";
 import { Gerador, type AlunoComEquipe } from "@/modules/gerador/ui/Gerador";
 import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -8,7 +8,11 @@ import { listarParticipantes } from "@/modules/pessoas/infra/repositorio";
 // Equipes → Gerador: monta equipes equilibradas por semestre e nota e cadastra a combinação escolhida.
 export default async function AdminGerador() {
   const { cliente, edicao } = await sessaoAtual();
-  const [participantes, totalEquipes] = await Promise.all([listarParticipantes(cliente, edicao.id), contarEquipes(cliente, edicao.id)]);
+  const [participantes, totalEquipes, paraAprovar] = await Promise.all([
+    listarParticipantes(cliente, edicao.id),
+    contarEquipes(cliente, edicao.id),
+    contarParaAprovar(cliente, edicao.id),
+  ]);
 
   const alunosTodos = participantes.filter((p) => p.papel === "aluno");
   const alunos: AlunoComEquipe[] = alunosTodos
@@ -26,7 +30,7 @@ export default async function AdminGerador() {
   return (
     <>
       <div className="mx-auto w-full max-w-6xl px-4 pt-4">
-        <SubAbasEquipes ativa="gerador" equipes={totalEquipes} />
+        <SubAbasEquipes ativa="gerador" equipes={totalEquipes} paraAprovar={paraAprovar} />
       </div>
       {/* O gerador usa a largura toda (modo telão). */}
       <Gerador
