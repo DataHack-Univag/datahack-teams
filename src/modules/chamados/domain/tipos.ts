@@ -35,3 +35,27 @@ export function ordemDeAtendimento(a: Chamado, b: Chamado): number {
   if (a.tipo !== b.tipo) return a.tipo === "problema" ? -1 : 1;
   return a.aberto_em.localeCompare(b.aberto_em);
 }
+
+/** Pedido já fechado: resolvido (pela mentoria ou pela equipe) ou cancelado pela equipe. */
+export type ChamadoEncerrado = Chamado & { fechado_em: string | null; fechado_por: string | null };
+
+/** Minutos em texto: "4 min", "1 h 05 min", "menos de 1 min". */
+export function emMinutos(min: number): string {
+  if (min < 1) return "menos de 1 min";
+  if (min < 60) return `${min} min`;
+  return `${Math.floor(min / 60)} h ${String(min % 60).padStart(2, "0")} min`;
+}
+
+/** Quanto tempo o pedido ficou aberto (null se ainda não fechou). */
+export function duracao(de: string, ate: string | null): string | null {
+  if (!ate) return null;
+  return emMinutos(Math.max(0, Math.round((new Date(ate).getTime() - new Date(de).getTime()) / 60000)));
+}
+
+/** Tempo médio até resolver, em minutos (só os resolvidos; null se não houver). */
+export function mediaAteResolver(chamados: ChamadoEncerrado[]): number | null {
+  const tempos = chamados
+    .filter((c) => c.situacao === "resolvido" && c.fechado_em)
+    .map((c) => (new Date(c.fechado_em!).getTime() - new Date(c.aberto_em).getTime()) / 60000);
+  return tempos.length ? Math.round(tempos.reduce((a, b) => a + b, 0) / tempos.length) : null;
+}

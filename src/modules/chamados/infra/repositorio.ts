@@ -1,4 +1,4 @@
-import type { Chamado, TipoChamado } from "@/modules/chamados/domain/tipos";
+import type { Chamado, ChamadoEncerrado, TipoChamado } from "@/modules/chamados/domain/tipos";
 import { exigir } from "@/shared/db/erros";
 import type { Cliente } from "@/shared/db/servidor";
 
@@ -54,3 +54,21 @@ export const atenderChamado = (cliente: Cliente, id: string, resolver: boolean) 
   cliente.rpc("atender_chamado", { p_chamado: id, p_resolver: resolver });
 
 export const reabrirChamado = (cliente: Cliente, id: string) => cliente.rpc("reabrir_chamado", { p_chamado: id });
+
+/** Pedidos já fechados (resolvidos ou cancelados), do mais recente para o mais antigo. */
+export async function listarChamadosEncerrados(cliente: Cliente, edicaoId: string): Promise<ChamadoEncerrado[]> {
+  const r = await cliente
+    .from("chamados")
+    .select(`${COLUNAS}, fechado_em, fechador:pessoas!chamados_fechado_por_fkey(nome)`)
+    .eq("edicao_id", edicaoId)
+    .in("situacao", ["resolvido", "cancelado"])
+    .order("fechado_em", { ascending: false, nullsFirst: false })
+    .overrideTypes<(Linha & { fechado_em: string | null; fechador: { nome: string } | null })[], { merge: false }>();
+  return (exigir(r, "os pedidos de ajuda encerrados") ?? []).map((l) => ({ ...paraChamado(l), fechado_em: l.fechado_em, fechado_por: l.fechador?.nome ?? null }));
+}
+
+/** Quantos pedidos já foram encerrados (número da aba). */
+export async function contarChamadosEncerrados(cliente: Cliente, edicaoId: string): Promise<number> {
+  const r = await cliente.from("chamados").select("*", { count: "exact", head: true }).eq("edicao_id", edicaoId).in("situacao", ["resolvido", "cancelado"]);
+  return r.error ? 0 : (r.count ?? 0);
+}

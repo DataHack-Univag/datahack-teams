@@ -1,6 +1,7 @@
 import { atenderChamado, reabrirChamado } from "@/modules/chamados/application/actions";
 import { espera, ordemDeAtendimento, TIPOS_CHAMADO, type Chamado } from "@/modules/chamados/domain/tipos";
-import { listarChamadosAtivos } from "@/modules/chamados/infra/repositorio";
+import { contarChamadosEncerrados, listarChamadosAtivos, listarChamadosEncerrados } from "@/modules/chamados/infra/repositorio";
+import { HistoricoChamados } from "@/modules/chamados/ui/HistoricoChamados";
 import type { Edicao } from "@/modules/edicoes/domain/tipos";
 import { listarEquipes } from "@/modules/equipes/infra/repositorio";
 import { IconeEquipe } from "@/modules/equipes/ui/IconeEquipe";
@@ -13,6 +14,7 @@ import { AutoAtualizar } from "@/shared/ui/AutoAtualizar";
 import { EstadoVazio } from "@/shared/ui/EstadoVazio";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 import { Icone } from "@/shared/ui/Icone";
+import { SubAbas } from "@/shared/ui/Pagina";
 import { Selo } from "@/shared/ui/Selo";
 
 /** Onde a equipe está no mapa: a sala (com o desenho) e o lugar dela. */
@@ -21,22 +23,49 @@ export type LocalNoMapa = { sala: Sala; elementos: Elemento[]; lugar: string };
 /**
  * Pedidos de ajuda da edição para quem atende (mentoria e organização). Cada pedido é uma
  * linha: o pedido à esquerda e, ao lado, a sala da equipe com o lugar dela piscando
- * (heurísticas 1 e 6). Atualiza sozinha a cada 15 segundos.
+ * (heurísticas 1 e 6). Atualiza sozinha a cada 15 segundos. Na aba "Encerrados" ficam os pedidos
+ * já resolvidos ou cancelados, para consultar depois.
  */
-export async function TelaChamados({ cliente, edicao }: { cliente: Cliente; edicao: Edicao }) {
-  const [chamados, mapa, alocacoes, equipes] = await Promise.all([
+export async function TelaChamados({ cliente, edicao, aba, base }: { cliente: Cliente; edicao: Edicao; aba: "abertos" | "encerrados"; base: string }) {
+  if (aba === "encerrados") {
+    const [encerrados, ativos] = await Promise.all([listarChamadosEncerrados(cliente, edicao.id), listarChamadosAtivos(cliente, edicao.id)]);
+    return (
+      <>
+        <AbasChamados ativa="encerrados" base={base} abertos={ativos.length} encerrados={encerrados.length} />
+        <HistoricoChamados chamados={encerrados} />
+      </>
+    );
+  }
+  const [chamados, mapa, alocacoes, equipes, encerrados] = await Promise.all([
     listarChamadosAtivos(cliente, edicao.id),
     carregarMapa(cliente, edicao.id),
     carregarAlocacoes(cliente, edicao.id),
     listarEquipes(cliente, edicao.id),
+    contarChamadosEncerrados(cliente, edicao.id),
   ]);
   const salas = mapa.pisos.flatMap((p) => p.salas);
   return (
-    <PainelChamados
-      chamados={chamados}
-      locais={locaisDasEquipes(salas, mapa.elementos, alocacoes)}
-      noMapa={localNoMapa(salas, mapa.elementos, alocacoes)}
-      ocupacao={ocupacao(mapa.elementos, alocacoes, equipes.map((e) => ({ id: e.id, nome: e.nome, icone: e.icone })))}
+    <>
+      <AbasChamados ativa="abertos" base={base} abertos={chamados.length} encerrados={encerrados} />
+      <PainelChamados
+        chamados={chamados}
+        locais={locaisDasEquipes(salas, mapa.elementos, alocacoes)}
+        noMapa={localNoMapa(salas, mapa.elementos, alocacoes)}
+        ocupacao={ocupacao(mapa.elementos, alocacoes, equipes.map((e) => ({ id: e.id, nome: e.nome, icone: e.icone })))}
+      />
+    </>
+  );
+}
+
+/** Abertos (para atender agora) e Encerrados (para consultar). */
+function AbasChamados({ ativa, base, abertos, encerrados }: { ativa: "abertos" | "encerrados"; base: string; abertos: number; encerrados: number }) {
+  return (
+    <SubAbas
+      ativa={ativa}
+      abas={[
+        { id: "abertos", rotulo: "Abertos", href: base, contagem: abertos },
+        { id: "encerrados", rotulo: "Encerrados", href: `${base}?aba=encerrados`, contagem: encerrados },
+      ]}
     />
   );
 }

@@ -187,7 +187,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como atendo os pedidos de ajuda?",
     resposta:
-      "Em “Chamados” aparecem as equipes que pediram ajuda, na ordem: problemas primeiro, depois quem espera há mais tempo, com o lugar no mapa. Toque em “Vou atender” (a equipe vê que você está indo) e, no fim, em “Resolvido”. Errou? Use “Desfazer”. O número ao lado de “Chamados” no menu mostra quantos estão esperando.",
+      "Em “Chamados” aparecem as equipes que pediram ajuda, na ordem: problemas primeiro, depois quem espera há mais tempo, com o lugar no mapa. Toque em “Vou atender” (a equipe vê que você está indo) e, no fim, em “Resolvido”. Errou? Use “Desfazer”. O número ao lado de “Chamados” no menu mostra quantos estão esperando. Os pedidos resolvidos ou cancelados ficam na aba “Encerrados”, com quem atendeu e quanto tempo levou; dá para reabrir um resolvido por engano.",
     publicos: ["mentoria", "organizacao"],
   },
   {
