@@ -29,7 +29,9 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
 
   const mensagem = typeof erro === "string" ? MENSAGENS[erro] ?? MENSAGENS.falha : null;
   // Logo e dados da edição atual; sem a migração 020, fica o de sempre.
-  const { atual, inscricoes } = await vitrine(supabase);
+  const { atual, inscricoes: todas } = await vitrine(supabase);
+  // "Inscrever-se" só para inscrições abertas: edição atual, em andamento e dentro do prazo.
+  const inscricoes = todas.filter((i) => i.situacao === "aberta");
   const marca = atual ? resolverMarca(atual) : null;
 
   return (
@@ -88,7 +90,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
                   <Link href={`/inscricao/${i.slug}`} className="flex items-center justify-between gap-2 rounded-xl border border-borda p-3 text-sm hover:border-marca">
                     <span className="min-w-0">
                       <strong className="block truncate">{i.nome}</strong>
-                      <span className="text-xs text-suave">{i.situacao === "aberta" ? "Inscrições abertas" : "Inscrições em breve"}</span>
+                      <span className="text-xs text-suave">Inscrições abertas</span>
                     </span>
                     <span className="shrink-0 font-semibold text-marca">Inscrever-se →</span>
                   </Link>
