@@ -95,7 +95,7 @@ export const inscrever = criarAcao(
         );
       if (!conta.ok) return falha("Inscrição feita, mas não deu para criar a senha agora. Use “Primeiro acesso” na tela de login.");
     }
-    redirect("/minha-inscricao");
+    redirect(`/minha-inscricao?edicao=${encodeURIComponent(d.slug)}`);
   },
 );
 

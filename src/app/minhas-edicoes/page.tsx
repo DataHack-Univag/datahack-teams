@@ -83,7 +83,7 @@ export default async function MinhasEdicoes() {
                   Sua inscrição: <Selo tom={situacaoInscricao(chamada.situacao).tom}>{situacaoInscricao(chamada.situacao).rotulo}</Selo>{" "}
                   <span className="text-suave">{situacaoInscricao(chamada.situacao).explicacao}</span>
                 </p>
-                <Link href="/minha-inscricao" className="btn-secundario">
+                <Link href={`/minha-inscricao${atual.slug ?? aberta?.slug ? `?edicao=${encodeURIComponent((atual.slug ?? aberta?.slug)!)}` : ""}`} className="btn-secundario">
                   Acompanhar inscrição
                 </Link>
               </div>

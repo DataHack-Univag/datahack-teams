@@ -69,7 +69,7 @@ export default async function PaginaInscricao({ params }: Props) {
         )}
         <p className="border-t border-borda pt-4 text-sm text-suave">
           Já se inscreveu?{" "}
-          <Link href={logado ? "/minha-inscricao" : "/login"} className="font-semibold text-marca underline">
+          <Link href={logado ? `/minha-inscricao?edicao=${encodeURIComponent(slug)}` : "/login"} className="font-semibold text-marca underline">
             {logado ? "Ver a minha inscrição" : "Entre para acompanhar"}
           </Link>
         </p>
