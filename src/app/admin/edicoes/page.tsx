@@ -5,7 +5,7 @@ import { FormAcessoEdicao } from "@/modules/instituicoes/ui/FormAcessoEdicao";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { CartaoEdicao, FormDadosEdicao } from "@/modules/edicoes/ui/Edicoes";
 import { FormSituacaoEdicao } from "@/modules/edicoes/ui/FormSituacaoEdicao";
-import { rotuloSituacaoEdicao, tomSituacaoEdicao } from "@/modules/edicoes/domain/tipos";
+import { edicaoEmExibicao, rotuloSituacaoEdicao, tomSituacaoEdicao } from "@/modules/edicoes/domain/tipos";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { BotaoAjuda } from "@/shared/ui/Ajuda";
 import { Aviso } from "@/shared/ui/Aviso";
@@ -25,6 +25,9 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
     instituicoesDaEdicao(cliente, edicao.id),
   ]);
   const marca = resolverMarca(edicao);
+  // Sem edição atual, a última encerrada é a que o login e o sistema mostram.
+  const exibida = edicaoEmExibicao(edicoesOrganizadas);
+  const semAtual = !edicoesOrganizadas.some((e) => e.atual);
 
   return (
     <Pagina>
@@ -66,7 +69,7 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
         <h2 className="text-lg font-semibold">Todas as edições ({edicoesOrganizadas.length})</h2>
         <div className="grid gap-3 lg:grid-cols-2">
           {edicoesOrganizadas.map((e) => (
-            <CartaoEdicao key={e.id} edicao={e} numeros={numeros.get(e.id)} vendo={e.id === edicao.id} />
+            <CartaoEdicao key={e.id} edicao={e} numeros={numeros.get(e.id)} vendo={e.id === edicao.id} emExibicao={semAtual && e.id === exibida?.id} />
           ))}
         </div>
       </section>
@@ -87,7 +90,13 @@ export default async function AdminEdicoes({ searchParams }: PageProps<"/admin/e
             </h2>
             <div className="mt-1 flex flex-wrap gap-1.5">
               <Selo tom="marca">Você está vendo</Selo>
-              {edicao.atual ? <Selo tom="sucesso">Atual dos participantes e bancas</Selo> : <Selo tom="alerta">Não é a atual</Selo>}
+              {edicao.atual ? (
+                <Selo tom="sucesso">Atual dos participantes e bancas</Selo>
+              ) : semAtual && exibida?.id === edicao.id ? (
+                <Selo tom="sucesso">Atual · encerrada (nenhuma edição é a atual)</Selo>
+              ) : (
+                <Selo tom="alerta">Não é a atual</Selo>
+              )}
               <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
             </div>
           </div>

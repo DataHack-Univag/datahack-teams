@@ -621,11 +621,12 @@ reset role;
 do $$
 declare v_ed uuid := current_setting('dh.ed_form')::uuid;
 begin
-  update edicoes set acesso = 'aberto', situacao = 'planejada', inscricao_abre_em = null, inscricao_fecha_em = null where id = v_ed;
+  update edicoes set acesso = 'aberto', situacao = case when atual then 'em_andamento' else 'planejada' end, inscricao_abre_em = null, inscricao_fecha_em = null where id = v_ed;
   assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'em_breve' end, 'atual abre; planejada não atual: ainda não abriu';
   update edicoes set situacao = 'em_andamento' where id = v_ed and not atual;
   assert situacao_inscricao(v_ed) = case when (select atual from edicoes where id = v_ed) then 'aberta' else 'encerrada' end, 'não atual que já passou: encerrada';
-  update edicoes set situacao = 'planejada' where id = v_ed;
+  -- 033: a edição atual não volta ao planejamento; aqui ela já está em andamento ou não é a atual
+  update edicoes set situacao = 'planejada' where id = v_ed and not atual;
   update edicoes set inscricao_abre_em = now() + interval '1 day' where id = v_ed;
   assert situacao_inscricao(v_ed) = 'em_breve', 'prazo ainda vai abrir';
   update edicoes set inscricao_abre_em = null, inscricao_fecha_em = now() - interval '1 hour' where id = v_ed;
@@ -725,6 +726,27 @@ begin
   update edicoes set atual = true where numero = 1;
 end $$;
 
+-- ---------------------------------------------------------------- 033 · atual = em andamento
+reset role;
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;
+begin
+  update edicoes set atual = false where atual;
+  update edicoes set situacao = 'planejada' where id = v_ed;
+  update edicoes set atual = true where id = v_ed;
+  assert (select situacao from edicoes where id = v_ed) = 'em_andamento', 'virou atual: em andamento';
+  begin
+    update edicoes set situacao = 'planejada' where id = v_ed;
+    raise exception 'atual voltou ao planejamento';
+  exception when raise_exception then
+    if sqlerrm = 'atual voltou ao planejamento' then raise; end if;
+  end;
+  update edicoes set situacao = 'encerrada' where id = v_ed;
+  assert (select situacao from edicoes where id = v_ed) = 'encerrada', 'atual pode ser encerrada';
+  update edicoes set atual = false where id = v_ed;
+  update edicoes set atual = true where numero = 1;
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 032 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 033 conferem.'

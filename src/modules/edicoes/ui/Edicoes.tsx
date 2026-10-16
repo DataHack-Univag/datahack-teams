@@ -13,26 +13,46 @@ export function CartaoEdicao({
   edicao,
   numeros,
   vendo,
+  emExibicao = false,
 }: {
   edicao: Edicao;
   numeros?: { alunos: number; equipes: number; fichas: number };
   /** É a edição que a organização está vendo agora. */
   vendo: boolean;
+  /** Sem edição atual, é a que o login e o sistema mostram (a última encerrada). */
+  emExibicao?: boolean;
 }) {
   const marca = resolverMarca(edicao);
   return (
     <article
-      className={`card min-w-0 space-y-3 border-t-4 ${edicao.atual ? "destaque-grad" : ""}`}
+      className={`card min-w-0 space-y-3 border-t-4 ${edicao.atual || emExibicao ? "destaque-grad" : ""}`}
       style={{ borderTopColor: marca.cor ?? COR_PADRAO }}
     >
       <div className="flex flex-wrap items-start justify-between gap-2">
         <LogoEdicao marca={marca} className="h-10 w-28" />
         <div className="flex flex-wrap justify-end gap-1.5">
-          {edicao.atual && <Selo tom="sucesso">Atual</Selo>}
+          {edicao.atual ? (
+            <Selo tom="sucesso" title="A edição que o login, os participantes e as bancas veem">
+              Atual
+            </Selo>
+          ) : emExibicao ? (
+            <Selo tom="sucesso" title="Nenhuma edição é a atual: o login e o sistema mostram esta, a última encerrada">
+              Atual · encerrada
+            </Selo>
+          ) : null}
           {vendo && <Selo tom="marca">Você está vendo</Selo>}
-          <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>
+          {!emExibicao && <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>}
         </div>
       </div>
+      {edicao.atual && edicao.situacao === "planejada" && (
+        <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
+          É a atual, mas está <strong>em planejamento</strong>: o login já mostra esta edição. Se ela ainda não começou, use “Deixar de ser a atual”; se já
+          começou, mude a situação para “Em andamento”.
+        </p>
+      )}
+      {emExibicao && (
+        <p className="text-xs text-suave">Nenhuma edição é a atual: o login e o sistema mostram esta, a última encerrada, só para consulta.</p>
+      )}
       {edicao.situacao === "cancelada" && edicao.motivo_cancelamento && (
         <p className="rounded-xl border border-red-500/30 bg-red-500/5 p-2 text-xs">
           <strong>Motivo do cancelamento:</strong> {edicao.motivo_cancelamento}

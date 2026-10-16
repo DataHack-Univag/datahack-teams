@@ -62,6 +62,18 @@ export const rotuloModo = (m: string) => MODOS_FORMACAO.find((x) => x.valor === 
 export const rotuloSituacaoEdicao = (s: string) => SITUACOES_EDICAO.find((x) => x.valor === s)?.rotulo ?? ANTIGAS[s] ?? s;
 export const tomSituacaoEdicao = (s: string) => SITUACOES_EDICAO.find((x) => x.valor === s)?.tom ?? "neutro";
 
+/**
+ * A edição que o login e o sistema mostram: a atual ou, sem nenhuma atual, a última encerrada
+ * (a mesma regra da vitrine do login, migração 032).
+ */
+export function edicaoEmExibicao<T extends Pick<Edicao, "id" | "atual" | "situacao" | "data_inicio" | "numero">>(edicoes: T[]): T | undefined {
+  const atual = edicoes.find((e) => e.atual);
+  if (atual) return atual;
+  return edicoes
+    .filter((e) => e.situacao === "encerrada")
+    .sort((a, b) => (b.data_inicio ?? "").localeCompare(a.data_inicio ?? "") || b.numero - a.numero)[0];
+}
+
 /** "09 a 10/10/2026", "08/10/2027" ou "sem data". */
 export function periodo(e: Pick<Edicao, "data_inicio" | "data_fim">): string {
   const br = (d: string) => d.split("-").reverse().join("/");

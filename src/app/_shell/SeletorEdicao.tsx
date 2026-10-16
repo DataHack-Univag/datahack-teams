@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { escolherEdicao } from "@/modules/edicoes/application/actions";
-import { periodo, rotuloSituacaoEdicao, type Edicao } from "@/modules/edicoes/domain/tipos";
+import { edicaoEmExibicao, periodo, rotuloSituacaoEdicao, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { COR_PADRAO, resolverMarca, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { Girando } from "@/shared/ui/Botao";
@@ -30,6 +30,9 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
 
   if (!vendo) return null;
   const ordenadas = [...edicoes].sort((a, b) => b.numero - a.numero);
+  // Sem edição atual, a última encerrada é a que o login e o sistema mostram.
+  const exibida = edicoes.some((e) => e.atual) ? undefined : edicaoEmExibicao(edicoes)?.id;
+  const ehAtual = (e: EdicaoResumo) => e.atual || e.id === exibida;
   const corVendo = resolverMarca(vendo).cor ?? COR_PADRAO;
 
   return (
@@ -39,7 +42,7 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
         title={`${participante ? "Você está vendo" : "Você está administrando"} a Edição ${vendo.numero} · ${vendo.nome}${vendo.atual ? " (atual)" : " (não é a atual)"}`}
       >
         <span aria-hidden className="relative size-3.5 shrink-0 rounded" style={{ backgroundColor: corVendo }}>
-          <span className={`absolute -right-1 -bottom-1 size-2 rounded-full ring-2 ring-[var(--background)] ${vendo.atual ? "bg-emerald-500" : "bg-amber-500"}`} />
+          <span className={`absolute -right-1 -bottom-1 size-2 rounded-full ring-2 ring-[var(--background)] ${ehAtual(vendo) ? "bg-emerald-500" : "bg-amber-500"}`} />
         </span>
         <span className="sr-only">{participante ? "Edição que você está vendo:" : "Edição que você está administrando:"}</span>
         <span className="text-sm font-semibold">
@@ -64,13 +67,13 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
             <li key={e.id}>
               {e.id === vendo.id ? (
                 <div aria-current="true" className="rounded-xl ring-2 ring-marca">
-                  <CartaoMenu edicao={e} marcada participante={participante} />
+                  <CartaoMenu edicao={e} marcada participante={participante} exibida={e.id === exibida} />
                 </div>
               ) : (
                 <form action={escolherEdicao}>
                   <input type="hidden" name="edicao" value={e.id} />
                   <input type="hidden" name="voltar" value={voltar} />
-                  <BotaoEdicao edicao={e} participante={participante} />
+                  <BotaoEdicao edicao={e} participante={participante} exibida={e.id === exibida} />
                 </form>
               )}
             </li>
@@ -107,7 +110,19 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
 }
 
 /** Uma edição no menu: faixa e logo na cor dela, número, nome, período e situação. */
-function CartaoMenu({ edicao, marcada = false, enviando = false, participante }: { edicao: EdicaoResumo; marcada?: boolean; enviando?: boolean; participante: boolean }) {
+function CartaoMenu({
+  edicao,
+  marcada = false,
+  enviando = false,
+  participante,
+  exibida = false,
+}: {
+  edicao: EdicaoResumo;
+  marcada?: boolean;
+  enviando?: boolean;
+  participante: boolean;
+  exibida?: boolean;
+}) {
   const marca = resolverMarca(edicao);
   return (
     <span
@@ -118,11 +133,15 @@ function CartaoMenu({ edicao, marcada = false, enviando = false, participante }:
       <span className="min-w-0 flex-1">
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <span className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Edição {edicao.numero}</span>
-          {edicao.atual && (
+          {edicao.atual ? (
             <Selo tom="sucesso" title="A edição que participantes e bancas veem ao entrar">
               Atual
             </Selo>
-          )}
+          ) : exibida ? (
+            <Selo tom="sucesso" title="Nenhuma edição é a atual: o login mostra esta, a última encerrada">
+              Atual · encerrada
+            </Selo>
+          ) : null}
           {marcada && <Selo tom="marca">{participante ? "Vendo" : "Você está aqui"}</Selo>}
         </span>
         <span className="block truncate text-sm font-semibold" title={marca.nome}>
@@ -141,11 +160,11 @@ function CartaoMenu({ edicao, marcada = false, enviando = false, participante }:
 }
 
 /** Opção do menu: mostra "abrindo" enquanto troca de edição (heurística 1). */
-function BotaoEdicao({ edicao, participante }: { edicao: EdicaoResumo; participante: boolean }) {
+function BotaoEdicao({ edicao, participante, exibida }: { edicao: EdicaoResumo; participante: boolean; exibida: boolean }) {
   const { pending } = useFormStatus();
   return (
     <button type="submit" disabled={pending} className="block w-full rounded-xl hover:bg-superficie disabled:opacity-70">
-      <CartaoMenu edicao={edicao} enviando={pending} participante={participante} />
+      <CartaoMenu edicao={edicao} enviando={pending} participante={participante} exibida={exibida} />
     </button>
   );
 }

@@ -28,7 +28,8 @@ export function FormSituacaoEdicao({ edicao }: { edicao: Pick<Edicao, "id" | "si
       <fieldset className="grid gap-2 sm:grid-cols-2">
         <legend className="sr-only">Situação</legend>
         {SITUACOES_EDICAO.map((s) => {
-          const bloqueada = s.valor === "cancelada" && edicao.atual;
+          // A atual não pode ser cancelada nem voltar ao planejamento (banco, 031/033).
+          const bloqueada = edicao.atual && (s.valor === "cancelada" || (s.valor === "planejada" && edicao.situacao !== "planejada"));
           return (
             <label
               key={s.valor}
@@ -51,7 +52,11 @@ export function FormSituacaoEdicao({ edicao }: { edicao: Pick<Edicao, "id" | "si
                   {s.valor === edicao.situacao && <span className="ml-2 text-xs font-normal text-suave">(agora)</span>}
                 </span>
                 <span className="block text-xs text-suave">
-                  {bloqueada ? "A edição atual não pode ser cancelada: torne outra a atual antes." : s.descricao}
+                  {bloqueada
+                    ? s.valor === "cancelada"
+                      ? "A edição atual não pode ser cancelada: torne outra a atual antes."
+                      : "A edição atual está acontecendo. Para voltar ao planejamento, use “Deixar de ser a atual” antes."
+                    : s.descricao}
                 </span>
               </span>
             </label>
