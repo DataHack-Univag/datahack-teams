@@ -692,6 +692,39 @@ begin
   update edicoes set atual = true where id = v_atual;
 end $$;
 
+-- ---------------------------------------------------------------- 032 · sem edição atual e nomes visíveis
+reset role;
+select pg_temp.como('p1@teste.local');
+set role authenticated;
+select pg_temp.falha($q$select limpar_edicao_atual()$q$, 'Só a organização');
+reset role;
+do $$
+declare
+  v_ed1 uuid := (select id from edicoes where numero = 1);
+  v_colega text := (select email from participacoes where edicao_id = (select id from edicoes where numero = 1)
+                      and email <> 'p1@teste.local' and removido_em is null limit 1);
+begin
+  update edicoes set atual = false where atual;
+  update edicoes set atual = true, situacao = 'em_andamento' where id = v_ed1;
+  update edicoes set situacao = 'encerrada' where id = v_ed1;
+  update edicoes set atual = false where id = v_ed1;
+  assert (vitrine() -> 'atual' ->> 'numero')::int = 1 and not (vitrine() -> 'atual' ->> 'eh_atual')::boolean,
+         'sem edição atual: o login mostra a última encerrada';
+  perform set_config('dh.colega', v_colega, false);
+end $$;
+select pg_temp.como('p1@teste.local');
+set role authenticated;
+do $$
+begin
+  assert exists (select 1 from pessoas where email = current_setting('dh.colega')), 'quem consulta uma edição anterior vê os nomes dos colegas';
+  assert exists (select 1 from pessoas where email = 'p1@teste.local'), 'vê o próprio nome';
+end $$;
+reset role;
+do $$
+begin
+  update edicoes set atual = true where numero = 1;
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 031 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 032 conferem.'

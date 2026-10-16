@@ -23,7 +23,8 @@ export default async function MinhasEdicoes() {
   const [vit, inscricoes] = await Promise.all([vitrine(cliente), minhasInscricoes(cliente)]);
 
   const itens = avaliador ? navBancas() : mentor ? navMentoria() : navAluno("/", {}, true, edicao.permite_trocas);
-  const atual = vit.atual;
+  // Sem edição atual (032), a vitrine traz a última encerrada: aí não há nada "acontecendo agora".
+  const atual = vit.atual && vit.atual.eh_atual !== false ? vit.atual : null;
   const marcaAtual = atual ? resolverMarca(atual) : null;
   const participaDaAtual = edicoesDoUsuario.find((e) => e.atual);
   const minha = atual?.numero ? inscricoes.find((i) => i.numero === atual.numero) : undefined;
@@ -107,6 +108,12 @@ export default async function MinhasEdicoes() {
               <p className="text-sm text-suave">Esta edição não recebe inscrições pelo site: a participação é combinada com a organização.</p>
             )}
           </section>
+        )}
+
+        {!atual && (
+          <p className="card text-sm text-suave">
+            Nenhuma edição está acontecendo agora. Quando a próxima começar, ela aparece aqui, com a inscrição se estiver aberta.
+          </p>
         )}
 
         <section aria-labelledby="titulo-minhas" className="card space-y-3">

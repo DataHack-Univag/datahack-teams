@@ -91,6 +91,9 @@ export type Vitrine = {
     /** Só quando a edição recebe inscrição pelo site (não é lista fechada). */
     slug?: string | null;
     inscricao?: SituacaoInscricoes;
+    /** Migração 032: sem edição atual, a vitrine traz a última encerrada (eh_atual = false). */
+    situacao?: string;
+    eh_atual?: boolean;
   } | null;
   inscricoes: { slug: string; nome: string; situacao: "aberta" | "em_breve"; data_inicio: string | null; local: string | null }[];
 };

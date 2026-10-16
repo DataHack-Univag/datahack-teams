@@ -158,6 +158,15 @@ export const tornarAtual = criarAcao(z.object({ id }), async (d) => {
   return sucesso("Pronto: esta é a edição atual, agora em andamento. Participantes e bancas veem esta edição ao entrar.");
 });
 
+/** Deixa o sistema sem edição atual: entre uma edição e outra, o login mostra a última encerrada. */
+export const deixarSemAtual = criarAcao(z.object({ id }), async () => {
+  const { cliente } = await sessaoAtual();
+  const { error } = await repo.limparEdicaoAtual(cliente);
+  if (error) return falha(traduzirErro(error));
+  atualizarTelas();
+  return sucesso("Pronto: nenhuma edição é a atual. A tela de entrada mostra a última edição encerrada e nenhuma inscrição pelo site fica aberta.");
+});
+
 /** Importa o regulamento (JSON no formato canônico) numa edição que ainda não tem um. */
 export const importarRegulamento = criarAcao(z.object({ id, json: z.string().min(2, "Cole o JSON do regulamento."), substituir: caixa }), async (d) => {
   let canonico: RegulamentoCanonico;

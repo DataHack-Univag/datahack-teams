@@ -1,4 +1,4 @@
-import { criarEdicao, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
+import { criarEdicao, deixarSemAtual, escolherEdicao, salvarDadosEdicao, tornarAtual } from "@/modules/edicoes/application/actions";
 import { tomSituacaoEdicao } from "@/modules/edicoes/domain/tipos";
 import { MODOS_FORMACAO, periodo, rotuloModo, rotuloSituacaoEdicao, type Edicao } from "@/modules/edicoes/domain/tipos";
 import { ACESSOS, COR_PADRAO, resolverMarca, rotuloAcesso } from "@/modules/instituicoes/domain/tipos";
@@ -77,6 +77,20 @@ export function CartaoEdicao({
             Administrar esta edição
           </BotaoEnviar>
         </form>
+      )}
+      {edicao.atual && (
+        <Formulario
+          action={deixarSemAtual}
+          tituloConfirmar="Deixar o sistema sem edição atual?"
+          confirmar="Útil entre uma edição e outra. A tela de entrada passa a mostrar a última edição encerrada, nenhuma inscrição pelo site fica aberta e cada pessoa continua vendo as edições de que participou. Depois, é só tornar outra edição a atual."
+          rotuloConfirmar="Deixar sem edição atual"
+          perigo={false}
+        >
+          <Ocultos valores={{ id: edicao.id }} />
+          <BotaoEnviar variante="fantasma" tamanho="pequeno" icone="desfazer">
+            Deixar de ser a atual
+          </BotaoEnviar>
+        </Formulario>
       )}
       {!edicao.atual && edicao.situacao !== "cancelada" && (
         <Formulario

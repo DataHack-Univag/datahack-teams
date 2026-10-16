@@ -41,6 +41,9 @@ export const criarEdicao = (cliente: Cliente, dados: Record<string, unknown>, co
 
 export const definirEdicaoAtual = (cliente: Cliente, id: string) => cliente.rpc("definir_edicao_atual", { p_edicao: id });
 
+/** Deixa o sistema sem edição atual (migração 032): o login mostra a última encerrada. */
+export const limparEdicaoAtual = (cliente: Cliente) => cliente.rpc("limpar_edicao_atual");
+
 export const definirRegulamento = (cliente: Cliente, id: string, json: unknown) =>
   cliente.rpc("definir_regulamento", { p_edicao: id, p_json: json as Json });
 

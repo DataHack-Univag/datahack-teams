@@ -1972,8 +1972,9 @@ export type Database = {
       importar_mapa: { Args: { p_edicao: string; p_mapa: Json; p_substituir?: boolean }; Returns: Json };
       importar_regulamento: { Args: { p_edicao: string; p_json: Json }; Returns: undefined };
       inscrever_publico: { Args: { p_slug: string; p_nome: string; p_email: string; p_respostas: Json; p_termo_versao?: number }; Returns: Json };
+      limpar_edicao_atual: { Args: Record<PropertyKey, never>; Returns: undefined };
       meu_codigo_checkin: { Args: { p_edicao: string }; Returns: string };
-      minha_equipe: { Args: { p_edicao: string }; Returns: string } | { Args: Record<PropertyKey, never>; Returns: string };
+      minha_equipe: { Args: Record<PropertyKey, never>; Returns: string } | { Args: { p_edicao: string }; Returns: string };
       minhas_inscricoes: { Args: Record<PropertyKey, never>; Returns: Json };
       nome_de: { Args: { p_email: string }; Returns: string };
       normalizar_email: { Args: { p: string }; Returns: string };
@@ -1982,6 +1983,7 @@ export type Database = {
       participa_de: { Args: { p_edicao: string }; Returns: boolean };
       pedir_troca: { Args: { p_destino: string; p_mensagem?: string; p_como?: string }; Returns: string };
       pode_avaliar: { Args: { p_rubrica: string }; Returns: boolean };
+      pode_ver_pessoa: { Args: { p_email: string }; Returns: boolean };
       promover_da_espera: { Args: { p_edicao: string }; Returns: number };
       propor_equipe: { Args: { p_nome: string; p_emails: string[]; p_repo?: string; p_como?: string }; Returns: string };
       quem_age: { Args: { p_como: string }; Returns: string };
