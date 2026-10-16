@@ -1,4 +1,5 @@
 import { listarEquipes } from "@/modules/equipes/infra/repositorio";
+import { SoSeEditavel } from "@/shared/ui/SomenteLeitura";
 import { carregarAlocacoes, carregarMapa } from "@/modules/mapa/infra/repositorio";
 import { DistribuirEquipes } from "@/modules/mapa/ui/DistribuirEquipes";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
@@ -34,7 +35,9 @@ export default async function DistribuirPagina() {
           </>
         }
       />
-      <DistribuirEquipes mapa={mapa} equipes={equipes.map((e) => ({ id: e.id, nome: e.nome, icone: e.icone }))} alocacoes={alocacoes} />
+      <SoSeEditavel aviso="Esta edição está encerrada: os lugares das equipes não mudam mais. Veja onde cada equipe ficou em “Croqui com as equipes”.">
+        <DistribuirEquipes mapa={mapa} equipes={equipes.map((e) => ({ id: e.id, nome: e.nome, icone: e.icone }))} alocacoes={alocacoes} />
+      </SoSeEditavel>
     </Pagina>
   );
 }

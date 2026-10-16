@@ -95,6 +95,7 @@ export function CartaoEdicao({
       {edicao.atual && (
         <Formulario
           action={deixarSemAtual}
+          livre
           tituloConfirmar="Deixar o sistema sem edição atual?"
           confirmar="Útil entre uma edição e outra. A tela de entrada passa a mostrar a última edição encerrada, nenhuma inscrição pelo site fica aberta e cada pessoa continua vendo as edições de que participou. Depois, é só tornar outra edição a atual."
           rotuloConfirmar="Deixar sem edição atual"
@@ -109,6 +110,7 @@ export function CartaoEdicao({
       {!edicao.atual && edicao.situacao !== "cancelada" && (
         <Formulario
           action={tornarAtual}
+          livre
           tituloConfirmar={`Tornar a ${edicao.nome} a edição atual?`}
           confirmar="Participantes e bancas passam a ver esta edição ao entrar, e ela fica “em andamento”. A edição atual de hoje continua guardada e consultável pela organização."
           rotuloConfirmar="Tornar atual"
@@ -154,7 +156,7 @@ export function FormDadosEdicao({ edicao }: { edicao: Edicao }) {
 export function FormNovaEdicao({ edicoes, base }: { edicoes: Edicao[]; base: Edicao }) {
   const ano = new Date().getFullYear() + 1;
   return (
-    <Formulario action={criarEdicao} className="grid gap-3 sm:grid-cols-2">
+    <Formulario action={criarEdicao} livre className="grid gap-3 sm:grid-cols-2">
       <Campo rotulo="Nome" name="nome" required maxLength={120} placeholder={`DATAHack Univag ${ano}`} className="sm:col-span-2" />
       <Campo
         rotulo="Endereço curto"

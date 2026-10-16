@@ -1,5 +1,6 @@
 "use client";
 
+import { MOTIVO_SOMENTE_LEITURA, useSomenteLeitura } from "@/shared/ui/SomenteLeitura";
 import { useActionState, useEffect, useRef, startTransition, type ReactNode } from "react";
 import { useFormStatus } from "react-dom";
 import type { Acao } from "@/shared/acao/acao";
@@ -26,6 +27,7 @@ export function Formulario({
   acaoDesfazer,
   mensagemNoLugar = false,
   aoSucesso,
+  livre = false,
 }: {
   action: Acao;
   children: ReactNode;
@@ -41,8 +43,11 @@ export function Formulario({
   /** Mostra o sucesso como texto abaixo do formulário em vez de aviso flutuante. */
   mensagemNoLugar?: boolean;
   aoSucesso?: () => void;
+  /** Vale mesmo na edição encerrada (situação da edição, tornar atual, criar edição). */
+  livre?: boolean;
 }) {
   const [estado, formAction, pendente] = useActionState(action, null);
+  const leitura = useSomenteLeitura() && !livre;
   const formRef = useRef<HTMLFormElement>(null);
   const modal = useModal();
   const confirmado = useRef(false);
@@ -89,7 +94,7 @@ export function Formulario({
           confirmado.current = false;
         }}
       >
-        <fieldset disabled={pendente} className="contents">
+        <fieldset disabled={pendente || leitura} title={leitura ? MOTIVO_SOMENTE_LEITURA : undefined} className="contents">
           {children}
         </fieldset>
         {estado?.erro && (

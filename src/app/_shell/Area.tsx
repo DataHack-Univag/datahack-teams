@@ -9,6 +9,7 @@ import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { inicioDoPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { Navegacao, type ItemNav } from "@/shared/ui/Navegacao";
+import { ProvedorSomenteLeitura } from "@/shared/ui/SomenteLeitura";
 import { PaletaComandos, type Comando } from "@/shared/ui/PaletaComandos";
 import { ToastDaUrl } from "@/shared/ui/Toast";
 
@@ -90,6 +91,11 @@ export async function Area({
           .
         </p>
       )}
+      {!organiza && edicao.situacao === "encerrada" && !(consultaOutras && !edicao.atual) && (
+        <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
+          <strong>A Edição {edicao.numero} · {edicao.nome} está encerrada:</strong> só consulta. Nada pode ser alterado.
+        </p>
+      )}
       {organiza && !edicao.atual && edicao.situacao !== "encerrada" && (
         <p role="status" className="border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
           Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que não é a edição atual dos participantes e das bancas.
@@ -100,7 +106,8 @@ export async function Area({
       </Suspense>
       {/* pb: espaço para a barra de navegação fixa no celular */}
       <main id="conteudo" className="flex flex-1 flex-col pb-[calc(env(safe-area-inset-bottom)+4.5rem)] lg:pb-0">
-        {children}
+        {/* Edição encerrada: os botões que gravam ficam desabilitados (migração 035 trava no banco). */}
+        <ProvedorSomenteLeitura ativo={edicao.situacao === "encerrada"}>{children}</ProvedorSomenteLeitura>
       </main>
       <PaletaComandos comandos={comandos} />
       <Suspense>

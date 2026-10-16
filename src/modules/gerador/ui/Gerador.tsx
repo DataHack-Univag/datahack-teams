@@ -1,5 +1,6 @@
 "use client";
 
+import { MOTIVO_SOMENTE_LEITURA, useSomenteLeitura } from "@/shared/ui/SomenteLeitura";
 import { COR_PADRAO, type MarcaResolvida } from "@/modules/instituicoes/domain/tipos";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -82,6 +83,7 @@ export function Gerador({
   // ---------------------------------------------------------------- estado
   const [fonte, setFonte] = useState<"sem_equipe" | "todos">(nSemEquipe > 0 ? "sem_equipe" : "todos");
   const [usarNota, setUsarNota] = useState(true);
+  const leitura = useSomenteLeitura();
   const [peso, setPeso] = useState(50);
   const [imputacao, setImputacao] = useState<Imputacao>("med");
   const [tamanho, setTamanho] = useState(5);
@@ -622,7 +624,7 @@ export function Gerador({
                             </label>
                           )}
                           <div className="acoes">
-                            <button className="primary" onClick={cadastrar} disabled={salvando}>
+                            <button className="primary" onClick={cadastrar} disabled={salvando || leitura} title={leitura ? MOTIVO_SOMENTE_LEITURA : undefined}>
                               {salvando ? "Cadastrando…" : "Cadastrar estas equipes"}
                             </button>
                             <button onClick={() => gerar(variacao + 1)} disabled={salvando}>

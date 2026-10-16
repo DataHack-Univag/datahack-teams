@@ -1,4 +1,5 @@
 import type { Entrada } from "@/modules/checkin/infra/repositorio";
+import { SoSeEditavel } from "@/shared/ui/SomenteLeitura";
 import { LeitorCheckin } from "@/modules/checkin/ui/LeitorCheckin";
 import { ListaEntradas } from "@/modules/checkin/ui/ListaEntradas";
 import { AoVivo } from "@/shared/ui/AoVivo";
@@ -65,7 +66,9 @@ export function TelaCheckin({
           <ListaEntradas entradas={entradas} />
         </>
       ) : (
-        <LeitorCheckin />
+        <SoSeEditavel aviso="Esta edição está encerrada: o check-in está fechado. A lista de quem entrou continua na aba “Lista”.">
+          <LeitorCheckin />
+        </SoSeEditavel>
       )}
     </Pagina>
   );

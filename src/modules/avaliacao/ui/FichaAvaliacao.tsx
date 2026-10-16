@@ -1,5 +1,6 @@
 "use client";
 
+import { useSomenteLeitura } from "@/shared/ui/SomenteLeitura";
 import { useActionState, useEffect, useRef, useState } from "react";
 import { salvarFicha } from "@/modules/avaliacao/application/actions";
 import { CRITERIOS_COM_PERGUNTAS } from "@/modules/avaliacao/domain/perguntas";
@@ -35,7 +36,7 @@ export function FichaAvaliacao({
   notasIniciais,
   comentarioInicial,
   salvoEm,
-  bloqueada,
+  bloqueada: bloqueadaPelaTela,
   voltarAoSalvar,
 }: {
   rubrica: Rubrica;
@@ -51,6 +52,8 @@ export function FichaAvaliacao({
   /** true = depois de salvar volta para a lista de equipes (visão das bancas). */
   voltarAoSalvar: boolean;
 }) {
+  const leitura = useSomenteLeitura();
+  const bloqueada = bloqueadaPelaTela || leitura;
   const [estado, acao, salvando] = useActionState(salvarFicha, null);
   const [notas, setNotas] = useState<Notas>(notasIniciais);
   const [comentario, setComentario] = useState(comentarioInicial);

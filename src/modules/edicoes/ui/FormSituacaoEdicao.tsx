@@ -18,6 +18,7 @@ export function FormSituacaoEdicao({ edicao }: { edicao: Pick<Edicao, "id" | "si
   return (
     <Formulario
       action={salvarSituacaoEdicao}
+      livre
       className="space-y-3"
       confirmar={cancelar && mudou ? "O link de inscrição desta edição deixa de funcionar. Dá para desfazer depois mudando a situação de novo." : undefined}
       tituloConfirmar="Cancelar esta edição?"
