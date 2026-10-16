@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { inscrever } from "@/modules/inscricoes/application/actions";
 import { limparRespostas, validarRespostas, type Respostas } from "@/modules/inscricoes/domain/campos";
-import { limparNome, problemaNoNome, type EdicaoPublica } from "@/modules/inscricoes/domain/publica";
+import { comAceiteDoTermo, limparNome, perguntasNaTela, problemaNoNome, type EdicaoPublica } from "@/modules/inscricoes/domain/publica";
 import { FormularioDinamico } from "@/modules/inscricoes/ui/FormularioDinamico";
 import { LeituraTermo } from "@/modules/inscricoes/ui/LeituraTermo";
 import { CampoSenha } from "@/shared/ui/CampoSenha";
@@ -23,8 +23,12 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
   const [email, setEmail] = useState("");
   const erroNome = tentou ? problemaNoNome(nome) : null;
   const opcoes = { instituicoes: edicao.instituicoes.map((i) => i.id), aceitaOutra: edicao.acesso !== "instituicoes" };
-  const erros = tentou ? validarRespostas(edicao.campos, respostas, opcoes) : {};
-  const pacote = JSON.stringify(limparRespostas(edicao.campos, respostas));
+  // Com termo cadastrado, a pergunta pronta de aceite some e o aceite do termo vale por ela.
+  const temTermo = !!edicao.termo;
+  const naTela = perguntasNaTela(edicao.campos, temTermo);
+  const completas = comAceiteDoTermo(edicao.campos, respostas, temTermo, termo);
+  const erros = tentou ? validarRespostas(naTela, respostas, opcoes) : {};
+  const pacote = JSON.stringify(limparRespostas(edicao.campos, completas));
 
   return (
     <Formulario action={inscrever} className="flex flex-col gap-6">
@@ -79,11 +83,11 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
         )}
       </fieldset>
 
-      {edicao.campos.length > 0 && (
+      {naTela.length > 0 && (
         <fieldset className="space-y-3">
           <legend className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Sobre você</legend>
           <FormularioDinamico
-            campos={edicao.campos}
+            campos={naTela}
             valores={respostas}
             aoMudar={(k, v) => setRespostas((r) => ({ ...Object.fromEntries(Object.entries(r).filter(([x]) => x !== k)), ...(v === undefined ? {} : { [k]: v }) }))}
             erros={erros}
@@ -101,7 +105,7 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
       <div
         onClickCapture={(ev) => {
           setTentou(true);
-          const problemas = problemaNoNome(nome) || Object.keys(validarRespostas(edicao.campos, respostas, opcoes)).length || (edicao.termo && !termo);
+          const problemas = problemaNoNome(nome) || Object.keys(validarRespostas(naTela, respostas, opcoes)).length || (edicao.termo && !termo);
           if (problemas) {
             ev.preventDefault();
             ev.stopPropagation();

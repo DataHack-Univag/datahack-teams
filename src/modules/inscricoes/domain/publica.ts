@@ -1,7 +1,7 @@
 // A edição como aparece na página pública de inscrição e o andamento de cada inscrição.
 
 import type { Acesso, Aprovacao, MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
-import type { Campo } from "@/modules/inscricoes/domain/campos";
+import type { Campo, Respostas } from "@/modules/inscricoes/domain/campos";
 
 export type SituacaoInscricoes = "fechada" | "em_breve" | "aberta" | "encerrada";
 export type SituacaoInscricao = "pendente" | "aprovada" | "espera" | "recusada" | "cancelada";
@@ -35,6 +35,25 @@ export const SITUACOES_INSCRICAO: { valor: SituacaoInscricao; rotulo: string; to
   { valor: "recusada", rotulo: "Não aprovada", tom: "erro", explicacao: "A organização não aprovou esta inscrição. Em caso de dúvida, fale com ela." },
   { valor: "cancelada", rotulo: "Cancelada", tom: "neutro", explicacao: "Esta inscrição foi cancelada." },
 ];
+
+/**
+ * Pergunta pronta "Li e aceito o uso dos meus dados" (chave "termo"): quando a edição tem o
+ * termo de uso cadastrado, ela some da tela e o aceite do termo vale por ela (um aceite só).
+ */
+export const ehAceiteDosDados = (c: Pick<Campo, "chave" | "tipo">) => c.tipo === "aceite" && c.chave === "termo";
+
+export const perguntasNaTela = (campos: Campo[], temTermo: boolean) => (temTermo ? campos.filter((c) => !ehAceiteDosDados(c)) : campos);
+
+/** Respostas com o aceite do termo copiado para a pergunta pronta, se ela existir. */
+export function comAceiteDoTermo(campos: Campo[], respostas: Respostas, temTermo: boolean, aceitou: boolean): Respostas {
+  if (!temTermo) return respostas;
+  const r = { ...respostas };
+  for (const c of campos.filter(ehAceiteDosDados)) {
+    if (aceitou) r[c.chave] = true;
+    else delete r[c.chave];
+  }
+  return r;
+}
 
 /** Nome como o banco guarda: espaços repetidos (inclusive os "invisíveis") viram um só. */
 export const limparNome = (nome: string) => nome.replace(/\s+/g, " ").trim();
