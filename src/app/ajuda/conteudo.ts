@@ -134,7 +134,7 @@ export const TOPICOS: Topico[] = [
   {
     pergunta: "Como funciona o check-in por QR code?",
     resposta:
-      "Cada participante tem um QR de entrada no topo da tela da equipe (na edição atual). Na porta, a mentoria ou a organização abre Check-in, toca em “Abrir câmera” e aponta para o QR: a tela mostra o nome, a equipe e marca a presença na hora (verde), ou avisa que a pessoa já tinha entrado (azul). Se a câmera não ler, dá para digitar o código de 8 letras que aparece embaixo do QR.",
+      "Cada participante tem um QR de entrada no topo da tela da equipe (na edição atual). Na porta, a mentoria ou a organização abre Check-in, toca em “Abrir câmera” e aponta para o QR: a tela mostra o nome, a equipe e marca a presença na hora (verde), ou avisa que a pessoa já tinha entrado (azul). Se a câmera não ler, dá para digitar o código de 8 letras que aparece embaixo do QR. Na aba “Lista” ficam todos os alunos: quem entrou (com horário e quem marcou), quem está faltando (dá para marcar ali) e quem foi marcado ausente; ela se atualiza sozinha a cada leitura.",
     publicos: ["organizacao", "mentoria"],
   },
   {
