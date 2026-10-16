@@ -154,13 +154,16 @@ As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ord
 22. `…22_cr_no_formulario` — o CR (nota média) vira pergunta do formulário (sensível) nas edições
     que perguntam curso e semestre, acompanhando a tabela `notas` (de onde o gerador lê). O
     cadastro em Pessoas segue as perguntas da edição (`salvar_respostas_organizacao`).
+23. `…23_tempo_real` — liga o Supabase Realtime em `inscricoes` e `participacoes`: a tela
+    "Acompanhe sua inscrição" muda na hora da aprovação e o QR vira "Presença confirmada" no
+    check-in. No Postgres local (sem a publicação do Realtime) não faz nada.
 
 **Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
 (ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
 (os inscritos, as notas e o organizador inicial).
 
 **Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 022 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
+(a 011 em 12/10/2026; confira se da 012 à 023 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
 **não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
 
 1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local

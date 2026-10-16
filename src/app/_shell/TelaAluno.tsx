@@ -96,7 +96,7 @@ export async function TelaAluno({
                 Em <strong>Materiais</strong> estão os desafios e as bases de dados.
               </BoasVindas>
             )}
-            {codigo && <MeuQr codigo={codigo} edicao={edicao.nome} />}
+            {codigo && <MeuQr codigo={codigo} edicao={edicao.nome} email={aluno.email} presente={aluno.presenca === "presente"} presencaEm={aluno.presenca_em ?? null} />}
             {troca && troca.recebidos.length > 0 && (
               <PedidosRecebidos recebidos={troca.recebidos} equipes={equipes} meuEmail={aluno.email} souLider={souLider} />
             )}

@@ -5,9 +5,11 @@ import { COR_PADRAO, resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { situacaoInscricao } from "@/modules/inscricoes/domain/publica";
 import { minhasInscricoes } from "@/modules/inscricoes/infra/repositorio";
+import { emailNormalizado } from "@/modules/pessoas/infra/repositorio";
 import { sair } from "@/modules/pessoas/application/actions";
 import { usuarioAutenticado } from "@/shared/auth/autenticacao";
 import { clienteServidor } from "@/shared/db/servidor";
+import { AoVivo } from "@/shared/ui/AoVivo";
 import { BotaoTema } from "@/shared/ui/BotaoTema";
 import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
@@ -18,8 +20,9 @@ export default async function MinhaInscricao() {
   const cliente = await clienteServidor();
   const auth = await usuarioAutenticado(cliente);
   if (!auth) redirect("/login");
-  const inscricoes = await minhasInscricoes(cliente);
+  const [inscricoes, email] = await Promise.all([minhasInscricoes(cliente), emailNormalizado(cliente)]);
   const algumaAprovada = inscricoes.some((i) => i.situacao === "aprovada");
+  const esperando = inscricoes.some((i) => i.situacao === "pendente" || i.situacao === "espera");
 
   return (
     <main className="relative mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8 sm:py-12">
@@ -29,6 +32,18 @@ export default async function MinhaInscricao() {
         <h1 className="text-3xl font-extrabold tracking-tight">Acompanhe sua inscrição</h1>
         <p className="text-sm text-suave">Conta: {auth.email}</p>
       </header>
+
+      {/* Aprovou (ou saiu da espera): a tela muda na hora, sem recarregar. */}
+      {esperando && <AoVivo tabela="inscricoes" filtro={`email=eq.${email ?? auth.email}`} />}
+      {algumaAprovada && (
+        <div role="status" className="card flex flex-wrap items-center gap-3 border-l-4 border-l-emerald-500">
+          <Icone nome="ok" className="size-6 text-emerald-600" />
+          <p className="flex-1 font-semibold">Sua inscrição foi aprovada! Você já pode entrar no sistema do evento.</p>
+          <Link href="/" className="btn-primario">
+            Entrar agora
+          </Link>
+        </div>
+      )}
 
       {!inscricoes.length && (
         <p className="card text-sm">Não encontramos inscrição com este e-mail. Se você se inscreveu com outro e-mail, saia e entre com ele.</p>
@@ -55,8 +70,10 @@ export default async function MinhaInscricao() {
                 {s.explicacao}
                 {i.situacao === "espera" && i.posicao ? ` Você é o nº ${i.posicao} da fila.` : ""}
               </p>
-              {i.situacao !== "aprovada" && i.situacao !== "cancelada" && (
-                <p className="text-xs text-suave">Esta página se atualiza quando a situação mudar: volte aqui ou entre de novo mais tarde.</p>
+              {(i.situacao === "pendente" || i.situacao === "espera") && (
+                <p className="flex items-center gap-1.5 text-xs text-suave">
+                  <span className="size-2 animate-pulse rounded-full bg-emerald-500" aria-hidden /> Esta tela se atualiza sozinha quando a situação mudar.
+                </p>
               )}
             </li>
           );

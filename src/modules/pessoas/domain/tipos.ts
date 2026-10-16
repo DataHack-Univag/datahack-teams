@@ -14,6 +14,8 @@ export type Inscrito = {
   banca: string | null;
   /** Presença no evento (null = ainda não registrada). */
   presenca: Presenca | null;
+  /** Quando a presença foi registrada (check-in). */
+  presenca_em?: string | null;
 };
 
 export type Presenca = "presente" | "ausente";

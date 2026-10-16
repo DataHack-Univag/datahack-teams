@@ -14,9 +14,10 @@ type LinhaParticipacao = {
   pessoa: { nome: string } | null;
   banca: { codigo: string } | null;
   presenca: Presenca | null;
+  presenca_em: string | null;
 };
 
-const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, pessoa:pessoas!participacoes_email_fkey(nome), banca:bancas(codigo)";
+const SELECT_PARTICIPACAO = "email, papel, curso, semestre, presenca, presenca_em, pessoa:pessoas!participacoes_email_fkey(nome), banca:bancas(codigo)";
 
 const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   email: p.email,
@@ -26,6 +27,7 @@ const paraInscrito = (p: LinhaParticipacao): Inscrito => ({
   papel: p.papel,
   banca: p.banca?.codigo ?? null,
   presenca: p.presenca ?? null,
+  presenca_em: p.presenca_em ?? null,
 });
 
 /**
