@@ -5,6 +5,7 @@ import { inscrever } from "@/modules/inscricoes/application/actions";
 import { limparRespostas, validarRespostas, type Respostas } from "@/modules/inscricoes/domain/campos";
 import { limparNome, problemaNoNome, type EdicaoPublica } from "@/modules/inscricoes/domain/publica";
 import { FormularioDinamico } from "@/modules/inscricoes/ui/FormularioDinamico";
+import { LeituraTermo } from "@/modules/inscricoes/ui/LeituraTermo";
 import { CampoSenha } from "@/shared/ui/CampoSenha";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
 
@@ -93,22 +94,7 @@ export function FormInscricaoPublica({ edicao, logado }: { edicao: EdicaoPublica
       )}
 
       {edicao.termo && (
-        <fieldset className="space-y-2 rounded-xl border border-borda p-3">
-          <legend className="px-1 font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Uso dos seus dados</legend>
-          <details className="text-sm">
-            <summary className="cursor-pointer font-semibold text-marca">Ler o termo (versão {edicao.termo.versao})</summary>
-            <p className="mt-2 max-h-60 overflow-y-auto text-sm whitespace-pre-line text-suave">{edicao.termo.texto}</p>
-          </details>
-          <label className="flex items-start gap-3 text-sm">
-            <input type="checkbox" checked={termo} onChange={(e) => setTermo(e.target.checked)} className="mt-0.5 size-5 shrink-0 accent-[var(--marca)]" />
-            <span>Li e aceito o termo de uso dos dados.</span>
-          </label>
-          {tentou && !termo && (
-            <span role="alert" className="block text-xs font-medium text-red-600 dark:text-red-400">
-              Marque para continuar.
-            </span>
-          )}
-        </fieldset>
+        <LeituraTermo versao={edicao.termo.versao} texto={edicao.termo.texto} aceito={termo} aoAceitar={setTermo} mostrarErro={tentou} />
       )}
 
       {/* Antes de enviar: confere na tela e só deixa ir se estiver tudo certo. */}
