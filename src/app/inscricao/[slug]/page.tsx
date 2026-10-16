@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { periodo } from "@/modules/edicoes/domain/tipos";
 import { COR_PADRAO, resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
+import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { fraseInscricoes, vagasRestantes } from "@/modules/inscricoes/domain/publica";
 import { edicaoPublica } from "@/modules/inscricoes/infra/repositorio";
 import { FormInscricaoPublica } from "@/modules/inscricoes/ui/FormInscricaoPublica";
@@ -33,6 +34,7 @@ export default async function PaginaInscricao({ params }: Props) {
 
   return (
     <main className="relative mx-auto w-full max-w-5xl flex-1 space-y-8 px-4 py-8 sm:py-12" style={{ borderTop: `4px solid ${marca.cor ?? COR_PADRAO}` }}>
+      <TemaDaEdicao cor={marca.cor} />
       <BotaoTema className="btn-secundario absolute top-4 right-4 size-9 min-h-9 p-0" />
 
       <header className="grid gap-4">

@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { periodo } from "@/modules/edicoes/domain/tipos";
 import { COR_PADRAO, resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
+import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { situacaoInscricao } from "@/modules/inscricoes/domain/publica";
 import { minhasInscricoes } from "@/modules/inscricoes/infra/repositorio";
 import { emailNormalizado } from "@/modules/pessoas/infra/repositorio";
@@ -26,6 +27,8 @@ export default async function MinhaInscricao() {
 
   return (
     <main className="relative mx-auto w-full max-w-3xl flex-1 space-y-6 px-4 py-8 sm:py-12">
+      {/* A cor da edição mais recente em que a pessoa se inscreveu. */}
+      <TemaDaEdicao cor={inscricoes[0]?.marca?.cor} />
       <BotaoTema className="btn-secundario absolute top-4 right-4 size-9 min-h-9 p-0" />
       <header className="space-y-1">
         <p className="font-mono text-[11px] font-semibold tracking-[0.14em] text-suave uppercase">Minha inscrição</p>

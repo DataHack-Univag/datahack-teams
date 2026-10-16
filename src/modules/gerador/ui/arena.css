@@ -268,3 +268,13 @@
 @media (max-width:900px){
   .arena .side{top:0;height:100vh;height:100dvh}
 }
+
+/* O telão segue o tema da edição: as cores vêm das variáveis do sistema (globals.css),
+   que a cor da edição troca. Sem cor de edição, os valores são os mesmos de sempre. */
+.arena,
+:root[data-theme="light"] .arena {
+  --bg: var(--background); --bg2: var(--background-2); --surface: var(--superficie); --surface-solid: var(--superficie-solida);
+  --fg: var(--foreground); --muted: var(--suave); --line: var(--borda); --line-strong: var(--borda-forte);
+  --cy: var(--marca); --vi: var(--azul); --accent-soft: var(--marca-fundo);
+  --grad: var(--grad); --glow: var(--glow); --net: var(--net); --dot: var(--ponto);
+}

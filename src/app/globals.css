@@ -27,6 +27,11 @@
   --sombra: 0 1px 0 rgb(255 255 255 / 0.04) inset, 0 18px 40px -24px rgb(0 0 0 / 0.8);
   --net: 0, 229, 255;
   --ponto: rgb(120 160 255 / 0.13);
+  --brilho-1: rgb(47 91 255 / 0.2);
+  --brilho-2: rgb(0 229 255 / 0.12);
+  --botao-1: #005bc9;
+  --botao-3: #5a2bff;
+  --botao-sombra: rgb(47 91 255 / 0.8);
   color-scheme: dark;
 }
 
@@ -50,6 +55,11 @@
   --sombra: 0 1px 2px rgb(0 11 56 / 0.05), 0 14px 30px -20px rgb(0 11 56 / 0.25);
   --net: 21, 48, 224;
   --ponto: rgb(0 40 160 / 0.09);
+  --brilho-1: rgb(47 91 255 / 0.2);
+  --brilho-2: rgb(0 229 255 / 0.12);
+  --botao-1: #005bc9;
+  --botao-3: #5a2bff;
+  --botao-sombra: rgb(47 91 255 / 0.8);
   color-scheme: light;
 }
 
@@ -75,8 +85,8 @@
 body {
   background:
     radial-gradient(var(--ponto) 1px, transparent 1.2px) 0 0 / 22px 22px,
-    radial-gradient(1200px 700px at 85% -10%, rgb(47 91 255 / 0.2), transparent 60%),
-    radial-gradient(900px 600px at -10% 110%, rgb(0 229 255 / 0.12), transparent 60%),
+    radial-gradient(1200px 700px at 85% -10%, var(--brilho-1), transparent 60%),
+    radial-gradient(900px 600px at -10% 110%, var(--brilho-2), transparent 60%),
     var(--background);
   background-attachment: fixed;
   color: var(--foreground);
@@ -133,9 +143,9 @@ body {
 /* Botão principal: gradiente da marca com brilho passando. */
 @utility btn-primario {
   @apply btn relative overflow-hidden border-0 text-white;
-  background: linear-gradient(110deg, #005bc9, var(--azul) 60%, #5a2bff);
+  background: linear-gradient(110deg, var(--botao-1), var(--azul) 60%, var(--botao-3));
   background-size: 160% 100%;
-  box-shadow: 0 10px 30px -12px rgb(47 91 255 / 0.8);
+  box-shadow: 0 10px 30px -12px var(--botao-sombra);
   transition:
     background-position 0.5s,
     box-shadow 0.2s,

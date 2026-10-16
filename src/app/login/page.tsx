@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { periodo } from "@/modules/edicoes/domain/tipos";
 import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
+import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { vitrine } from "@/modules/inscricoes/infra/repositorio";
 import { LoginSenha } from "@/modules/pessoas/ui/LoginSenha";
 import { clienteServidor } from "@/shared/db/servidor";
@@ -33,6 +34,7 @@ export default async function Login({ searchParams }: PageProps<"/login">) {
 
   return (
     <main className="relative mx-auto grid w-full max-w-6xl flex-1 items-center gap-8 px-4 py-8 sm:py-12 lg:grid-cols-[1.2fr_1fr] lg:gap-14">
+      <TemaDaEdicao cor={marca?.cor} />
       <BotaoTema className="btn-secundario absolute top-4 right-4 size-9 min-h-9 p-0" />
 
       {/* ------------------------------------------------ hero */}

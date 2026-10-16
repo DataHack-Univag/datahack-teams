@@ -4,6 +4,7 @@ import { FaixaSimulacao } from "@/app/_shell/FaixaSimulacao";
 import { SeletorEdicao } from "@/app/_shell/SeletorEdicao";
 import { escolherEdicao } from "@/modules/edicoes/application/actions";
 import { resolverMarca } from "@/modules/instituicoes/domain/tipos";
+import { TemaDaEdicao } from "@/modules/instituicoes/ui/TemaDaEdicao";
 import { sessaoAtual } from "@/modules/pessoas/application/sessao";
 import { inicioDoPapel, type Papel } from "@/modules/pessoas/domain/papeis";
 import { Navegacao, type ItemNav } from "@/shared/ui/Navegacao";
@@ -41,6 +42,7 @@ export async function Area({
   const atual = edicoesDoUsuario.find((e) => e.atual);
   return (
     <>
+      <TemaDaEdicao cor={marca?.cor} />
       {simulacao && <FaixaSimulacao nome={usuario.nome} papel={usuario.papel} />}
       <Cabecalho
         nome={nome}
