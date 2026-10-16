@@ -84,7 +84,9 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
             ? edicoes.some((e) => e.atual)
               ? "As edições anteriores ficam só para consulta. Ao entrar, você sempre começa na atual."
               : "As edições anteriores ficam só para consulta. Você ainda não participa da edição atual."
-            : "Trocar aqui muda só o que você vê. Participantes e bancas continuam na edição atual."}
+            : exibida
+              ? "Nenhuma edição é a atual: o login e o sistema mostram a última encerrada. Trocar aqui muda só o que você vê."
+              : "Trocar aqui muda só o que você vê. Participantes e bancas continuam na edição atual."}
         </p>
         {participante && (
           <Link href="/minhas-edicoes" onClick={fechar} className="mt-2 flex items-center gap-2 rounded-xl border-t border-borda p-2 pt-3 text-sm font-semibold hover:bg-superficie">

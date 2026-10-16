@@ -44,12 +44,6 @@ export function CartaoEdicao({
           {!emExibicao && <Selo tom={tomSituacaoEdicao(edicao.situacao)}>{rotuloSituacaoEdicao(edicao.situacao)}</Selo>}
         </div>
       </div>
-      {edicao.atual && edicao.situacao === "planejada" && (
-        <p className="rounded-xl border border-amber-500/40 bg-amber-500/10 p-2 text-xs">
-          É a atual, mas está <strong>em planejamento</strong>: o login já mostra esta edição. Se ela ainda não começou, use “Deixar de ser a atual”; se já
-          começou, mude a situação para “Em andamento”.
-        </p>
-      )}
       {emExibicao && (
         <p className="text-xs text-suave">Nenhuma edição é a atual: o login e o sistema mostram esta, a última encerrada, só para consulta.</p>
       )}

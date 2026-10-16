@@ -747,6 +747,14 @@ begin
   update edicoes set atual = true where numero = 1;
 end $$;
 
+-- ---------------------------------------------------------------- 034 · planejada nunca é a atual
+reset role;
+do $$
+begin
+  assert not exists (select 1 from edicoes where atual and situacao in ('planejada', 'inscricoes', 'cancelada')), 'nenhuma atual em planejamento';
+  assert exists (select 1 from pg_constraint where conname = 'edicoes_atual_acontecendo'), 'o banco não aceita atual + planejada';
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 033 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 034 conferem.'
