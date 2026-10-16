@@ -37,7 +37,7 @@ export const salvarParticipante = criarAcao(
     email_original: z.string().optional(),
     email,
     nome: texto("o nome", { min: 2, max: 120 }),
-    curso: z.string().optional().transform((v) => v?.trim().toUpperCase() || null),
+    curso: z.string().optional().transform((v) => v?.trim() || null),
     semestre: inteiroOpcional("O semestre", 1, 12),
     nota: decimalOpcional("A nota", 0, 10),
     funcao,
@@ -54,7 +54,8 @@ export const salvarParticipante = criarAcao(
         email: d.email,
         nome: d.nome,
         // Campo que o formulário da edição não mostra não chega: fica como está.
-        curso: bruto.curso === undefined ? undefined : d.curso,
+        // Curso digitado (sigla) fica em maiúsculas, como sempre; curso escolhido na lista fica como está.
+        curso: bruto.curso === undefined ? undefined : bruto.curso_livre === "1" ? (d.curso?.toUpperCase() ?? null) : d.curso,
         semestre: bruto.semestre === undefined ? undefined : d.semestre,
         papel: d.funcao.papel,
         bancaId: idBanca,

@@ -599,6 +599,21 @@ select pg_temp.falha($q$select salvar_respostas_organizacao((select id from edic
 select pg_temp.como('p1@teste.local');
 select pg_temp.falha($q$select salvar_respostas_organizacao((select id from edicoes where numero = 1), 'p1@teste.local', '{}')$q$, 'Só a organização');
 
+-- ---------------------------------------------------------------- 024 · curso e semestre em lista
+select pg_temp.como('p56@teste.local');
+do $$
+declare v_ed uuid := current_setting('dh.ed_form')::uuid;
+begin
+  assert (select tipo from perguntas_catalogo where chave = 'curso') = 'escolha', 'curso é lista';
+  assert (select opcoes @> '["Outro"]' and 'curso_outro' = any (traz) from perguntas_catalogo where chave = 'curso'), 'curso tem Outro e traz o texto';
+  perform definir_campos_inscricao(v_ed, (select jsonb_agg(jsonb_build_object('chave', chave, 'rotulo', rotulo, 'tipo', tipo, 'opcoes', opcoes, 'condicao', condicao) order by ordem)
+                                            from perguntas_catalogo where chave in ('curso', 'curso_outro', 'semestre')));
+  assert cardinality(validar_respostas(v_ed, '{"curso":"Sistemas de Informação","semestre":3}')) = 0, 'curso da lista e semestre inteiro';
+  assert validar_respostas(v_ed, '{"curso":"Outro","curso_outro":"Biomedicina","semestre":3}') = '{}', 'Outro com o texto';
+  assert validar_respostas(v_ed, '{"curso":"Outro","semestre":3}') = array['Responda: Qual o seu curso?'], 'Outro pede o texto';
+  assert validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}') = array['Curso: escolha uma das opções da lista.', 'Semestre: escolha um número inteiro.'], 'fora da lista e semestre quebrado: ' || array_to_string(validar_respostas(v_ed, '{"curso":"SI","semestre":3.5}'), ' | ');
+end $$;
+
 reset role;
 rollback;
-\echo 'OK: todas as regras das migrações 010 a 022 conferem.'
+\echo 'OK: todas as regras das migrações 010 a 024 conferem.'

@@ -321,8 +321,25 @@ function Detalhes({ campo: c, aoMudar }: { campo: Campo; aoMudar: (f: (c: Campo)
   const faixa = c.opcoes && !Array.isArray(c.opcoes) ? c.opcoes : {};
   // O texto das opções fica local enquanto digita (linhas em branco no meio não somem).
   const [opcoes, setOpcoes] = useState(lista.join("\n"));
+  // Trocar o tipo (ex.: um "Curso" de texto livre virando lista): as opções do tipo novo começam vazias.
+  const trocarTipo = (tipo: TipoCampo) => {
+    const novas = tipo === "escolha" || tipo === "multipla" ? (lista.length ? lista : []) : tipo === "numero" ? {} : null;
+    setOpcoes(Array.isArray(novas) ? novas.join("\n") : "");
+    aoMudar((x) => ({ ...x, tipo, opcoes: novas }));
+  };
   return (
     <div className="grid gap-3 rounded-xl bg-superficie/60 p-3 sm:grid-cols-2">
+      <label className="sm:col-span-2">
+        <span className="rotulo">Tipo de resposta</span>
+        <select className="campo" value={c.tipo} onChange={(e) => trocarTipo(e.target.value as TipoCampo)}>
+          {TIPOS_CAMPO.map((t) => (
+            <option key={t.valor} value={t.valor}>
+              {t.rotulo}
+            </option>
+          ))}
+        </select>
+        <span className="mt-1 block text-xs text-suave">Para respostas conhecidas (curso, turno, nível…), prefira “Escolha uma opção”: vira uma lista, sem erro de digitação.</span>
+      </label>
       <label className="sm:col-span-2">
         <span className="rotulo">
           Texto de ajuda <span className="font-normal text-suave">(opcional)</span>
@@ -364,6 +381,18 @@ function Detalhes({ campo: c, aoMudar }: { campo: Campo; aoMudar: (f: (c: Campo)
               value={faixa.max ?? ""}
               onChange={(e) => aoMudar((x) => ({ ...x, opcoes: { ...faixa, max: e.target.value === "" ? undefined : Number(e.target.value) } }))}
             />
+          </label>
+          <label className="flex items-start gap-3 sm:col-span-2">
+            <input
+              type="checkbox"
+              checked={!!faixa.inteiro}
+              onChange={(e) => aoMudar((x) => ({ ...x, opcoes: { ...faixa, inteiro: e.target.checked || undefined } }))}
+              className="mt-0.5 size-5 accent-[var(--marca)]"
+            />
+            <span className="text-sm">
+              <strong className="font-semibold">Só números inteiros</strong>
+              <span className="block text-xs text-suave">Com mínimo e máximo próximos (ex.: semestre de 1 a 12), aparece como lista para escolher.</span>
+            </span>
           </label>
         </>
       )}

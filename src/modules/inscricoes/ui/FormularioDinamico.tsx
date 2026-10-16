@@ -1,6 +1,6 @@
 "use client";
 
-import { visiveis, type Campo, type Respostas, type Valor } from "@/modules/inscricoes/domain/campos";
+import { rotuloDoValor, valoresDaLista, visiveis, type Campo, type Respostas, type Valor } from "@/modules/inscricoes/domain/campos";
 
 export type OpcaoInstituicao = { id: string; nome: string };
 
@@ -100,7 +100,20 @@ function Entrada({
   switch (c.tipo) {
     case "texto_longo":
       return <textarea {...comum} rows={3} maxLength={2000} className="campo" value={typeof valor === "string" ? valor : ""} onChange={(e) => aoMudar(e.target.value || undefined)} />;
-    case "numero":
+    case "numero": {
+      // Inteiro com faixa curta (semestre): escolher numa lista é mais rápido e sem erro de digitação.
+      const valores = valoresDaLista(c);
+      if (valores)
+        return (
+          <select {...comum} className="campo" value={typeof valor === "number" ? String(valor) : ""} onChange={(e) => aoMudar(e.target.value === "" ? undefined : Number(e.target.value))}>
+            <option value="">Escolha…</option>
+            {valores.map((n) => (
+              <option key={n} value={n}>
+                {rotuloDoValor(c, n)}
+              </option>
+            ))}
+          </select>
+        );
       return (
         <input
           {...comum}
@@ -114,6 +127,7 @@ function Entrada({
           onChange={(e) => aoMudar(e.target.value === "" ? undefined : Number(e.target.value))}
         />
       );
+    }
     case "data":
       return <input {...comum} type="date" className="campo" value={typeof valor === "string" ? valor : ""} onChange={(e) => aoMudar(e.target.value || undefined)} />;
     case "escolha":

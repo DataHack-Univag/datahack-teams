@@ -7,7 +7,9 @@ import {
   limparRespostas,
   MODELOS_FORMULARIO,
   tirarCampo,
+  rotuloDoValor,
   validarRespostas,
+  valoresDaLista,
   visiveis,
   type Campo,
   type PerguntaCatalogo,
@@ -92,5 +94,16 @@ describe("respostas", () => {
     expect(validarRespostas(so, { instituicao: "a" }, { instituicoes: ["a", "b"] })).toEqual({});
     expect(validarRespostas(so, { instituicao: "c" }, { instituicoes: ["a", "b"] })).toEqual({ instituicao: "Escolha uma instituição da lista." });
     expect(validarRespostas(so, { instituicao: "outra" }, { aceitaOutra: false })).toEqual({ instituicao: "Este evento é só para as instituições participantes." });
+  });
+});
+
+describe("listas", () => {
+  const semestre: Campo = { chave: "semestre", rotulo: "Semestre", tipo: "numero", opcoes: { min: 1, max: 12, inteiro: true }, obrigatorio: true };
+  it("semestre inteiro vira lista de 1 a 12; CR (decimal) continua campo de número", () => {
+    expect(valoresDaLista(semestre)).toHaveLength(12);
+    expect(rotuloDoValor(semestre, 3)).toBe("3º semestre");
+    expect(valoresDaLista({ ...semestre, chave: "cr", opcoes: { min: 0, max: 10 } })).toBeNull();
+    expect(validarRespostas([semestre], { semestre: 3.5 })).toEqual({ semestre: "Escolha um número inteiro." });
+    expect(validarRespostas([semestre], { semestre: 4 })).toEqual({});
   });
 });

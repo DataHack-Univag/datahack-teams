@@ -14,8 +14,8 @@ export type Campo = {
   rotulo: string;
   ajuda?: string | null;
   tipo: TipoCampo;
-  /** escolha/multipla: lista de opções; numero: {min, max}. */
-  opcoes?: string[] | { min?: number; max?: number } | null;
+  /** escolha/multipla: lista de opções; numero: {min, max, inteiro} (inteiro com faixa curta vira lista). */
+  opcoes?: string[] | { min?: number; max?: number; inteiro?: boolean } | null;
   condicao?: Condicao | null;
   obrigatorio: boolean;
   sensivel?: boolean;
@@ -40,6 +40,16 @@ export const rotuloTipo = (t: string) => TIPOS_CAMPO.find((x) => x.valor === t)?
 
 const lista = (c: Campo) => (Array.isArray(c.opcoes) ? c.opcoes : []);
 const faixa = (c: Campo) => (c.opcoes && !Array.isArray(c.opcoes) ? c.opcoes : {});
+
+/** Número inteiro com faixa curta (ex.: semestre 1 a 12): a tela mostra uma lista para escolher. */
+export function valoresDaLista(c: Campo): number[] | null {
+  const { min, max, inteiro } = faixa(c);
+  if (c.tipo !== "numero" || !inteiro || min === undefined || max === undefined || max < min || max - min > 40) return null;
+  return Array.from({ length: max - min + 1 }, (_, i) => min + i);
+}
+
+/** Como cada valor aparece na lista ("3º semestre" para semestre, o número nos outros casos). */
+export const rotuloDoValor = (c: Pick<Campo, "chave">, n: number) => (c.chave.includes("semestre") ? `${n}º semestre` : String(n));
 const igual = (a: Valor | undefined, b: Valor) => JSON.stringify(a) === JSON.stringify(b);
 const vazio = (c: Campo, v: Valor | undefined) =>
   v === undefined || v === "" || (Array.isArray(v) && v.length === 0) || (c.tipo === "aceite" && v !== true);
@@ -93,6 +103,7 @@ export function validarRespostas(
         const { min, max } = faixa(c);
         if (typeof v !== "number" || Number.isNaN(v) || (min !== undefined && v < min) || (max !== undefined && v > max))
           erros[c.chave] = `Informe um número entre ${min ?? "…"} e ${max ?? "…"}.`;
+        else if (faixa(c).inteiro && !Number.isInteger(v)) erros[c.chave] = "Escolha um número inteiro.";
         break;
       }
       case "escolha":

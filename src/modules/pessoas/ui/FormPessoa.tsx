@@ -1,4 +1,4 @@
-import type { Campo as Pergunta, Respostas } from "@/modules/inscricoes/domain/campos";
+import { rotuloDoValor, valoresDaLista, type Campo as Pergunta, type Respostas } from "@/modules/inscricoes/domain/campos";
 import { CamposExtras } from "@/modules/inscricoes/ui/CamposExtras";
 import type { OpcaoInstituicao } from "@/modules/inscricoes/ui/FormularioDinamico";
 import { salvarParticipante } from "@/modules/pessoas/application/actions";
@@ -30,7 +30,16 @@ export function FormPessoa({
 }) {
   const tem = (chave: string) => !formulario || formulario.campos.some((c) => c.chave === chave);
   const cr = formulario?.campos.find((c) => c.chave === "cr");
-  const extras = formulario?.campos.filter((c) => !PROPRIAS.includes(c.chave) && c.tipo !== "aceite") ?? [];
+  const curso = formulario?.campos.find((c) => c.chave === "curso");
+  const semestre = formulario?.campos.find((c) => c.chave === "semestre");
+  // Curso em lista: as opções da edição (e o curso que a pessoa já tinha, se não estiver na lista).
+  const cursos = curso?.tipo === "escolha" && Array.isArray(curso.opcoes) ? curso.opcoes : null;
+  const semestres = semestre ? valoresDaLista(semestre) : null;
+  // "Qual o seu curso?" depende do curso, que fica fora do bloco de outras perguntas: aparece sempre.
+  const extras =
+    formulario?.campos
+      .filter((c) => !PROPRIAS.includes(c.chave) && c.tipo !== "aceite")
+      .map((c) => (c.condicao && PROPRIAS.includes(c.condicao.campo) ? { ...c, condicao: null, rotulo: `${c.rotulo} (se escolheu “${String(c.condicao.igual)}”)` } : c)) ?? [];
   return (
     <Formulario action={salvarParticipante} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-6">
       {p && <Ocultos valores={{ email_original: p.email }} />}
@@ -51,8 +60,35 @@ export function FormPessoa({
         className="sm:col-span-2"
         opcoes={opcoesFuncao(bancas).map((x) => ({ valor: x.valor, rotulo: `${x.rotulo} — ${x.descricao}` }))}
       />
-      {tem("curso") && <Campo rotulo="Curso" name="curso" defaultValue={p?.curso ?? ""} placeholder="ENS" className="uppercase" />}
-      {tem("semestre") && <Campo rotulo="Semestre" name="semestre" type="number" min={1} max={12} defaultValue={p?.semestre ?? ""} />}
+      {tem("curso") &&
+        (cursos ? (
+          <Selecao
+            rotulo="Curso"
+            name="curso"
+            defaultValue={p?.curso ?? ""}
+            vazio="Escolha o curso"
+            className="sm:col-span-2 lg:col-span-3"
+            opcoes={[...(p?.curso && !cursos.includes(p.curso) ? [p.curso] : []), ...cursos].map((x) => ({ valor: x, rotulo: x }))}
+          />
+        ) : (
+          <>
+            <Ocultos valores={{ curso_livre: "1" }} />
+            <Campo rotulo="Curso" name="curso" defaultValue={p?.curso ?? ""} placeholder="ENS" className="uppercase" />
+          </>
+        ))}
+      {tem("semestre") &&
+        (semestres && semestre ? (
+          <Selecao
+            rotulo="Semestre"
+            name="semestre"
+            defaultValue={p?.semestre ? String(p.semestre) : ""}
+            vazio="Escolha"
+            className="lg:col-span-1"
+            opcoes={semestres.map((n) => ({ valor: String(n), rotulo: rotuloDoValor(semestre, n) }))}
+          />
+        ) : (
+          <Campo rotulo="Semestre" name="semestre" type="number" min={1} max={12} defaultValue={p?.semestre ?? ""} />
+        ))}
       {tem("cr") && (
         <Campo
           rotulo={cr?.rotulo ?? "Nota média"}
