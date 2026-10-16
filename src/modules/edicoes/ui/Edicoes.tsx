@@ -4,6 +4,7 @@ import { ACESSOS, COR_PADRAO, resolverMarca, rotuloAcesso } from "@/modules/inst
 import { LogoEdicao } from "@/modules/instituicoes/ui/LogoEdicao";
 import { AreaTexto, Campo, CaixaMarcar, Selecao } from "@/shared/ui/Campo";
 import { BotaoEnviar, Formulario, Ocultos } from "@/shared/ui/Formulario";
+import { Icone } from "@/shared/ui/Icone";
 import { Selo } from "@/shared/ui/Selo";
 
 /** Cartão de uma edição: datas, formato, números e ações. */
@@ -57,6 +58,11 @@ export function CartaoEdicao({
         {edicao.permite_trocas ? "com trocas" : "sem trocas"}
         {edicao.acesso ? ` · ${rotuloAcesso(edicao.acesso).toLowerCase()}` : ""}
       </p>
+      {vendo && (
+        <a href="#configuracoes" className="btn-secundario min-h-9 px-3 text-xs">
+          <Icone nome="avancar" className="size-4 rotate-90" /> Ver configurações desta edição
+        </a>
+      )}
       {!vendo && (
         // Trocar de edição também por aqui: no celular o seletor do cabeçalho fica escondido (heurística 7).
         <form action={escolherEdicao}>

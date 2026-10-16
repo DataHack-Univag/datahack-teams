@@ -28,7 +28,8 @@ function useAtivo() {
   return (i: ItemNav) => {
     if (i.aba !== undefined) return aba ? aba === i.aba : !!i.padrao;
     const base = i.href.split("?")[0];
-    return i.prefixos ? i.prefixos.some((p) => caminho === p || caminho.startsWith(p + "/")) : caminho === base;
+    // O próprio endereço sempre conta; os prefixos acrescentam as subpáginas.
+    return caminho === base || (i.prefixos ?? []).some((p) => caminho === p || caminho.startsWith(p + "/"));
   };
 }
 
