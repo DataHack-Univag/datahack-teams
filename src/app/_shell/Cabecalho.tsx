@@ -35,7 +35,7 @@ export function Cabecalho({
   return (
     <header
       style={marca?.cor ? { borderTop: `3px solid ${marca.cor}` } : undefined}
-      className={`border-b border-borda bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-[14px] ${simulacao ? "" : "sticky top-0 z-20"}`}
+      className={`border-b border-borda bg-[color-mix(in_srgb,var(--background)_72%,transparent)] backdrop-blur-[14px] ${simulacao ? "relative z-30" : "sticky top-0 z-30"}`}
     >
       <div className="mx-auto flex max-w-6xl items-center gap-2 px-4 py-2.5 sm:gap-3">
         <Link href={inicio} className="mr-auto" aria-label={`${marca?.nome ?? "DATAHack"}: ir para o início`}>
