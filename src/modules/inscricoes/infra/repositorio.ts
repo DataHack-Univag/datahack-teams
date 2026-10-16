@@ -1,6 +1,6 @@
 import type { MarcaEdicao } from "@/modules/instituicoes/domain/tipos";
 import type { Campo, PerguntaCatalogo, Respostas } from "@/modules/inscricoes/domain/campos";
-import type { EdicaoPublica, SituacaoInscricao } from "@/modules/inscricoes/domain/publica";
+import type { EdicaoPublica, SituacaoInscricao, SituacaoInscricoes } from "@/modules/inscricoes/domain/publica";
 import { ErroCarregamento, exigir } from "@/shared/db/erros";
 import type { Cliente } from "@/shared/db/servidor";
 import type { Json } from "@/shared/db/tipos-banco";
@@ -80,7 +80,18 @@ export async function minhasInscricoes(cliente: Cliente): Promise<MinhaInscricao
 }
 
 export type Vitrine = {
-  atual: { nome: string; marca: MarcaEdicao; local: string | null; data_inicio: string | null; data_fim: string | null } | null;
+  atual: {
+    nome: string;
+    marca: MarcaEdicao;
+    local: string | null;
+    data_inicio: string | null;
+    data_fim: string | null;
+    /** Da migração 025 em diante. */
+    numero?: number;
+    /** Só quando a edição recebe inscrição pelo site (não é lista fechada). */
+    slug?: string | null;
+    inscricao?: SituacaoInscricoes;
+  } | null;
   inscricoes: { slug: string; nome: string; situacao: "aberta" | "em_breve"; data_inicio: string | null; local: string | null }[];
 };
 

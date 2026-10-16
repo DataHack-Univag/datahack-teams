@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { Cabecalho } from "@/app/_shell/Cabecalho";
 import { FaixaSimulacao } from "@/app/_shell/FaixaSimulacao";
@@ -37,9 +38,9 @@ export async function Area({
   // Sem a migração 017 (marca ainda não existe), fica a logo de sempre.
   const marca = edicao.marca ? resolverMarca(edicao) : undefined;
   const organiza = real.papel === "organizador";
-  // Quem participou de mais de uma edição pode consultar as anteriores.
-  const consultaOutras = !organiza && edicoesDoUsuario.length > 1;
   const atual = edicoesDoUsuario.find((e) => e.atual);
+  // Quem participou de mais de uma edição (ou só de anteriores) consulta as outras e vê a atual.
+  const consultaOutras = !organiza && (edicoesDoUsuario.length > 1 || !atual);
   return (
     <>
       <TemaDaEdicao cor={marca?.cor} />
@@ -62,14 +63,19 @@ export async function Area({
       {consultaOutras && !edicao.atual && (
         <div role="status" className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-borda bg-marca-fundo px-4 py-1.5 text-center text-xs">
           <span>
-            Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, que já passou: só para consulta.
+            <strong>Esta não é a edição atual.</strong> Você está vendo a <strong>Edição {edicao.numero} · {edicao.nome}</strong>, de que
+            participou: só para consulta.
           </span>
-          {atual && (
+          {atual ? (
             <form action={escolherEdicao}>
               <input type="hidden" name="edicao" value={atual.id} />
               <input type="hidden" name="voltar" value="/" />
               <button className="font-semibold text-marca underline">Voltar para a edição atual</button>
             </form>
+          ) : (
+            <Link href="/minhas-edicoes" className="font-semibold text-marca underline">
+              Ver a edição que está acontecendo
+            </Link>
           )}
         </div>
       )}

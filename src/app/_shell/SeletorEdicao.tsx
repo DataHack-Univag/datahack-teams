@@ -78,9 +78,17 @@ export function SeletorEdicao({ edicoes, escolhida, participante = false }: { ed
         </ul>
         <p className="px-2 pt-2 text-xs text-suave">
           {participante
-            ? "As edições anteriores ficam só para consulta. Ao entrar, você sempre começa na atual."
+            ? edicoes.some((e) => e.atual)
+              ? "As edições anteriores ficam só para consulta. Ao entrar, você sempre começa na atual."
+              : "As edições anteriores ficam só para consulta. Você ainda não participa da edição atual."
             : "Trocar aqui muda só o que você vê. Alunos e bancas continuam na edição atual."}
         </p>
+        {participante && (
+          <Link href="/minhas-edicoes" onClick={fechar} className="mt-2 flex items-center gap-2 rounded-xl border-t border-borda p-2 pt-3 text-sm font-semibold hover:bg-superficie">
+            <Icone nome="relogio" className="size-4 text-suave" />
+            Suas edições e a edição atual
+          </Link>
+        )}
         {!participante && (
           <div className="mt-2 grid grid-cols-2 gap-1 border-t border-borda pt-2">
             <Link href="/admin/edicoes" onClick={fechar} className="flex items-center gap-2 rounded-xl p-2 text-sm font-semibold hover:bg-superficie">
