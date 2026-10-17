@@ -1,227 +1,194 @@
-# DataHack Univag 2026 — Gestão de Equipes
+# DATAHack — Equipes
 
-Sistema web (mobile e desktop) para os inscritos do DataHack formarem equipes e
-registrarem onde fazem as entregas. Login por e-mail + senha no Supabase Auth, com
-"esqueci a senha" por e-mail; só entra quem está na lista de inscritos. Backend 100% Supabase (Auth + Postgres com RLS).
+Sistema web (celular e computador) para organizar o **DATAHack**: inscrições, equipes, check-in,
+pedidos de ajuda, mapa do evento, avaliação pelas bancas e ranking. Começou no DATAHack Univag
+2026 (Edição 1) e hoje é **por edição**: cada evento tem o seu formulário, as suas regras, o seu
+regulamento, a sua logo e a sua cor, e pode ser de uma instituição só, de várias ou aberto a todos.
 
-**Stack:** Next.js 16 (App Router, Server Actions) · `@supabase/ssr` · Tailwind CSS v4.
+**Stack:** Next.js 16 (App Router, Server Actions) · React 19 · Tailwind CSS v4 · Supabase
+(Auth, Postgres com RLS, Realtime) · Zod · Vitest. Produção na Vercel (deploy da `main`).
+
+---
 
 ## O que faz
 
-**Aluno**
-- No primeiro acesso cria a senha com o e-mail da inscrição (só se estiver cadastrado na edição).
-- Vê a própria equipe, montada pela organização. **Não adiciona, não remove e não sai**:
-  a composição é só da organização.
-- Escolhe o **líder** da equipe: sem líder, qualquer integrante define; depois de
-  definido, só o próprio líder passa a liderança para outra pessoa (a organização sempre pode).
-- Edita nome da equipe, repositório GitHub (público, obrigatório para a entrega) e os
-  links de entrega com categoria: GitHub, Google Drive, Apresentação, Vídeo, Dashboard,
-  Figma, Site/Deploy, Outro.
-- Vê os materiais publicados pela organização.
-- **Troca de equipe:** pede para ir para outra equipe; qualquer integrante de lá pode
-  aceitar (os dois trocam de lugar) ou recusar. Quem pediu pode cancelar. O aviso aparece
-  no topo da tela da equipe pedida (a tela se atualiza sozinha a cada 30 s).
+### Participante
+- **Inscrição pelo site** (`/inscricao/<edição>`), quando a edição é aberta ou de instituições:
+  nome e sobrenome, e-mail (pode ser o pessoal), senha, as perguntas da edição e o **termo de uso
+  dos dados**, que só libera o aceite depois de rolar até o fim. Acompanha a situação em
+  **Minha inscrição** (em análise, aprovada, lista de espera com a posição), que muda na hora.
+- **Login vale sempre:** quem participou de qualquer edição entra e vê as edições de que participou
+  (só consulta) e, em **Suas edições**, a edição que está acontecendo, com a inscrição se estiver aberta.
+- **Minha equipe:** colegas, líder, repositório no GitHub, links de entrega, ícone da equipe e o lugar
+  no mapa. Conforme a edição, a equipe vem do gerador da organização, é montada à mão ou é
+  **proposta pelos participantes** (quem propõe convida, cada um confirma, a organização aprova).
+- **Trocas de equipe** (se a edição permitir), **pedido de ajuda** à mentoria (dúvida ou problema),
+  **QR code de entrada** no check-in e **Materiais** (desafios, bases, dicionários).
 
-**Organização** (`/admin`, papel `organizador`), com 6 abas na ordem do evento
-(no celular: barra embaixo com Painel, Equipes, Avaliação, Ranking e "Mais"):
-- **Painel:** números do evento e pendências (equipes sem líder/repositório, trocas
-  aguardando, alunos sem equipe, fichas faltando), cada uma com link para resolver.
-- **Pessoas:** alunos, organizadores e bancas num lugar só, com filtros (papel, sem
-  equipe, sem nota) e busca. Cadastrar, editar, mudar papel, remover. A **nota média**
-  só os organizadores veem.
-- **Equipes**, com sub-abas:
-  - *Equipes:* todas as equipes com integrantes, repositório (público/privado/pendente) e
-    links; filtro "com pendência"; quem está sem equipe; criar equipe; limite de
-    integrantes e **trava de edição**; exportar CSV.
-  - *Trocas:* auditoria de todos os pedidos (aguardando, aceitos, recusados, cancelados).
-  - *Gerador:* o algoritmo do `datahack-equipes.html`: equilibra semestre + nota, mistura
-    cursos, semente reproduzível, compara com 200 sorteios aleatórios, modo telão, e
-    **salva as equipes no sistema**.
-- **Materiais:** links publicados para todos os alunos (desafios, fontes, dicionários).
-- **Avaliação:** quadro geral, andamento das bancas e fichas com penalidades; encerrar ou
-  reabrir; exportar ranking, analítico, dados brutos e notas por avaliador (CSV).
-- **Ranking:** pódio com Top 3 / Top 5 / Todos e modo revelação para o telão.
+### Mentoria (`/mentoria`)
+Equipes e pessoas da edição, **check-in por QR** (câmera ou código de 8 letras) com a lista de quem
+entrou e quem falta, chamada de presença e **chamados** (pedidos de ajuda), com histórico.
 
-Em qualquer tela: **Ctrl+K** abre a busca rápida (telas, equipes, pessoas, "ver como");
-**?** mostra os atalhos. Remoções simples têm **Desfazer** no aviso.
+### Bancas (`/avaliar`)
+Ficha por rubrica com os níveis de cada critério (atalhos de teclado), salva pela metade, nota na hora.
+O regulamento (fases, rubricas, critérios, níveis, penalidades, desempate) fica no banco, por edição.
 
-**Bancas** (`/avaliar`, papéis `avaliador_tecnico` e `avaliador_negocio`; organizadores também)
-- Lista das equipes com o andamento das fichas; ficha por rubrica com os 4 níveis de cada
-  critério (descrições das rubricas do evento), nota calculada na hora e comentário.
-- Rubricas v2 (`docs/cronograma_rubrica_v2.html`): fase 1 = pitch 6% + mesa 9%, fase 2 = pitch 8%
-  + mesa 12%, fase 3 (repositório) 25%, negócio 40%. Cada avaliador pertence a uma banca
-  da edição: na de 2026, a banca de professores avalia os pitches F1/F2, a organização avalia
-  mesa F1/F2 e F3 (e pode lançar qualquer rubrica) e os jurados de negócio avaliam o pitch final.
-- O regulamento (rubricas, pesos, penalidades) fica no banco, por edição; veja e baixe em
-  Organização → Edições → Regulamento. Para uma edição nova a partir do Python:
-  `python src/build_cronograma_rubrica.py`, copie o JSON para `config/rubricas_v2.json`,
-  rode `npm run regulamento` e importe `config/regulamento_2026.json` na tela da edição.
-- **Ver como qualquer pessoa:** em Pessoas (ou na equipe) ou pela busca rápida
-  (Ctrl+K → "Ver como"), a organização navega como um aluno ou como um avaliador de qualquer
-  banca, sem senha e sem contas falsas. Uma faixa amarela mostra a simulação; nas fichas das
-  bancas nada é salvo. Como aluno, abre a tela exatamente como ele vê, com os mesmos botões que ele tem,
-  todos funcionando (agindo como organização)
-  (`/ver-como?email=...`, com uma confirmação antes de começar).
+### Organização (`/admin`)
+Menu por tarefa: **Painel · Equipes · Avaliação · Ranking**, e os grupos **Participantes** (Pessoas,
+Inscrições, Check-in), **Durante o evento** (Chamados, Mapa, Materiais) e **Configurar** (Edições,
+Formulário de inscrição, Regulamento, Instituições).
+- **Painel:** números e pendências do evento, inclusive a formação das equipes (quem propôs, quem foi
+  convidado, quem está livre).
+- **Pessoas e Inscrições:** cadastro com as perguntas da edição, fila de inscrições (aprovar, recusar,
+  lista de espera), vagas, prazo e termo LGPD com versões.
+- **Equipes:** lista, propostas, trocas e o **gerador** (equilibra semestre e nota, telão).
+- **Avaliação e Ranking:** quadro geral, fichas por banca, exportações e pódio com modo revelação.
+- **Mapa:** salas desenhadas em escala, bancadas, distribuição das equipes e croqui para imprimir.
+- **Edições:** criar (copiando o regulamento de outra), acesso e marca (logo e cor), **situação** e
+  edição atual. **Ver como:** navega como qualquer participante, mentor ou banca, sem senha.
 
-## Edições do evento
+### Em todas as telas
+- **Ao vivo:** inscrição nova, convite, proposta pronta para aprovar, troca, pedido de ajuda, mentor a
+  caminho, presença confirmada… a tela se atualiza na hora e mostra um aviso (Supabase Realtime).
+  Bolinhas no menu mostram o que espera ação.
+- **A cor da edição pinta o sistema inteiro** (claro e escuro), inclusive login, carregamentos e janelas.
+- **Ajuda** por módulo, com busca (a organização vê a de todos os perfis); **Ctrl+K** abre a busca rápida.
+- Heurísticas de Nielsen como guia: estado sempre visível, confirmação e "Desfazer", prevenir o erro.
 
-Cada DATAHack é uma **edição** (2026 = Edição 1) e tudo fica ligado a ela: participantes,
-equipes, trocas, materiais, fichas e o **regulamento da avaliação**, que fica no banco
-(fases, rubricas, critérios, níveis, penalidades e regras de desempate) e não mais no código.
+---
 
-- **Pessoa única + participação:** a pessoa tem um cadastro só (e-mail, nome); o papel
-  (aluno, organização ou avaliador de uma banca), o curso, o semestre e a nota são por edição.
-- **Formação das equipes por edição:** gerador da organização, montagem à mão ou
-  **alunos propõem** (quem propõe convida os colegas, cada um confirma e a organização
-  aprova ou recusa com motivo). Trocas entre alunos ligam e desligam por edição.
-- **Nada é apagado:** `DELETE` é barrado por gatilho no banco. Remover vira arquivar
-  (`removido_em`, `saiu_em`) e toda alteração fica em `historico` (antes e depois, quem e quando).
-- **Regulamento protegido:** depois que a edição tem fichas, pesos, fatores e estrutura
-  não mudam (mudariam notas já dadas); os textos podem ser corrigidos.
-- **Nova edição:** Organização → Mais → Edições → "Nova edição", copiando o regulamento e
-  os organizadores de outra. O formato canônico do regulamento é `config/regulamento_2026.json`
-  (`npm run regulamento` gera a partir de `config/rubricas_v2.json`) e pode ser baixado/importado pela tela.
-- **Edição atual:** é a que alunos e bancas veem; a organização escolhe a edição que está
-  administrando no seletor do cabeçalho.
+## Edições
+
+Cada DATAHack é uma **edição**, e tudo pertence a ela: participações, inscrições, equipes, trocas,
+chamados, check-in, mapa, materiais, fichas e regulamento. A pessoa tem um cadastro só; o papel
+(participante, organização, mentoria ou banca), o curso, o semestre e o CR são por edição.
+
+**Acesso:** lista fechada (a organização cadastra), instituições escolhidas ou aberto a todos.
+Aprovação das inscrições automática (com vagas e lista de espera) ou pela organização.
+
+**Situação** (Configurar → Edições → Situação):
+
+| Situação | O que significa |
+|---|---|
+| Em planejamento | em preparação; a página de inscrição diz "as inscrições ainda não foram abertas" |
+| Em andamento | acontecendo; **tornar a edição atual já põe aqui** |
+| Encerrada | concluída e **congelada**: nada dela muda, nem pela organização (reabrir = voltar para "em andamento") |
+| Cancelada | não vai acontecer, com o motivo; o link de inscrição deixa de existir |
+
+**Edição atual:** é a que o login, os participantes e as bancas veem. Só uma edição em andamento (ou
+encerrada) pode ser a atual; em planejamento nunca. **Sem edição atual**, o login e o sistema mostram
+a última encerrada, marcada como "Atual · encerrada".
+
+**Inscrições pelo site** só abrem na **edição atual, em andamento e dentro do prazo** (abrem em /
+fecham em). Só aí o botão "Inscrever-se" aparece no login.
+
+---
 
 ## Regras garantidas no banco (não só na tela)
 
-- Trigger em `auth.users` recusa cadastro de e-mail fora de `pessoas`.
-- Cada aluno está em no máximo uma equipe ativa por edição, contando convites (`membros_um_ativo`).
-- Nome de equipe único por edição (sem diferenciar maiúsculas).
-- `repo_github` no formato `https://github.com/usuario/repo` (obrigatório ao criar equipe;
-  equipes do gerador ficam "pendente" até os alunos cadastrarem).
-- Nota média fica numa tabela separada (`notas`, por edição) que só a organização da edição lê.
-- Gmail é comparado sem pontos e sem `+sufixo` (`joao.silva@gmail.com` = `joaosilva@gmail.com`).
-- RLS: só organizador cria equipe e adiciona/remove integrantes; aluno edita nome,
-  repositório, links e líder da própria equipe; com a trava ligada, aluno só visualiza.
-- O líder precisa ser integrante da equipe; se sair dela, a equipe fica sem líder.
-- Trava do líder: com líder definido, só ele (ou um organizador) troca o líder.
-- Nome e repositório da equipe: só o líder (ou um organizador) altera; links, todos os integrantes.
+- **Nada é apagado:** `DELETE` é barrado por gatilho; remover vira arquivar (`removido_em`, `saiu_em`)
+  e toda alteração fica em `historico` (antes, depois, quem e quando).
+- **Edição encerrada congelada:** um gatilho em cada tabela da edição recusa inserir, alterar ou apagar.
+  Manutenção de propósito: `set local dh.permitir_encerrada = 'sim';` na própria transação.
+- **RLS** em tudo; as RPCs `security definer` conferem o papel. Cada pessoa vê os nomes de quem dividiu
+  alguma edição com ela; a organização vê todos. O Realtime respeita as mesmas permissões.
+- Respostas do formulário conferidas por `validar_respostas` (a mesma regra roda na tela).
+  Inscrição aprovada já traz curso, semestre e CR para o cadastro.
+- Cada participante em no máximo uma equipe ativa por edição, contando convites; nome de equipe único
+  por edição; repositório no formato `https://github.com/usuario/repo`.
+- CR (nota média) numa tabela separada (`notas`), que só a organização lê.
+- Gmail comparado sem pontos e sem `+sufixo`. Cadastro no Auth só para e-mails que existem em `pessoas`.
+- Regulamento protegido: com fichas lançadas, pesos e estrutura não mudam.
 
-## Configuração (uma vez)
+---
+
+## Configuração
 
 ### 1. Banco
 
-As migrações ficam em `supabase/migrations/` (formato do Supabase CLI), em ordem:
+As migrações ficam em `supabase/migrations/`, em ordem:
 
-1. `…01_esquema_inicial` — tabelas, funções, trigger e RLS.
-2. `…02_organizacao` — notas, materiais e o RPC do gerador de equipes.
-3. `…03_lider_e_permissoes` — líder da equipe; composição só pela organização.
-4. `…04_trava_lider` — depois de definido, só o líder troca o líder.
-5. `…05_lider_edita_dados` — só o líder altera nome e repositório da equipe.
-6. `…06_trocas` — pedidos de troca de equipe.
-7. `…07_auditoria_trocas` — histórico de trocas preservado + quem cancelou.
-8. `…08_avaliacao` — módulo de avaliação (bancas).
-9. `…09_rubricas_v2` — fases 1 e 2 com pitch (professores) + mesa (organização).
-10. `…10_edicoes` — edições, pessoas + participações, regulamento no banco, propostas de equipe,
-    fichas por critério, histórico e "nada é apagado". A edição de 2026 vira a Edição 1 com todos
-    os dados; as tabelas antigas ficam guardadas como `*_legado`.
-11. `…11_presenca` — presença no evento por participação (presente/ausente, quando e quem marcou)
-    e o motivo de saída "ausente" para quem estava numa equipe e não compareceu.
-12. `…12_mentoria` — mentores entram no sistema: veem equipes e alunos da edição e registram a
-    presença pela função `registrar_presenca` (a única coisa que a mentoria altera).
-13. `…13_mapa` — mapa do evento por edição: pisos > salas > elementos (bancadas, mesas, portas…),
-    em centímetros, com importação/exportação em JSON (metros) e croqui em escala.
-14. `…14_mapa_equipes` — ícone da equipe (líder ou organização) e alocação das equipes nos
-    lugares das bancadas, com histórico (`alocar_equipe` troca as duas quando o lugar está ocupado).
-    **Rode antes de publicar o app**: a lista de equipes passa a ler a coluna `icone`.
-15. `…15_chamados` — pedidos de ajuda das equipes (dúvida/problema): a equipe abre, cancela ou
-    avisa que resolveu; mentoria e organização atendem. Só a equipe, a mentoria e a organização veem.
-16. `…16_substituir_regulamento` — trocar o regulamento por outro JSON enquanto a edição não tem
-    fichas (para planejar com uma IA); o anterior vai inteiro para o histórico.
-17. `…17_instituicoes_acesso` — instituições (com logo SVG) e, por edição, quem pode participar
-    (lista, instituições escolhidas ou aberto), vagas, período de inscrição e marca (nome, cor e a
-    logo do topo das telas). As edições de antes viram "lista" + Univag; a Edição 1 fica com a logo
-    de sempre e as outras sem logo. Função `definir_acesso_edicao`.
-    **Rode antes de publicar o app**: sem ela o cabeçalho volta à logo de sempre, mas o menu de
-    edições e a tela de acesso ficam incompletos.
-18. `…18_formulario_inscricao` — formulário de inscrição por edição: banco de perguntas prontas
-    (`perguntas_catalogo`), as perguntas de cada edição (`campos_inscricao`, obrigatória/opcional,
-    condição "só se…") e `inscricoes` com as respostas em JSONB, conferidas por `validar_respostas`.
-    As edições de antes ganham curso e semestre; cada aluno vira inscrição aprovada, e um gatilho
-    mantém a inscrição em dia quando a organização cadastra ou muda alguém em Pessoas.
-19. `…19_logo_edicao` — correção para quem rodou a primeira versão da 017 (a produção, em
-    16/10/2026): regra da logo/cor da edição, edição nova sem marca e a logo oficial na Edição 1.
-    Onde a 017 final já rodou, não muda nada.
-20. `…20_inscricao_publica` — inscrição pública (eventos de instituições ou abertos): página
-    `/inscricao/<edição>` sem login (`edicao_publica`, `inscrever_publico`), aprovação automática
-    com vagas e lista de espera (`promover_da_espera`) ou pela organização (`decidir_inscricao`),
-    termo LGPD com versão (`termos`), `/minha-inscricao` para acompanhar e a `vitrine` do login.
-21. `…21_checkin_qr` — check-in por QR: código de 8 caracteres por participante e edição
-    (`checkin_codigos`, só lido por `meu_codigo_checkin`) e `fazer_checkin`, que marca a presença
-    (mentoria e organização).
-22. `…22_cr_no_formulario` — o CR (nota média) vira pergunta do formulário (sensível) nas edições
-    que perguntam curso e semestre, acompanhando a tabela `notas` (de onde o gerador lê). O
-    cadastro em Pessoas segue as perguntas da edição (`salvar_respostas_organizacao`).
-23. `…23_tempo_real` — liga o Supabase Realtime em `inscricoes` e `participacoes`: a tela
-    "Acompanhe sua inscrição" muda na hora da aprovação e o QR vira "Presença confirmada" no
-    check-in. No Postgres local (sem a publicação do Realtime) não faz nada.
-24. `…24_listas_curso_semestre` — no banco de perguntas, curso vira lista (com "Outro: qual?") e
-    semestre vira número inteiro de 1 a 12 (lista na tela); `validar_respostas` recusa número
-    quebrado nessas perguntas. As edições que já existem não mudam.
+| # | Migração | Resumo |
+|---|---|---|
+| 001–009 | esquema inicial … rubricas v2 | equipes, líder, trocas, avaliação (a versão do evento de 2026) |
+| 010 | `edicoes` | edições, pessoa + participação, regulamento no banco, propostas, histórico, nada apagado |
+| 011 | `presenca` | presença por participação |
+| 012 | `mentoria` | mentores veem a edição e registram presença |
+| 013–014 | `mapa`, `mapa_equipes` | mapa do evento em escala, ícone e lugar das equipes |
+| 015 | `chamados` | pedidos de ajuda das equipes |
+| 016 | `substituir_regulamento` | trocar o regulamento enquanto não há fichas |
+| 017 | `instituicoes_acesso` | instituições, acesso por edição, vagas, prazo, marca (logo e cor) |
+| 018 | `formulario_inscricao` | banco de perguntas, perguntas por edição, inscrições com respostas |
+| 019 | `logo_edicao` | correção da 017 (logo oficial na Edição 1) |
+| 020 | `inscricao_publica` | página pública, aprovação, lista de espera, termo LGPD, vitrine do login |
+| 021 | `checkin_qr` | código de check-in por participante e `fazer_checkin` |
+| 022 | `cr_no_formulario` | CR como pergunta do formulário |
+| 023 | `tempo_real` | Realtime em inscrições e presença |
+| 024 | `listas_curso_semestre` | curso em lista (com "Outro"), semestre inteiro |
+| 025 | `vitrine_edicao_atual` | login informa a edição atual e o link de inscrição |
+| 026 | `tempo_real_telas` | Realtime em equipes, convites, trocas, chamados, avaliação, mapa, materiais |
+| 027–028 | `inscricao_so_na_atual`, `inscricao_ainda_nao_abriu` | inscrição só na atual e no prazo; "ainda não abriram" × "encerradas" |
+| 029 | `participante_nas_mensagens` | "participante" no lugar de "aluno" nas mensagens |
+| 030 | `inscricao_preenche_cadastro` | inscrição aprovada traz curso, semestre e CR |
+| 031 | `situacao_edicao` | planejada / em andamento / encerrada / cancelada (com motivo) |
+| 032 | `sem_edicao_atual` | pode não haver atual (login mostra a última encerrada); nomes visíveis entre edições |
+| 033–034 | `atual_em_andamento`, `planejada_nao_e_atual` | atual = em andamento; planejada nunca é a atual |
+| 035 | `edicao_encerrada_congelada` | edição encerrada não muda mais |
 
-**Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push`
-(ou cole os arquivos no SQL Editor, na ordem). Depois rode `supabase/seed.sql`
-(os inscritos, as notas e o organizador inicial).
+**Projeto novo:** `supabase link --project-ref <ref>` e `supabase db push` (ou cole os arquivos no
+SQL Editor, na ordem). Depois rode `supabase/seed.sql` (inscritos, notas e organizador inicial).
 
-**Produção** (o projeto que já existe): as migrações 001 a 011 foram aplicadas pelo SQL Editor
-(a 011 em 12/10/2026; confira se da 012 à 024 já foram aplicadas). O banco de produção não guarda o histórico do `supabase db push`, então
-**não use `db push` nele**: ele tentaria rodar tudo de novo. Para uma migração nova:
+**Produção:** as migrações foram aplicadas **pelo SQL Editor**; o banco não guarda o histórico do
+`supabase db push`, então **não use `db push` nele**. Para uma migração nova:
 
-1. Crie o arquivo em `supabase/migrations/` com o próximo número e teste no Postgres local
-   (seção "Testes do banco" abaixo).
-2. Faça o backup (`pg_dump` do Session pooler) e anote as contagens das tabelas principais.
-3. Cole o arquivo no **SQL Editor** e rode. O script vai inteiro de uma vez: se der erro, nada muda.
-4. Confira as contagens e só então faça o merge do app na `main` (a Vercel publica a `main`).
-   Se a migração muda colunas que o app lê, o app novo e a migração precisam ir juntos.
+1. Crie o arquivo com o próximo número e teste no Postgres local (seção "Testes do banco").
+2. Faça o backup (`pg_dump` pelo Session pooler) e anote as contagens das tabelas principais.
+3. Cole o arquivo no **SQL Editor** e rode (vai inteiro: se der erro, nada muda).
+4. Confira as contagens e só então faça o merge na `main`. Se a migração muda o que o app lê,
+   app e migração vão juntos.
 
-**Ligações com `pessoas`:** várias tabelas têm mais de uma chave para `pessoas` (ex.:
-`participacoes.email` e `participacoes.presenca_por`). Ao trazer o nome junto numa consulta,
-diga qual ligação usar (`pessoa:pessoas!participacoes_email_fkey(nome)`). Sem isso, a API do
-Supabase recusa a consulta como ambígua assim que surge uma segunda chave — foi o que derrubou
-o login depois da 011. O Postgres local não pega esse erro, porque não tem a API na frente.
+**Ligações com `pessoas`:** várias tabelas têm mais de uma chave para `pessoas`. Ao trazer o nome numa
+consulta, diga qual usar (`pessoa:pessoas!participacoes_email_fkey(nome)`), senão a API recusa a
+consulta como ambígua. O Postgres local não pega esse erro.
 
-Se a lista de inscrições mudar: `node scripts/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql [slug-da-edicao]`.
+Lista de inscritos (lista fechada): `node scripts/gerar_seed.mjs "INSCRIÇÕES.txt" supabase/seed.sql [slug-da-edicao]`.
 
-> `seed.sql`, `INSCRIÇÕES.txt` e `inscritos-datahack.csv` contêm dados pessoais e
-> estão no `.gitignore`. Não versionar.
+> `seed.sql`, `INSCRIÇÕES.txt`, `inscritos-datahack.csv` e `.env.local` contêm dados pessoais ou
+> chaves e estão no `.gitignore`. **Não versionar.** Nunca use a chave `service_role` no app.
 
-### 2. Login (Supabase Auth, e-mail + senha)
+### 2. Login (Supabase Auth, e-mail e senha)
 
-No **primeiro acesso** o aluno informa o e-mail da inscrição e cria uma senha; depois
-entra com e-mail + senha. Quem não está em `pessoas` é recusado pelo trigger do banco.
-Em **"Esqueci a senha"** o Supabase envia um link por e-mail para criar uma nova senha.
+No primeiro acesso a pessoa cria a senha com o e-mail cadastrado (ou cria a conta ao se inscrever
+pelo site). "Esqueci a senha" manda um link por e-mail.
 
-1. **Authentication → Sign In / Providers → Email**: deixe ativo e **desligue
-   "Confirm email"** (o cadastro entra direto, sem e-mail de confirmação).
-2. **Authentication → URL Configuration**:
-   - *Site URL*: `http://localhost:3000` enquanto testa; depois o domínio de produção.
-   - *Redirect URLs*: `http://localhost:3000/**` e `https://SEU-DOMINIO/**`.
-3. **Authentication → Emails → Templates → Reset Password** (recomendado): troque o
-   link por este, que funciona mesmo se o aluno abrir o e-mail em outro navegador/celular:
+1. **Authentication → Sign In / Providers → Email:** ativo, com **"Confirm email" desligado**.
+2. **Authentication → URL Configuration:** *Site URL* = o domínio de produção; *Redirect URLs* com
+   `http://localhost:3000/**`, `https://SEU-DOMINIO/**` e o domínio do Preview, se usar.
+3. **Authentication → Emails → Templates → Reset Password** (recomendado), para funcionar mesmo
+   abrindo o e-mail em outro aparelho:
    ```html
-   <h2>Redefinir senha — DataHack Univag</h2>
+   <h2>Redefinir senha — DATAHack</h2>
    <p><a href="{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next=/nova-senha">Criar nova senha</a></p>
    ```
-   (Com o template padrão também funciona, mas só se abrir o link no mesmo navegador.)
-4. **SMTP:** o e-mail embutido do Supabase tem limite baixo de envios por hora e pode
-   só entregar para e-mails da equipe do projeto. Para os alunos receberem o e-mail de
-   redefinição, configure um SMTP em **Authentication → Emails → SMTP Settings**
-   (Resend, Brevo ou Gmail com senha de app). Só o "esqueci a senha" usa e-mail.
+4. **SMTP próprio** (Resend, Brevo ou Gmail com senha de app) em **Authentication → Emails → SMTP
+   Settings**: o e-mail embutido do Supabase tem limite baixo.
 
 ### 3. Rodar
 
 ```bash
-cp .env.example .env.local   # já existe um .env.local com as chaves do projeto
+cp .env.example .env.local   # NEXT_PUBLIC_SUPABASE_URL e NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
 npm install
 npm run dev                  # http://localhost:3000
 ```
 
-### 4. Deploy
+### 4. Deploy (Vercel)
 
-Qualquer host de Next.js (Vercel é o mais simples): configure as variáveis
-`NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+- **Produção:** a branch `main`.
+- **Testes:** a branch `dev` vira um **Preview** automático a cada push, com endereço próprio.
+  Marque as variáveis do Supabase também para o ambiente *Preview*. Atenção: com as mesmas
+  variáveis, o Preview usa **o mesmo banco da produção**.
+
+---
 
 ## Desenvolvimento
 
@@ -229,85 +196,83 @@ Qualquer host de Next.js (Vercel é o mais simples): configure as variáveis
 npm run dev          # http://localhost:3000
 npm run lint         # ESLint
 npm run typecheck    # tipos das rotas (next typegen) + tsc
-npm test             # Vitest: regras de nota, permissões, trocas, gerador, validação
+npm test             # Vitest (regras de domínio, permissões, gerador, inscrição, tema, avisos…)
 npm run db:tipos     # regenera src/shared/db/tipos-banco.ts lendo o banco (DATABASE_URL, só leitura)
+npm run regulamento  # gera config/regulamento_2026.json a partir de config/rubricas_v2.json
 ```
 
 O GitHub Actions (`.github/workflows/ci.yml`) roda lint, typecheck e testes em cada push.
+Com pouca memória, `npx vitest run --no-file-parallelism` roda um arquivo por vez.
 
 ### Testes do banco (Postgres local)
 
-As migrações são testadas num Postgres local comum, com um "shim" que imita o mínimo do
-Supabase (`auth.jwt()`, papéis `anon`/`authenticated`). Nada disso vai para a produção.
+As migrações são testadas num Postgres comum, com um "shim" que imita o mínimo do Supabase
+(`auth.jwt()`, papéis `anon` e `authenticated`). Nada disso vai para a produção.
 
 ```bash
 createdb datahack_teams_teste
 psql -d datahack_teams_teste -f supabase/teste/shim_supabase.sql
-for f in supabase/migrations/2026100*.sql supabase/migrations/20261010*.sql; do psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f "$f"; done
-node supabase/teste/dados_sinteticos.mjs | psql -d datahack_teams_teste   # dados SINTÉTICOS, no formato antigo
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261011000010_edicoes.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261012000011_presenca.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000012_mentoria.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000013_mapa.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000014_mapa_equipes.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261014000015_chamados.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261015000016_substituir_regulamento.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000017_instituicoes_acesso.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000018_formulario_inscricao.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261016000019_logo_edicao.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000020_inscricao_publica.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000021_checkin_qr.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261017000022_cr_no_formulario.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261018000023_tempo_real.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f supabase/migrations/20261018000024_listas_curso_semestre.sql
-psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql  # regras por papel
-PARIDADE_DB=datahack_teams_teste npx vitest run paridade  # ranking idêntico ao do código antigo
+for f in supabase/migrations/2026100*.sql supabase/migrations/20261010*.sql; do
+  psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f "$f"
+done
+node supabase/teste/dados_sinteticos.mjs | psql -d datahack_teams_teste   # dados SINTÉTICOS (formato antigo)
+for f in supabase/migrations/2026101[1-9]*.sql supabase/migrations/2026102*.sql; do
+  psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -1 -f "$f"
+done
+psql -d datahack_teams_teste -v ON_ERROR_STOP=1 -f supabase/teste/testes_edicoes.sql   # regras por papel (rollback no fim)
+PARIDADE_DB=datahack_teams_teste npx vitest run paridade                               # ranking igual ao do código antigo
 ```
 
-`supabase/teste/gabarito_ranking.json` é o ranking calculado pelo código anterior às edições
-sobre os mesmos dados sintéticos; o teste de paridade exige que o cálculo novo dê o mesmo
-resultado em todas as equipes (nota final, posição, rubricas, critérios, fases e desempate).
+`testes_edicoes.sql` termina com `OK: todas as regras das migrações 010 a 035 conferem.`
+`supabase/teste/gabarito_ranking.json` é o ranking do código anterior às edições sobre os mesmos dados
+sintéticos; o teste de paridade exige o mesmo resultado em todas as equipes.
+
+---
 
 ## Arquitetura
 
-Monólito modular em Next.js (App Router) sobre Supabase. Cada módulo de negócio tem as
-mesmas camadas, e a dependência só vai "para dentro" (ui → application → domain; infra
-implementa o acesso ao banco):
+Monólito modular em Next.js sobre Supabase. Cada módulo tem as mesmas camadas, e a dependência só vai
+"para dentro" (ui → application → domain; infra implementa o acesso ao banco):
 
 ```
 src/
-  app/                    rotas (só compõem telas; sem regra de negócio)
-    _shell/               Area (cabeçalho + navegação + busca), menus, TelaAluno
-    admin/                organização: painel, pessoas, equipes (lista/trocas/gerador),
-                          materiais, avaliacao (+ exportar), ranking
-    avaliar/              bancas: lista de equipes e ficha por rubrica
-    ver-como/ ajuda/ login/ nova-senha/ auth/confirm/
+  app/                      rotas (só compõem telas)
+    _shell/                 Area (cabeçalho, menu, avisos ao vivo), menus, TelaAluno, seletor de edições
+    admin/                  organização: painel, pessoas, inscrições, check-in, equipes, avaliação,
+                            ranking, chamados, mapa, materiais, edições, instituições
+    mentoria/               equipes, pessoas, check-in e chamados
+    avaliar/                bancas: lista de equipes e ficha por rubrica
+    inscricao/[slug]/       página pública de inscrição
+    minha-inscricao/ minhas-edicoes/ ver-como/ ajuda/ login/ nova-senha/ auth/confirm/
   modules/
-    pessoas/ equipes/ trocas/ materiais/ avaliacao/ gerador/ painel/
-      domain/             tipos e regras puras (testadas com Vitest)
-      infra/              repositorio.ts: consultas Supabase tipadas
-      application/        Server Actions (validação Zod) e consultas compostas
-      ui/                 componentes do módulo
+    avaliacao chamados checkin edicoes equipes gerador inscricoes instituicoes
+    mapa materiais painel pessoas trocas
+      domain/               tipos e regras puras (testadas com Vitest)
+      infra/                repositorio.ts: consultas Supabase tipadas
+      application/          Server Actions (validação Zod)
+      ui/                   componentes do módulo
   shared/
-    db/                   clientes Supabase (servidor/navegador), tipos gerados, erros
-    acao/                 criarAcao(schema, fn), Resultado { ok, erro, desfazer }, campos Zod
-    auth/ lib/            sessão, formatação (fuso de Cuiabá), texto, CSV
-    ui/                   design system: Botao, Campo, Formulario, Modal, Toast, Aviso,
-                          Selo, EstadoVazio, Navegacao, PaletaComandos, Pagina…
-  proxy.ts                renova a sessão e manda para /login quem não está logado
-supabase/migrations/      esquema do banco (Supabase CLI)
-config/regulamento_2026.json  regulamento canônico da Edição 1 (scripts/regulamento_canonico.mjs)
-supabase/teste/           shim do Supabase, dados sintéticos, testes de regras e gabarito da paridade
+    db/                     clientes Supabase, tipos gerados, tradução de erros
+    acao/                   criarAcao(schema, fn), Resultado { ok, erro, desfazer }, campos Zod
+    auth/ lib/              sessão, edição escolhida, fuso de Cuiabá, texto, CSV, regras dos avisos
+    ui/                     design system: Botao, Campo, Formulario, Modal, Toast, Navegacao,
+                            TempoReal, SomenteLeitura, PaletaComandos, Pagina…
+  proxy.ts                  renova a sessão e manda para /login quem não está logado
+supabase/migrations/        esquema do banco
+supabase/teste/             shim do Supabase, dados sintéticos, testes de regras e gabarito da paridade
+config/                     regulamento canônico da Edição 1
 ```
 
-A segurança continua no banco (RLS, triggers e RPCs); as regras repetidas na tela
-(`modules/equipes/domain/permissoes.ts`) só servem para mostrar o que é possível e
-explicar o motivo quando algo está bloqueado.
+A segurança fica no banco (RLS, gatilhos e RPCs). As regras repetidas na tela só servem para mostrar
+o que é possível e explicar o motivo quando algo está bloqueado (ex.: a edição encerrada deixa os
+botões que gravam desabilitados, e o banco recusa de qualquer forma).
+
+---
 
 ## Observações
 
-- Como o cadastro não exige confirmação por e-mail, quem souber o e-mail de um inscrito
-  poderia criar a senha antes dele. Se acontecer, o dono usa "Esqueci a senha" (o link
-  chega no e-mail dele) ou você apaga o usuário em Authentication → Users.
-- A checagem de "repositório público" usa a API pública do GitHub (60 consultas/hora
-  por IP do servidor). Ela não bloqueia a criação; só sinaliza.
+- Como o cadastro não exige confirmação por e-mail, quem souber o e-mail de alguém da lista poderia
+  criar a senha antes. Se acontecer, o dono usa "Esqueci a senha" ou a organização apaga o usuário em
+  Authentication → Users.
+- A checagem de "repositório público" usa a API pública do GitHub (60 consultas por hora por IP do
+  servidor). Ela não bloqueia nada; só sinaliza.
